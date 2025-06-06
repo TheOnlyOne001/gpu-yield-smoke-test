@@ -1,0 +1,5 @@
+redis
+requests
+sentry-sdk
+python-dotenv
+schedule

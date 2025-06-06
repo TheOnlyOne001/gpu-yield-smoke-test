@@ -1,0 +1,64 @@
+envVarGroups:
+  - name: shared-vars
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis-cache
+          property: connectionString
+      - key: SENTRY_DSN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: HCP_SECRET
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.11"
+
+services:
+  - name: next-ui
+    type: web
+    env: node
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: yield-api
+          property: url
+
+  - name: yield-api
+    type: web
+    env: python
+    rootDir: api
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVarGroups:
+      - shared-vars
+
+  - name: alert-worker
+    type: worker
+    env: python
+    rootDir: worker
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python alerts.py"
+    envVarGroups:
+      - shared-vars
+
+  - name: gpu-scraper
+    type: cron
+    env: python
+    rootDir: scrapper
+    schedule: "*/2 * * * *"
+    buildCommand: "pip install -r requirements.txt"
+    command: "python main.py"
+    envVarGroups:
+      - shared-vars
+
+  - name: redis-cache
+    type: redis
+    plan: free
