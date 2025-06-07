@@ -1,4 +1,4 @@
-# Render Blueprint for the GPU-Yield Project (Corrected Version)
+# Render Blueprint for the GPU-Yield Project (v3, Corrected)
 
 envVarGroups:
   - name: shared-vars
@@ -41,7 +41,7 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
-      - fromGroup: shared-vars # CORRECTED
+      - fromGroup: shared-vars
 
   # 3. Background Worker: Redis consumer
   - name: alert-worker
@@ -51,7 +51,7 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python alerts.py"
     envVars:
-      - fromGroup: shared-vars # CORRECTED
+      - fromGroup: shared-vars
 
   # 4. Cron Job: Price Scraper
   - name: gpu-scraper
@@ -60,9 +60,7 @@ services:
     rootDir: scrapper
     schedule: "*/2 * * * *"
     buildCommand: "pip install -r requirements.txt"
-    command: "python main.py"
-    envVars:
-      - fromGroup: shared-vars # CORRECTED
+    startCommand: "python main.py" # CORRECTED KEY
 
   # 5. Redis Instance
   - type: redis
