@@ -7,6 +7,7 @@ envVarGroups:
         fromService:
           type: redis
           name: redis-cache
+          property: connectionString
       - key: SENTRY_DSN
         sync: false
       - key: DATABASE_URL
@@ -31,7 +32,7 @@ services:
         fromService:
           type: web
           name: yield-api
-          property: url
+          property: host
 
   # 2. Backend API: FastAPI Web Service
   - name: yield-api
@@ -60,9 +61,10 @@ services:
     rootDir: scrapper
     schedule: "*/2 * * * *"
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python main.py" # CORRECTED KEY
+    startCommand: "python main.py"
 
   # 5. Redis Instance
   - type: redis
     name: redis-cache
     plan: free
+    ipAllowList: []
