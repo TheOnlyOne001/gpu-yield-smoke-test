@@ -4,6 +4,7 @@ envVarGroups:
   - name: shared-vars
     envVars:
       - key: REDIS_URL
+        value: "" # Temporary placeholder, will be set by fromService
         fromService:
           type: redis
           name: redis-cache
