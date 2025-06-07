@@ -1,3 +1,5 @@
+# Render Blueprint for the GPU-Yield Project (Corrected Version)
+
 envVarGroups:
   - name: shared-vars
     envVars:
@@ -5,7 +7,6 @@ envVarGroups:
         fromService:
           type: redis
           name: redis-cache
-          property: connectionString
       - key: SENTRY_DSN
         sync: false
       - key: DATABASE_URL
@@ -18,6 +19,7 @@ envVarGroups:
         value: "3.11"
 
 services:
+  # 1. Frontend: Next.js Web Service
   - name: next-ui
     type: web
     env: node
@@ -31,24 +33,27 @@ services:
           name: yield-api
           property: url
 
+  # 2. Backend API: FastAPI Web Service
   - name: yield-api
     type: web
     env: python
     rootDir: api
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
-    envVarGroups:
-      - shared-vars
+    envVars:
+      - fromGroup: shared-vars # CORRECTED
 
+  # 3. Background Worker: Redis consumer
   - name: alert-worker
     type: worker
     env: python
     rootDir: worker
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python alerts.py"
-    envVarGroups:
-      - shared-vars
+    envVars:
+      - fromGroup: shared-vars # CORRECTED
 
+  # 4. Cron Job: Price Scraper
   - name: gpu-scraper
     type: cron
     env: python
@@ -56,9 +61,10 @@ services:
     schedule: "*/2 * * * *"
     buildCommand: "pip install -r requirements.txt"
     command: "python main.py"
-    envVarGroups:
-      - shared-vars
+    envVars:
+      - fromGroup: shared-vars # CORRECTED
 
-  - name: redis-cache
-    type: redis
+  # 5. Redis Instance
+  - type: redis
+    name: redis-cache
     plan: free
