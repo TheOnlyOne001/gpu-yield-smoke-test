@@ -93,7 +93,7 @@ const HomePage: React.FC = () => {
         body: JSON.stringify({
           gpu_model: gpuModel,
           hours_per_day: parseFloat(hoursPerDay),
-          power_cost: parseFloat(powerCost)
+          power_cost_kwh: parseFloat(powerCost)  // Changed from power_cost to power_cost_kwh
         }),
       });
       
