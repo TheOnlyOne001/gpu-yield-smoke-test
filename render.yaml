@@ -1,14 +1,15 @@
-# Render Blueprint for the GPU-Yield Project (v3, Corrected)
+# Render Blueprint for the GPU-Yield Project (FINAL CORRECTED VERSION)
 
 envVarGroups:
   - name: shared-vars
     envVars:
+      # This is the corrected REDIS_URL definition.
+      # The problematic `value: ""` line has been removed.
       - key: REDIS_URL
-        value: "" # Temporary placeholder, will be set by fromService
         fromService:
           type: redis
           name: redis-cache
-          property: connectionString
+          property: internalConnectionString # Using the more specific internal URL
       - key: SENTRY_DSN
         sync: false
       - key: DATABASE_URL
@@ -33,7 +34,7 @@ services:
         fromService:
           type: web
           name: yield-api
-          property: host
+          property: url # FIXED: 'url' is more reliable than 'host'
 
   # 2. Backend API: FastAPI Web Service
   - name: yield-api
@@ -63,9 +64,10 @@ services:
     schedule: "*/2 * * * *"
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python main.py"
+    envVars: # ADDED a link to the environment group
+      - fromGroup: shared-vars
 
   # 5. Redis Instance
   - type: redis
     name: redis-cache
     plan: free
-    ipAllowList: []
