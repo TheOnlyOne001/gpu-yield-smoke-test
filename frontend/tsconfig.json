@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -19,7 +17,10 @@
         "name": "next"
       }
     ],
-    // This is the critical part that fixes the error
+    // The two lines below work together to fix the alias error.
+    // baseUrl defines the root for path resolution.
+    "baseUrl": ".",
+    // paths defines the alias itself.
     "paths": {
       "@/*": ["./src/*"]
     }
