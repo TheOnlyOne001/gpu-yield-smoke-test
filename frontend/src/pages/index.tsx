@@ -83,6 +83,7 @@ const HomePage: React.FC = () => {
   // Handle ROI calculation
   const handleRoiCalc = async (e: FormEvent) => {
     e.preventDefault();
+    setRoiResult(null); // Reset previous result
     
     try {
       const response = await fetch(`${API_BASE_URL}/roi`, {
@@ -93,19 +94,24 @@ const HomePage: React.FC = () => {
         body: JSON.stringify({
           gpu_model: gpuModel,
           hours_per_day: parseFloat(hoursPerDay),
-          power_cost_kwh: parseFloat(powerCost)  // Changed from power_cost to power_cost_kwh
+          power_cost_kwh: parseFloat(powerCost)
         }),
       });
       
       if (response.ok) {
         const data = await response.json();
-        setRoiResult(data.monthly_profit || data.profit || 0);
+        // THE FIX: Read the correct property name 'potential_monthly_profit'
+        if (data && data.potential_monthly_profit !== undefined) {
+          setRoiResult(data.potential_monthly_profit);
+        } else {
+          throw new Error("Invalid response structure from API");
+        }
       } else {
         throw new Error('ROI calculation failed');
       }
     } catch (error) {
       console.error('ROI calculation error:', error);
-      setRoiResult(null);
+      setRoiResult(null); // Set to null on error
     }
   };
 
