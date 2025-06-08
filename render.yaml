@@ -1,13 +1,18 @@
 # Render Blueprint - v5 (Corrected for Validation Errors)
 
-# Define the group for secrets YOU will provide in the dashboard.
+# Define the group for environment variables
 envVarGroups:
   - name: shared-vars
     envVars:
+      # FIX: Each env var needs both key AND value (or sync/fromService)
       - key: DATABASE_URL
+        sync: false  # You'll set this in the dashboard
       - key: SENTRY_DSN
+        sync: false  # You'll set this in the dashboard
       - key: SENDGRID_API_KEY
+        sync: false  # You'll set this in the dashboard
       - key: HCP_SECRET
+        sync: false  # You'll set this in the dashboard
       - key: PYTHON_VERSION
         value: "3.11.9"
 
@@ -16,8 +21,7 @@ services:
   - type: redis
     name: redis-cache
     plan: free
-    # FIX: Add the required ipAllowList. `[]` means no external access.
-    ipAllowList: []
+    ipAllowList: []  # No external access
 
   # 2. The Backend API. It depends on Redis.
   - name: yield-api
@@ -29,14 +33,14 @@ services:
     envVars:
       # Link the manual secrets group
       - fromGroup: shared-vars
-      # Get the Redis URL directly from the service
+      # FIX: Use 'connectionString' instead of 'internalConnectionString'
       - key: REDIS_URL
         fromService:
           type: redis
           name: redis-cache
-          property: internalConnectionString
+          property: connectionString
 
-  # 3. The Frontend. It depends on the API. Must be defined AFTER yield-api.
+  # 3. The Frontend. It depends on the API.
   - name: next-ui
     type: web
     env: node
@@ -44,12 +48,10 @@ services:
     buildCommand: "npm install && npm run build"
     startCommand: "npm start"
     envVars:
+      # FIX: For web services, we can't use 'url' property
+      # Instead, construct the URL manually
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: yield-api
-          # FIX: The property name is 'url'
-          property: url
+        value: https://yield-api.onrender.com
 
   # 4. The Background Worker. It depends on Redis.
   - name: alert-worker
@@ -60,11 +62,12 @@ services:
     startCommand: "python alerts.py"
     envVars:
       - fromGroup: shared-vars
+      # FIX: Use 'connectionString' instead of 'internalConnectionString'
       - key: REDIS_URL
         fromService:
           type: redis
           name: redis-cache
-          property: internalConnectionString
+          property: connectionString
 
   # 5. The Cron Job. It depends on Redis.
   - name: gpu-scraper
@@ -76,8 +79,9 @@ services:
     startCommand: "python main.py"
     envVars:
       - fromGroup: shared-vars
+      # FIX: Use 'connectionString' instead of 'internalConnectionString'
       - key: REDIS_URL
         fromService:
           type: redis
           name: redis-cache
-          property: internalConnectionString
+          property: connectionString
