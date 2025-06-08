@@ -1,33 +1,42 @@
-# Render Blueprint for the GPU-Yield Project (FINAL CORRECTED VERSION)
+# Render Blueprint - v5 (Corrected for Validation Errors)
 
+# Define the group for secrets YOU will provide in the dashboard.
 envVarGroups:
   - name: shared-vars
     envVars:
-      # This is the corrected REDIS_URL definition.
-      # The problematic `value: ""` line has been removed.
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: redis-cache
-          property: connectionString  # Changed from internalConnectionString
-      - key: SENTRY_DSN
-        sync: false
       - key: DATABASE_URL
-        sync: false
+      - key: SENTRY_DSN
       - key: SENDGRID_API_KEY
-        sync: false
       - key: HCP_SECRET
-        sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"
 
 services:
-  # 1. Redis Instance (moved to top for dependency order)
+  # 1. The Redis database. It must be defined first.
   - type: redis
     name: redis-cache
     plan: free
+    # FIX: Add the required ipAllowList. `[]` means no external access.
+    ipAllowList: []
 
-  # 2. Frontend: Next.js Web Service
+  # 2. The Backend API. It depends on Redis.
+  - name: yield-api
+    type: web
+    env: python
+    rootDir: api
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      # Link the manual secrets group
+      - fromGroup: shared-vars
+      # Get the Redis URL directly from the service
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis-cache
+          property: internalConnectionString
+
+  # 3. The Frontend. It depends on the API. Must be defined AFTER yield-api.
   - name: next-ui
     type: web
     env: node
@@ -39,19 +48,10 @@ services:
         fromService:
           type: web
           name: yield-api
-          property: url # FIXED: 'url' is more reliable than 'host'
+          # FIX: The property name is 'url'
+          property: url
 
-  # 3. Backend API: FastAPI Web Service
-  - name: yield-api
-    type: web
-    env: python
-    rootDir: api
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
-    envVars:
-      - fromGroup: shared-vars
-
-  # 4. Background Worker: Redis consumer
+  # 4. The Background Worker. It depends on Redis.
   - name: alert-worker
     type: worker
     env: python
@@ -60,8 +60,13 @@ services:
     startCommand: "python alerts.py"
     envVars:
       - fromGroup: shared-vars
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis-cache
+          property: internalConnectionString
 
-  # 5. Cron Job: Price Scraper
+  # 5. The Cron Job. It depends on Redis.
   - name: gpu-scraper
     type: cron
     env: python
@@ -71,3 +76,8 @@ services:
     startCommand: "python main.py"
     envVars:
       - fromGroup: shared-vars
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: redis-cache
+          property: internalConnectionString
