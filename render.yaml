@@ -1,87 +1,158 @@
-# Render Blueprint - v5 (Corrected for Validation Errors)
+# Production-Ready Render Blueprint
 
-# Define the group for environment variables
 envVarGroups:
-  - name: shared-vars
+  - name: shared-production-vars
     envVars:
-      # FIX: Each env var needs both key AND value (or sync/fromService)
-      - key: DATABASE_URL
-        sync: false  # You'll set this in the dashboard
+      # Database and Infrastructure
+      - key: REDIS_URL
+        sync: false  # Set in dashboard
+      
+      # Monitoring and Error Tracking
       - key: SENTRY_DSN
-        sync: false  # You'll set this in the dashboard
+        sync: false  # Set in dashboard
+      
+      # Email Service
       - key: SENDGRID_API_KEY
-        sync: false  # You'll set this in the dashboard
+        sync: false  # Set in dashboard
+      - key: FROM_EMAIL
+        value: "alerts@gpuyield.com"
+      
+      # Security
       - key: HCP_SECRET
-        sync: false  # You'll set this in the dashboard
+        sync: false  # Set in dashboard
+      - key: ALLOWED_HOSTS
+        value: "gpuyield.com,*.gpuyield.com,*.onrender.com"
+      
+      # Application Configuration
+      - key: ENVIRONMENT
+        value: "production"
+      - key: LOG_LEVEL
+        value: "INFO"
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: NODE_VERSION
+        value: "18"
 
 services:
-  # 1. The Redis database. It must be defined first.
+  # 1. Redis Database - Primary data store
   - type: redis
-    name: redis-cache
-    plan: free
-    ipAllowList: []  # No external access
+    name: gpu-yield-redis
+    plan: starter  # Upgrade from free for production
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
 
-  # 2. The Backend API. It depends on Redis.
-  - name: yield-api
+  # 2. Backend API Service
+  - name: gpu-yield-api
     type: web
     env: python
     rootDir: api
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    plan: starter  # Upgrade for production
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt
+    startCommand: |
+      uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2 --access-log --log-level info
+    healthCheckPath: /health
     envVars:
-      # Link the manual secrets group
-      - fromGroup: shared-vars
-      # FIX: Use 'connectionString' instead of 'internalConnectionString'
+      - fromGroup: shared-production-vars
       - key: REDIS_URL
         fromService:
           type: redis
-          name: redis-cache
+          name: gpu-yield-redis
           property: connectionString
+      - key: PORT
+        value: "8000"
+    
+    # Auto-scaling configuration
+    autoDeploy: true
+    
+    # Custom domains (configure in dashboard)
+    # domains:
+    #   - api.gpuyield.com
 
-  # 3. The Frontend. It depends on the API.
-  - name: next-ui
+  # 3. Frontend Application
+  - name: gpu-yield-frontend
     type: web
     env: node
     rootDir: frontend
-    buildCommand: "npm install && npm run build"
-    startCommand: "npm start"
+    plan: starter  # Upgrade for production
+    buildCommand: |
+      npm ci &&
+      npm run build
+    startCommand: npm start
     envVars:
-      # FIX: For web services, we can't use 'url' property
-      # Instead, construct the URL manually
+      - fromGroup: shared-production-vars
       - key: NEXT_PUBLIC_API_URL
-        value: https://yield-api-bnlc.onrender.com
+        fromService:
+          type: web
+          name: gpu-yield-api
+          property: url
+      - key: NODE_ENV
+        value: "production"
+    
+    # Frontend-specific settings
+    staticPublishPath: ./out  # If using static export
+    
+    # Custom domains (configure in dashboard)
+    # domains:
+    #   - gpuyield.com
+    #   - www.gpuyield.com
 
-  # 4. The Background Worker. It depends on Redis.
-  - name: alert-worker
+  # 4. Background Worker for Alerts
+  - name: gpu-yield-worker
     type: worker
     env: python
     rootDir: worker
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python alerts.py"
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt
+    startCommand: python alerts.py
     envVars:
-      - fromGroup: shared-vars
-      # FIX: Use 'connectionString' instead of 'internalConnectionString'
+      - fromGroup: shared-production-vars
       - key: REDIS_URL
         fromService:
           type: redis
-          name: redis-cache
+          name: gpu-yield-redis
           property: connectionString
+    
+    # Worker scaling
+    autoDeploy: true
 
-  # 5. The Cron Job. It depends on Redis.
-  - name: gpu-scraper
+  # 5. GPU Price Scraper (Cron Job)
+  - name: gpu-price-scraper
     type: cron
     env: python
     rootDir: scrapper
-    schedule: "*/2 * * * *"
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python main.py"
+    schedule: "*/3 * * * *"  # Every 3 minutes for production
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip &&
+      pip install -r requirements.txt
+    startCommand: python main.py
     envVars:
-      - fromGroup: shared-vars
-      # FIX: Use 'connectionString' instead of 'internalConnectionString'
+      - fromGroup: shared-production-vars
       - key: REDIS_URL
         fromService:
           type: redis
-          name: redis-cache
+          name: gpu-yield-redis
           property: connectionString
+    
+    # Cron-specific settings
+    timeoutSeconds: 300  # 5 minute timeout
+
+# Database configurations (if needed)
+databases: []
+
+# Additional production configurations
+previewsEnabled: false  # Disable for production
+buildFilter:
+  paths:
+    - api/**
+    - frontend/**
+    - worker/**
+    - scrapper/**
+  ignoredPaths:
+    - "**/*.md"
+    - "**/tests/**"
+    - "**/.env*"

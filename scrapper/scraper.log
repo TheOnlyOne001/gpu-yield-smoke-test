@@ -1,0 +1,431 @@
+2025-06-08 21:12:27,999 - utils - INFO - Sentry initialized successfully.
+2025-06-08 21:12:28,013 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 21:12:28,014 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 21:12:28,067 - __main__ - INFO - Running initial scrape job...
+2025-06-08 21:12:28,084 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:12:28,086 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:12:32,297 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168448 chars)
+2025-06-08 21:12:32,348 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:12:32,349 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:12:32,350 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:12:36,084 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:12:36,121 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:12:36,136 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:12:36,138 - __main__ - INFO - Duration: 8.05s
+2025-06-08 21:12:36,140 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:12:36,144 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:12:36,145 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:14:36,144 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:14:36,145 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:14:40,400 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168482 chars)
+2025-06-08 21:14:40,447 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:14:40,448 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:14:40,449 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:14:43,825 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:14:43,845 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:14:43,846 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:14:43,847 - __main__ - INFO - Duration: 7.70s
+2025-06-08 21:14:43,848 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:14:43,849 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:14:43,850 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:16:53,850 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:16:53,852 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:16:58,048 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168417 chars)
+2025-06-08 21:16:58,106 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:16:58,108 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:16:58,109 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:17:01,491 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:17:01,528 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:17:01,529 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:17:01,532 - __main__ - INFO - Duration: 7.68s
+2025-06-08 21:17:01,534 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:17:01,537 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:17:01,539 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:19:11,572 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:19:11,573 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:19:15,584 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168656 chars)
+2025-06-08 21:19:15,654 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:19:15,655 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:19:15,656 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:19:19,328 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:19:19,352 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:19:19,353 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:19:19,353 - __main__ - INFO - Duration: 7.78s
+2025-06-08 21:19:19,355 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:19:19,356 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:19:19,357 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:21:29,356 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:21:29,360 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:21:33,237 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168895 chars)
+2025-06-08 21:21:33,302 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:21:33,302 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:21:33,303 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:21:36,717 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:21:36,797 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:21:36,802 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:21:36,813 - __main__ - INFO - Duration: 7.44s
+2025-06-08 21:21:36,824 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:21:36,826 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:21:36,836 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:23:46,841 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:23:46,846 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:23:50,812 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169004 chars)
+2025-06-08 21:23:50,876 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:23:50,878 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:23:50,880 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:23:54,275 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:23:54,304 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:23:54,305 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:23:54,307 - __main__ - INFO - Duration: 7.46s
+2025-06-08 21:23:54,308 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:23:54,309 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:23:54,310 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:26:04,304 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:26:04,305 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:26:08,454 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168618 chars)
+2025-06-08 21:26:08,492 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:26:08,493 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:26:08,494 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:26:12,226 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:26:12,258 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:26:12,259 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:26:12,260 - __main__ - INFO - Duration: 7.95s
+2025-06-08 21:26:12,261 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:26:12,262 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:26:12,263 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:29:50,564 - utils - INFO - Sentry initialized successfully.
+2025-06-08 21:29:50,607 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 21:29:50,608 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 21:29:50,677 - __main__ - INFO - Running initial scrape job...
+2025-06-08 21:29:50,684 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:29:50,686 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:29:55,029 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168484 chars)
+2025-06-08 21:29:55,092 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:29:55,093 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:29:55,094 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:29:58,485 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:29:58,522 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:29:58,523 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:29:58,525 - __main__ - INFO - Duration: 7.84s
+2025-06-08 21:29:58,526 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:29:58,528 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:29:58,529 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:31:58,540 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:31:58,544 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:32:02,524 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168590 chars)
+2025-06-08 21:32:02,578 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:32:02,579 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:32:02,581 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:32:06,381 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:32:06,411 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:32:06,412 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:32:06,415 - __main__ - INFO - Duration: 7.87s
+2025-06-08 21:32:06,416 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:32:06,417 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:32:06,419 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:34:16,413 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:34:16,415 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:34:20,610 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168819 chars)
+2025-06-08 21:34:20,649 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:34:20,650 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:34:20,651 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:34:24,014 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:34:24,033 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:34:24,034 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:34:24,034 - __main__ - INFO - Duration: 7.62s
+2025-06-08 21:34:24,035 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:34:24,036 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:34:24,037 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:36:34,037 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:36:34,038 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:36:38,356 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168866 chars)
+2025-06-08 21:36:38,398 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:36:38,398 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:36:38,399 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:36:41,862 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:36:41,885 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:36:41,886 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:36:41,887 - __main__ - INFO - Duration: 7.85s
+2025-06-08 21:36:41,888 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:36:41,889 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:36:41,889 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:38:51,886 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:38:51,887 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:38:55,891 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168988 chars)
+2025-06-08 21:38:55,927 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:38:55,927 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:38:55,928 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:38:59,707 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:38:59,747 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:38:59,749 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:38:59,751 - __main__ - INFO - Duration: 7.86s
+2025-06-08 21:38:59,752 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:38:59,755 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:38:59,756 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:40:16,499 - utils - INFO - Sentry initialized successfully.
+2025-06-08 21:40:16,507 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 21:40:16,509 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 21:40:16,545 - __main__ - INFO - Running initial scrape job...
+2025-06-08 21:40:16,548 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:40:16,549 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:40:20,708 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168504 chars)
+2025-06-08 21:40:20,746 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:40:20,746 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:40:20,749 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:40:24,532 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:40:24,563 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:40:24,563 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:40:24,565 - __main__ - INFO - Duration: 8.01s
+2025-06-08 21:40:24,566 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:40:24,567 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:40:24,568 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:42:24,568 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:42:24,569 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:42:28,478 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168779 chars)
+2025-06-08 21:42:28,515 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:42:28,516 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:42:28,517 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:42:31,886 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:42:31,910 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:42:31,911 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:42:31,912 - __main__ - INFO - Duration: 7.34s
+2025-06-08 21:42:31,913 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:42:31,914 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:42:31,915 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:44:41,915 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:44:41,916 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:44:46,098 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168902 chars)
+2025-06-08 21:44:46,135 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:44:46,136 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:44:46,138 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:44:49,946 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:44:49,967 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:44:49,968 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:44:49,969 - __main__ - INFO - Duration: 8.05s
+2025-06-08 21:44:49,971 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:44:49,972 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:44:49,973 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:46:59,975 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:46:59,976 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:47:04,227 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168919 chars)
+2025-06-08 21:47:04,267 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:47:04,268 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:47:04,269 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:47:07,650 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:47:07,673 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:47:07,674 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:47:07,675 - __main__ - INFO - Duration: 7.70s
+2025-06-08 21:47:07,677 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:47:07,677 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:47:07,679 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:49:17,676 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:49:17,677 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:49:21,726 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168830 chars)
+2025-06-08 21:49:21,795 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:49:21,796 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:49:21,797 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:49:25,172 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:49:25,219 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:49:25,220 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:49:25,222 - __main__ - INFO - Duration: 7.54s
+2025-06-08 21:49:25,224 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:49:25,225 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:49:25,227 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:52:10,189 - utils - INFO - Sentry initialized successfully.
+2025-06-08 21:52:10,199 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 21:52:10,201 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 21:52:10,233 - __main__ - INFO - Running initial scrape job...
+2025-06-08 21:52:10,236 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:52:10,238 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:52:14,237 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168774 chars)
+2025-06-08 21:52:14,292 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:52:14,293 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:52:14,295 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:52:18,100 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:52:18,117 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:52:18,118 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:52:18,119 - __main__ - INFO - Duration: 7.88s
+2025-06-08 21:52:18,120 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:52:18,121 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:52:18,121 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:54:18,119 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:54:18,121 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:54:22,314 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169344 chars)
+2025-06-08 21:54:22,357 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:54:22,358 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:54:22,359 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:54:25,756 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:54:25,774 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:54:25,775 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:54:25,776 - __main__ - INFO - Duration: 7.65s
+2025-06-08 21:54:25,777 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:54:25,778 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:54:25,779 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:56:35,781 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:56:35,782 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:56:39,756 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169047 chars)
+2025-06-08 21:56:39,796 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:56:39,797 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:56:39,797 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:56:43,173 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:56:43,194 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:56:43,194 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:56:43,195 - __main__ - INFO - Duration: 7.41s
+2025-06-08 21:56:43,196 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:56:43,197 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:56:43,197 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 21:58:53,199 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 21:58:53,201 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 21:58:57,104 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168613 chars)
+2025-06-08 21:58:57,144 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 21:58:57,145 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 21:58:57,146 - __main__ - INFO - Scraping runpod...
+2025-06-08 21:59:01,238 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 21:59:01,262 - __main__ - WARNING - No data received from runpod
+2025-06-08 21:59:01,262 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 21:59:01,263 - __main__ - INFO - Duration: 8.06s
+2025-06-08 21:59:01,264 - __main__ - INFO - Records this cycle: 64
+2025-06-08 21:59:01,265 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 21:59:01,266 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:01:11,271 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:01:11,272 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:01:15,618 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169427 chars)
+2025-06-08 22:01:15,672 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:01:15,673 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:01:15,674 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:01:19,065 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:01:19,093 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:01:19,094 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:01:19,096 - __main__ - INFO - Duration: 7.82s
+2025-06-08 22:01:19,097 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:01:19,097 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:01:19,098 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:03:44,349 - utils - INFO - Sentry initialized successfully.
+2025-06-08 22:03:44,358 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 22:03:44,360 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 22:03:44,392 - __main__ - INFO - Running initial scrape job...
+2025-06-08 22:03:44,395 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:03:44,396 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:03:48,455 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168801 chars)
+2025-06-08 22:03:48,522 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:03:48,524 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:03:48,525 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:03:51,926 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:03:51,958 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:03:51,959 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:03:51,960 - __main__ - INFO - Duration: 7.56s
+2025-06-08 22:03:51,962 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:03:51,964 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:03:51,965 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:05:51,968 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:05:51,969 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:05:56,108 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168713 chars)
+2025-06-08 22:05:56,163 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:05:56,164 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:05:56,165 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:05:59,872 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:05:59,894 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:05:59,895 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:05:59,896 - __main__ - INFO - Duration: 7.93s
+2025-06-08 22:05:59,896 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:05:59,897 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:05:59,898 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:08:09,900 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:08:09,901 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:08:14,091 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169071 chars)
+2025-06-08 22:08:14,133 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:08:14,134 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:08:14,135 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:08:17,536 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:08:17,556 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:08:17,557 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:08:17,557 - __main__ - INFO - Duration: 7.66s
+2025-06-08 22:08:17,558 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:08:17,559 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:08:17,560 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:10:27,557 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:10:27,558 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:10:31,662 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168924 chars)
+2025-06-08 22:10:31,728 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:10:31,729 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:10:31,730 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:10:35,123 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:10:35,144 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:10:35,145 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:10:35,145 - __main__ - INFO - Duration: 7.59s
+2025-06-08 22:10:35,146 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:10:35,147 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:10:35,148 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:12:45,269 - utils - INFO - Sentry initialized successfully.
+2025-06-08 22:12:45,278 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 22:12:45,279 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 22:12:45,321 - __main__ - INFO - Running initial scrape job...
+2025-06-08 22:12:45,324 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:12:45,334 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:12:49,428 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168887 chars)
+2025-06-08 22:12:49,506 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:12:49,515 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:12:49,517 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:12:53,265 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:12:53,295 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:12:53,296 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:12:53,301 - __main__ - INFO - Duration: 7.96s
+2025-06-08 22:12:53,303 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:12:53,304 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:12:53,306 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:14:53,304 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:14:53,305 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:14:57,480 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169134 chars)
+2025-06-08 22:14:57,531 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:14:57,532 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:14:57,533 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:15:00,908 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:15:00,932 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:15:00,933 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:15:00,934 - __main__ - INFO - Duration: 7.63s
+2025-06-08 22:15:00,935 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:15:00,936 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:15:00,937 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:17:10,935 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:17:10,937 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:17:15,092 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169138 chars)
+2025-06-08 22:17:15,137 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:17:15,138 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:17:15,139 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:17:18,512 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:17:18,536 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:17:18,537 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:17:18,538 - __main__ - INFO - Duration: 7.60s
+2025-06-08 22:17:18,539 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:17:18,540 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:17:18,541 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:19:59,264 - utils - INFO - Sentry initialized successfully.
+2025-06-08 22:19:59,273 - __main__ - INFO - Successfully connected to Redis
+2025-06-08 22:19:59,274 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-08 22:19:59,305 - __main__ - INFO - Running initial scrape job...
+2025-06-08 22:19:59,308 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:19:59,308 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:20:03,400 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168942 chars)
+2025-06-08 22:20:03,483 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:20:03,486 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:20:03,488 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:20:07,232 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:20:07,261 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:20:07,262 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:20:07,265 - __main__ - INFO - Duration: 7.95s
+2025-06-08 22:20:07,268 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:20:07,272 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:20:07,273 - __main__ - INFO - Processing rate: 100.0%
+2025-06-08 22:22:07,271 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-08 22:22:07,272 - __main__ - INFO - Scraping vast.ai...
+2025-06-08 22:22:11,354 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168907 chars)
+2025-06-08 22:22:11,402 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-08 22:22:11,403 - __main__ - INFO - vast.ai: 64 records published
+2025-06-08 22:22:11,404 - __main__ - INFO - Scraping runpod...
+2025-06-08 22:22:14,786 - __main__ - ERROR - HTTP error fetching data from runpod: 400
+2025-06-08 22:22:14,806 - __main__ - WARNING - No data received from runpod
+2025-06-08 22:22:14,807 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-08 22:22:14,808 - __main__ - INFO - Duration: 7.53s
+2025-06-08 22:22:14,809 - __main__ - INFO - Records this cycle: 64
+2025-06-08 22:22:14,810 - __main__ - INFO - Success rate: 50.0%
+2025-06-08 22:22:14,811 - __main__ - INFO - Processing rate: 100.0%

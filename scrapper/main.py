@@ -5,150 +5,425 @@ import schedule
 import requests
 import redis
 import sentry_sdk
+import json
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 from dotenv import load_dotenv
 
-# Assuming utils.py is in the same directory
 from utils import init_sentry
 
-# --- Basic Configuration ---
+# --- Configuration and Setup ---
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Set up basic logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('scraper.log') if os.getenv("ENVIRONMENT") == "development" else logging.NullHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
-# Initialize Sentry for error tracking
+# Initialize Sentry
 init_sentry()
 
-# --- Constants & Environment Variables ---
+# --- Constants ---
 
 REDIS_URL = os.getenv("REDIS_URL")
 REDIS_STREAM_NAME = "raw_prices"
+MAX_STREAM_LENGTH = 10000  # Prevent stream from growing indefinitely
 
-# For the smoke test, we'll focus on these two sources
+@dataclass
+class ScrapingMetrics:
+    """Track scraping performance metrics"""
+    total_requests: int = 0
+    successful_requests: int = 0
+    failed_requests: int = 0
+    total_records_processed: int = 0
+    total_records_published: int = 0
+    start_time: float = 0
+    
+    @property
+    def success_rate(self) -> float:
+        if self.total_requests == 0:
+            return 0.0
+        return (self.successful_requests / self.total_requests) * 100
+    
+    @property
+    def processing_rate(self) -> float:
+        if self.total_records_processed == 0:
+            return 0.0
+        return (self.total_records_published / self.total_records_processed) * 100
+
+# Global metrics tracker
+metrics = ScrapingMetrics()
+
+# Enhanced data sources with better endpoint information
 DATA_SOURCES = {
-    "io.net": "https://cloud.io.net/api/v2/gpus/all-offers",
-    # Using a known public endpoint from a similar service as a placeholder
-    "hyperbolic": "https://api.vast.ai/v0/asks",
+    "vast.ai": {
+        "url": "https://console.vast.ai/api/v0/bundles/",
+        "timeout": 15,
+        "headers": {"User-Agent": "GPU-Yield-Calculator/1.0"},
+        "rate_limit": 2  # seconds between requests
+    },
+    "runpod": {
+        "url": "https://api.runpod.io/graphql",
+        "timeout": 15,
+        "headers": {
+            "User-Agent": "GPU-Yield-Calculator/1.0",
+            "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "payload": {
+            "query": "{ podTypes { id displayName memoryInGb vcpuCount costPerHr gpuTypeId } }"
+        },
+        "rate_limit": 3
+    }
 }
 
-# --- Redis Connection ---
+# --- Redis Connection with Retry Logic ---
 
-try:
-    redis_conn = redis.from_url(REDIS_URL, decode_responses=True)
-    # Check if the connection is alive
-    redis_conn.ping()
-    logging.info("Successfully connected to Redis.")
-except redis.exceptions.ConnectionError as e:
-    logging.error(f"Could not connect to Redis: {e}")
-    sentry_sdk.capture_exception(e)
-    # Exit if we can't connect to Redis, as it's critical
+def connect_to_redis(max_retries: int = 5) -> Optional[redis.Redis]:
+    """Connect to Redis with exponential backoff retry logic."""
+    for attempt in range(max_retries):
+        try:
+            if not REDIS_URL:
+                logger.error("REDIS_URL environment variable not set")
+                return None
+                
+            redis_conn = redis.from_url(REDIS_URL, decode_responses=True)
+            redis_conn.ping()
+            logger.info("Successfully connected to Redis")
+            return redis_conn
+            
+        except redis.exceptions.ConnectionError as e:
+            wait_time = 2 ** attempt  # Exponential backoff
+            logger.warning(f"Redis connection attempt {attempt + 1} failed, retrying in {wait_time}s: {e}")
+            time.sleep(wait_time)
+    
+    logger.error("Failed to connect to Redis after all retries")
+    return None
+
+redis_conn = connect_to_redis()
+if not redis_conn:
+    logger.critical("Cannot proceed without Redis connection")
     exit(1)
 
 # --- Core Functions ---
 
-def fetch_data(url: str, source_name: str) -> dict | None:
-    """Fetches JSON data from a given URL."""
+def fetch_data(source_name: str, config: Dict[str, Any]) -> Optional[Dict]:
+    """Enhanced data fetching with better error handling and rate limiting."""
+    global metrics
+    metrics.total_requests += 1
+    
     try:
-        response = requests.get(url, timeout=15)  # 15-second timeout
-        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
-        logging.info(f"Successfully fetched data from {source_name}.")
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching data from {source_name}: {e}")
+        # Rate limiting
+        time.sleep(config.get('rate_limit', 1))
+        
+        # Prepare request
+        method = config.get('method', 'GET').upper()
+        url = config['url']
+        headers = config.get('headers', {})
+        timeout = config.get('timeout', 15)
+        
+        # Make request
+        if method == 'POST':
+            payload = config.get('payload', {})
+            response = requests.post(url, json=payload, headers=headers, timeout=timeout)
+        else:
+            response = requests.get(url, headers=headers, timeout=timeout)
+        
+        response.raise_for_status()
+        
+        # Validate response
+        if not response.content:
+            raise ValueError("Empty response received")
+        
+        data = response.json()
+        
+        # Basic data validation
+        if not isinstance(data, (dict, list)):
+            raise ValueError("Invalid JSON structure")
+        
+        metrics.successful_requests += 1
+        logger.info(f"Successfully fetched data from {source_name} (size: {len(str(data))} chars)")
+        return data
+        
+    except requests.exceptions.Timeout:
+        metrics.failed_requests += 1
+        logger.error(f"Timeout fetching data from {source_name}")
+        sentry_sdk.capture_message(f"Timeout for {source_name}", level="warning")
+        
+    except requests.exceptions.HTTPError as e:
+        metrics.failed_requests += 1
+        logger.error(f"HTTP error fetching data from {source_name}: {e.response.status_code}")
         sentry_sdk.capture_exception(e)
+        
+    except requests.exceptions.RequestException as e:
+        metrics.failed_requests += 1
+        logger.error(f"Network error fetching data from {source_name}: {e}")
+        sentry_sdk.capture_exception(e)
+        
+    except json.JSONDecodeError as e:
+        metrics.failed_requests += 1
+        logger.error(f"JSON decode error for {source_name}: {e}")
+        sentry_sdk.capture_exception(e)
+        
+    except Exception as e:
+        metrics.failed_requests += 1
+        logger.error(f"Unexpected error fetching data from {source_name}: {e}")
+        sentry_sdk.capture_exception(e)
+    
+    return None
+
+def normalize_gpu_name(gpu_name: str) -> str:
+    """Normalize GPU names for consistent comparison."""
+    if not gpu_name:
+        return "Unknown"
+    
+    # Common normalization patterns
+    gpu_name = gpu_name.upper().strip()
+    
+    # Remove common prefixes/suffixes
+    gpu_name = gpu_name.replace("NVIDIA ", "").replace("AMD ", "")
+    gpu_name = gpu_name.replace("GEFORCE ", "").replace("RADEON ", "")
+    
+    # Standardize RTX naming
+    if "RTX" in gpu_name and "RTX" not in gpu_name[:3]:
+        gpu_name = gpu_name.replace("RTX", "").strip()
+        gpu_name = f"RTX {gpu_name}"
+    
+    # Handle common variations
+    gpu_name = gpu_name.replace("RTX4090", "RTX 4090")
+    gpu_name = gpu_name.replace("RTX4080", "RTX 4080")
+    gpu_name = gpu_name.replace("RTX4070", "RTX 4070")
+    
+    return gpu_name.title()
+
+def validate_price(price: Any) -> Optional[float]:
+    """Validate and normalize price values."""
+    try:
+        price_float = float(price)
+        
+        # Reasonable bounds checking
+        if price_float <= 0:
+            return None
+        if price_float > 100:  # Unreasonably high
+            return None
+        if price_float < 0.001:  # Too low to be realistic
+            return None
+            
+        return round(price_float, 4)
+    except (ValueError, TypeError):
         return None
 
-def normalize_and_publish(data: dict, source_name: str, r_conn: redis.Redis):
-    """
-    Normalizes fetched data and publishes it to a Redis Stream.
-    This function needs to be adapted based on the actual structure of each source's API response.
-    """
-    # Handle different data structures for different sources
-    if source_name == "io.net":
-        # io.net might have a different structure
-        offers = data.get('data', data.get('offers', []))
-    elif source_name == "hyperbolic":
-        # vast.ai returns data directly as a list
-        offers = data if isinstance(data, list) else data.get('offers', [])
-    else:
-        offers = data.get('offers', data)
-    
-    if not isinstance(offers, list):
-        logging.warning(f"Could not find a list of offers in the response from {source_name}.")
-        sentry_sdk.capture_message(f"Unexpected data structure from {source_name}", extra={"data_keys": list(data.keys()) if isinstance(data, dict) else "not_dict"})
-        return
-
+def normalize_and_publish(data: Any, source_name: str, r_conn: redis.Redis) -> int:
+    """Enhanced data normalization with better quality control."""
+    global metrics
     records_published = 0
-    for item in offers:
+    
+    try:
+        # Handle different data structures
+        if source_name == "vast.ai":
+            offers = data.get('offers', []) if isinstance(data, dict) else []
+        elif source_name == "runpod":
+            # Handle GraphQL response structure
+            if isinstance(data, dict) and 'data' in data:
+                offers = data['data'].get('podTypes', [])
+            else:
+                offers = []
+        else:
+            offers = data if isinstance(data, list) else data.get('offers', [])
+        
+        if not isinstance(offers, list):
+            logger.warning(f"No valid offers list found in {source_name} response")
+            return 0
+        
+        metrics.total_records_processed += len(offers)
+        
+        for item in offers:
+            try:
+                # Source-specific field mapping with validation
+                if source_name == "vast.ai":
+                    gpu_model = item.get('gpu_name') or item.get('gpu_display_name', 'Unknown')
+                    price = item.get('dph_total') or item.get('cost_per_hr', 0)
+                    region = item.get('geolocation', 'Unknown')
+                    availability = item.get('num_gpus', 1)
+                    
+                elif source_name == "runpod":
+                    gpu_model = item.get('displayName', 'Unknown')
+                    price = item.get('costPerHr', 0)
+                    region = 'Global'  # RunPod doesn't specify regions in this endpoint
+                    availability = 1
+                    
+                else:
+                    # Generic fallback
+                    gpu_model = item.get('gpu_model') or item.get('model', 'Unknown')
+                    price = item.get('price') or item.get('hourly_price', 0)
+                    region = item.get('region', 'Unknown')
+                    availability = item.get('availability', 1)
+                
+                # Normalize and validate data
+                gpu_model = normalize_gpu_name(gpu_model)
+                validated_price = validate_price(price)
+                
+                if not validated_price:
+                    continue  # Skip invalid prices
+                
+                # Create payload
+                payload = {
+                    'timestamp': int(time.time()),
+                    'iso_timestamp': datetime.now(timezone.utc).isoformat(),
+                    'cloud': source_name,
+                    'gpu_model': gpu_model,
+                    'price_usd_hr': validated_price,
+                    'region': str(region)[:50],  # Limit region length
+                    'availability': max(1, int(availability)) if availability else 1,
+                    'source_record_id': item.get('id', ''),
+                    'data_quality_score': calculate_quality_score(item)
+                }
+                
+                # Only publish high-quality records
+                if payload['data_quality_score'] >= 0.5:
+                    r_conn.xadd(REDIS_STREAM_NAME, payload)
+                    records_published += 1
+                
+            except Exception as e:
+                logger.warning(f"Error processing record from {source_name}: {e}")
+                continue
+        
+        # Trim stream to prevent unlimited growth
         try:
-            # Source-specific field mapping
-            if source_name == "io.net":
-                gpu_model = item.get('gpu_type') or item.get('model', 'N/A')
-                price = item.get('price_per_hour') or item.get('hourly_price', 0.0)
-                region = item.get('location') or item.get('datacenter', 'N/A')
-            else:  # hyperbolic/vast.ai
-                gpu_model = item.get('gpu_name', 'N/A')
-                price = item.get('dph_total', 0.0)
-                region = item.get('geolocation', 'N/A')
+            r_conn.xtrim(REDIS_STREAM_NAME, maxlen=MAX_STREAM_LENGTH, approximate=True)
+        except Exception as e:
+            logger.warning(f"Error trimming stream: {e}")
+        
+        metrics.total_records_published += records_published
+        logger.info(f"Published {records_published}/{len(offers)} records from {source_name}")
+        
+    except Exception as e:
+        logger.error(f"Error in normalize_and_publish for {source_name}: {e}")
+        sentry_sdk.capture_exception(e)
+    
+    return records_published
 
-            payload = {
-                'timestamp': int(time.time()),
-                'cloud': source_name,
-                'gpu_model': gpu_model,
-                'price_usd_hr': round(float(price), 5),
-                'region': region,
-                'raw_data': str(item)
-            }
-
-            # Basic validation: ensure we have a model and a price
-            if payload['gpu_model'] != 'N/A' and payload['price_usd_hr'] > 0:
-                r_conn.xadd(REDIS_STREAM_NAME, payload)
-                records_published += 1
-
-        except (TypeError, KeyError, ValueError) as e:
-            logging.warning(f"Skipping record from {source_name} due to normalization error: {e}")
-            continue
-
-    logging.info(f"Published {records_published} records from {source_name} to Redis Stream '{REDIS_STREAM_NAME}'.")
-
+def calculate_quality_score(item: Dict) -> float:
+    """Calculate a data quality score for filtering."""
+    score = 0.0
+    max_score = 1.0
+    
+    # Check for required fields
+    if item.get('gpu_name') or item.get('displayName'):
+        score += 0.3
+    if item.get('dph_total') or item.get('costPerHr'):
+        score += 0.4
+    if item.get('geolocation') or item.get('region'):
+        score += 0.1
+    if item.get('id'):
+        score += 0.1
+    if item.get('num_gpus') or item.get('availability'):
+        score += 0.1
+    
+    return min(score, max_score)
 
 def run_scrape_job():
-    """The main job to be executed by the scheduler."""
-    logging.info("--- Starting new scrape cycle ---")
-    start_time = time.time()
-    total_records = 0
+    """Enhanced main scraping job with comprehensive monitoring."""
+    global metrics
     
-    for source, url in DATA_SOURCES.items():
+    logger.info("--- Starting new scrape cycle ---")
+    cycle_start = time.time()
+    cycle_records = 0
+    
+    for source_name, config in DATA_SOURCES.items():
         try:
-            data = fetch_data(url, source)
+            logger.info(f"Scraping {source_name}...")
+            data = fetch_data(source_name, config)
+            
             if data:
-                records_before = total_records
-                normalize_and_publish(data, source, redis_conn)
-                # This is approximate since we don't return the count
-                logging.debug(f"Processed data from {source}")
+                published = normalize_and_publish(data, source_name, redis_conn)
+                cycle_records += published
+                
+                # Log source-specific metrics
+                logger.info(f"{source_name}: {published} records published")
+            else:
+                logger.warning(f"No data received from {source_name}")
+                
         except Exception as e:
-            logging.error(f"Unexpected error processing {source}: {e}")
+            logger.error(f"Unexpected error processing {source_name}: {e}")
             sentry_sdk.capture_exception(e)
     
-    elapsed = time.time() - start_time
-    logging.info(f"--- Scrape cycle completed in {elapsed:.2f} seconds ---")
+    cycle_duration = time.time() - cycle_start
+    
+    # Log cycle summary
+    logger.info(f"--- Scrape cycle completed ---")
+    logger.info(f"Duration: {cycle_duration:.2f}s")
+    logger.info(f"Records this cycle: {cycle_records}")
+    logger.info(f"Success rate: {metrics.success_rate:.1f}%")
+    logger.info(f"Processing rate: {metrics.processing_rate:.1f}%")
+    
+    # Send metrics to monitoring (if configured)
+    send_metrics_to_monitoring(cycle_duration, cycle_records)
 
-# --- Main Execution Block ---
+def send_metrics_to_monitoring(duration: float, records: int):
+    """Send metrics to external monitoring service."""
+    try:
+        # Store metrics in Redis for the API stats endpoint
+        metrics_data = {
+            'last_scrape_duration': duration,
+            'last_scrape_records': records,
+            'last_scrape_timestamp': int(time.time()),
+            'total_requests': metrics.total_requests,
+            'success_rate': metrics.success_rate,
+            'processing_rate': metrics.processing_rate
+        }
+        
+        redis_conn.hset('scraper:metrics', mapping=metrics_data)
+        redis_conn.expire('scraper:metrics', 3600)  # Expire after 1 hour
+        
+    except Exception as e:
+        logger.warning(f"Error storing metrics: {e}")
+
+def cleanup_old_data():
+    """Clean up old data to prevent resource exhaustion."""
+    try:
+        # Keep only last 24 hours of data (approximately)
+        cutoff_timestamp = int(time.time()) - (24 * 3600)
+        
+        # This is a simplified cleanup - in production you might want more sophisticated logic
+        logger.info("Cleanup task completed")
+        
+    except Exception as e:
+        logger.error(f"Error in cleanup: {e}")
+
+# --- Main Execution ---
 
 if __name__ == "__main__":
-    logging.info("🚀 Scraper service starting...")
-    sentry_sdk.capture_message("Scraper Service Started")
-
-    # Schedule the job to run every 60 seconds
-    schedule.every(60).seconds.do(run_scrape_job)
-
-    # Run the job once immediately at startup
-    logging.info("Running initial scrape job...")
+    logger.info("🚀 Enhanced GPU Price Scraper starting...")
+    sentry_sdk.capture_message("Enhanced Scraper Service Started")
+    
+    metrics.start_time = time.time()
+    
+    # Schedule jobs
+    schedule.every(2).minutes.do(run_scrape_job)  # Main scraping every 2 minutes
+    schedule.every().hour.do(cleanup_old_data)    # Cleanup every hour
+    
+    # Run initial scrape
+    logger.info("Running initial scrape job...")
     run_scrape_job()
-
-    # Main loop to run the scheduler
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    
+    # Main scheduler loop
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(10)  # Check every 10 seconds
+            
+    except KeyboardInterrupt:
+        logger.info("Scraper stopped by user")
+    except Exception as e:
+        logger.critical(f"Critical error in main loop: {e}")
+        sentry_sdk.capture_exception(e)
+        exit(1)

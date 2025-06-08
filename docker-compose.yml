@@ -1,0 +1,159 @@
+
+
+services:
+  # Redis for caching and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: gpu-yield-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # PostgreSQL for persistent data
+  postgres:
+    image: postgres:15-alpine
+    container_name: gpu-yield-postgres
+    environment:
+      POSTGRES_DB: gpu_yield_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/migrations:/docker-entrypoint-initdb.d/migrations
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: gpu-yield-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gpu-yield-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    restart: unless-stopped
+    command: npm run dev
+
+  # Background Worker
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: gpu-yield-worker
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+    env_file:
+      - .env
+    volumes:
+      - ./worker:/app
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python alerts.py
+
+  # Price Scraper
+  scraper:
+    build:
+      context: ./scrapper
+      dockerfile: Dockerfile
+    container_name: gpu-yield-scraper
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+    env_file:
+      - .env
+    volumes:
+      - ./scrapper:/app
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python main.py
+
+  # Database Admin (Optional - for development)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: gpu-yield-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gpuyield.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles: ["dev"]  # Only start with --profile dev
+
+volumes:
+  redis_data:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  default:
+    name: gpu_yield_network
