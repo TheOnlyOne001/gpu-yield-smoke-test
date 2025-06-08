@@ -9,7 +9,7 @@ envVarGroups:
         fromService:
           type: redis
           name: redis-cache
-          property: internalConnectionString # Using the more specific internal URL
+          property: connectionString  # Changed from internalConnectionString
       - key: SENTRY_DSN
         sync: false
       - key: DATABASE_URL
@@ -22,7 +22,12 @@ envVarGroups:
         value: "3.11.9"
 
 services:
-  # 1. Frontend: Next.js Web Service
+  # 1. Redis Instance (moved to top for dependency order)
+  - type: redis
+    name: redis-cache
+    plan: free
+
+  # 2. Frontend: Next.js Web Service
   - name: next-ui
     type: web
     env: node
@@ -36,7 +41,7 @@ services:
           name: yield-api
           property: url # FIXED: 'url' is more reliable than 'host'
 
-  # 2. Backend API: FastAPI Web Service
+  # 3. Backend API: FastAPI Web Service
   - name: yield-api
     type: web
     env: python
@@ -46,7 +51,7 @@ services:
     envVars:
       - fromGroup: shared-vars
 
-  # 3. Background Worker: Redis consumer
+  # 4. Background Worker: Redis consumer
   - name: alert-worker
     type: worker
     env: python
@@ -56,7 +61,7 @@ services:
     envVars:
       - fromGroup: shared-vars
 
-  # 4. Cron Job: Price Scraper
+  # 5. Cron Job: Price Scraper
   - name: gpu-scraper
     type: cron
     env: python
@@ -66,8 +71,3 @@ services:
     startCommand: "python main.py"
     envVars:
       - fromGroup: shared-vars
-
-  # 5. Redis Instance
-  - type: redis
-    name: redis-cache
-    plan: free
