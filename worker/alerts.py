@@ -15,6 +15,32 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+def connect_to_redis_with_retry(max_retries=6, delay_seconds=5):
+    """Connect to Redis with retry logic for startup timing issues."""
+    for attempt in range(max_retries):
+        try:
+            redis_url = os.getenv("REDIS_URL")
+            if not redis_url:
+                logger.warning(f"REDIS_URL not found, retrying in {delay_seconds} seconds... (attempt {attempt + 1}/{max_retries})")
+                time.sleep(delay_seconds)
+                continue
+            
+            # Attempt to connect
+            conn = redis.from_url(redis_url, decode_responses=True)
+            
+            # Test the connection
+            conn.ping()
+            
+            logger.info("Successfully connected to Redis")
+            return conn
+            
+        except Exception as e:
+            logger.warning(f"Redis not ready, retrying in {delay_seconds} seconds... (attempt {attempt + 1}/{max_retries}): {e}")
+            time.sleep(delay_seconds)
+    
+    logger.error("Failed to connect to Redis after all retries")
+    return None
+
 def init_sentry():
     """Initialize Sentry for error tracking in the worker."""
     sentry_dsn = os.getenv("SENTRY_DSN")
@@ -36,14 +62,15 @@ GROUP_NAME = "alert_group"
 CONSUMER_NAME = "worker-1"
 
 # Get environment variables
-REDIS_URL = os.getenv("REDIS_URL")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 # Instantiate SendGrid client
 sendgrid_client = SendGridAPIClient(api_key=SENDGRID_API_KEY)
 
-# Redis Connection and Consumer Group Setup
-redis_conn = redis.from_url(REDIS_URL, decode_responses=True)
+# Redis Connection with retry logic
+redis_conn = connect_to_redis_with_retry()
+if not redis_conn:
+    exit(1)
 
 # Create consumer group
 try:
