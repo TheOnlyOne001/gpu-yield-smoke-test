@@ -19,7 +19,7 @@ app = FastAPI(title="GPU Price Scraper API", version="1.0.0")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],
+    allow_origins=["*"],  # Changed from os.getenv("FRONTEND_URL", "http://localhost:3000")
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
