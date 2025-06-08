@@ -3,7 +3,18 @@ import Head from 'next/head';
 import useSWR from 'swr';
 import { Zap, Calculator, Mail, X } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Fix the API_BASE_URL construction to handle both hostname and full URL
+const API_BASE_URL = (() => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  
+  // If it's already a full URL (starts with http), use it as-is
+  if (apiUrl.startsWith('http')) {
+    return apiUrl;
+  }
+  
+  // If it's just a hostname, prepend https://
+  return `https://${apiUrl}`;
+})();
 
 const HomePage: React.FC = () => {
   // Fetcher function for SWR
