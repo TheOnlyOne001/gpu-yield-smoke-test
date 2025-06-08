@@ -48,10 +48,12 @@ services:
     buildCommand: "npm install && npm run build"
     startCommand: "npm start"
     envVars:
-      # FIX: For web services, we can't use 'url' property
-      # Instead, construct the URL manually
+      # FIX: Use dynamic service reference instead of hardcoded URL
       - key: NEXT_PUBLIC_API_URL
-        value: https://yield-api.onrender.com
+        fromService:
+          type: web
+          name: yield-api
+          property: host # Changed from hardcoded URL to dynamic service reference
 
   # 4. The Background Worker. It depends on Redis.
   - name: alert-worker
