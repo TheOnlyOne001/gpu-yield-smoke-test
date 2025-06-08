@@ -64,7 +64,7 @@ services:
     schedule: "*/2 * * * *"
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python main.py"
-    envVars: # ADDED a link to the environment group
+    envVars:
       - fromGroup: shared-vars
 
   # 5. Redis Instance
