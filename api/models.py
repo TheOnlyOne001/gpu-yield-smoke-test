@@ -132,10 +132,39 @@ class PriceAlert(BaseModel):
     alert_threshold: float
 
 # Authentication Models
+class UserCreate(BaseModel):
+    """Model for creating a new user"""
+    email: EmailStr = Field(..., description="Valid email address")
+    username: Optional[str] = Field(None, min_length=3, max_length=50, description="Username")
+    password: str = Field(..., min_length=8, max_length=100, description="Password")
+    gpu_models_interested: Optional[List[str]] = Field(default=[], description="List of GPU models of interest")
+    min_profit_threshold: Optional[float] = Field(default=0.0, ge=0, description="Minimum profit threshold for alerts")
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        return v.lower().strip()
+    
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v):
+        if v:
+            v = v.strip()
+            if not v.replace('_', '').replace('-', '').isalnum():
+                raise ValueError('Username can only contain letters, numbers, hyphens, and underscores')
+        return v
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
 class User(BaseModel):
     id: Optional[str] = None
     email: EmailStr
-    username: Optional[str] = None  # Add username field
+    username: Optional[str] = None
     hashed_password: str
     is_active: bool = True
     created_at: Optional[str] = None

@@ -14,13 +14,17 @@ import {
   BarChart3,
   Shield,
   Globe,
-  ArrowRight,
   Check,
   AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import EmailCTA from '../components/EmailCTA';
+import ScrollCue from '../components/ScrollCue';
+import MiniROIPreview from '../components/MiniROIPreview';
+import { fetcherWithTimestamp, FetchResult } from '../lib/fetcher';
+import SyncStatusBadge from '../components/SyncStatusBadge';
 
 // API configuration
 const API_BASE_URL = (() => {
@@ -46,24 +50,32 @@ interface ROIResponse {
   potential_monthly_profit: number;
 }
 
-const HomePage: React.FC = () => {
-  // Fetcher function for SWR
-  const fetcher = async (url: string): Promise<DeltaResponse> => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch');
-    return res.json();
-  };
+function formatYieldDelta(delta: number | undefined) {
+  if (delta === undefined) return '—';
+  return delta >= 0 ? `+$${delta.toFixed(2)}/hr` : `-$${Math.abs(delta).toFixed(2)}/hr`;
+}
 
-  // SWR hook for fetching delta data
-  const { data, error, isLoading } = useSWR<DeltaResponse>(
+const HomePage: React.FC = () => {
+  // Enhanced SWR with timestamp tracking
+  const { data: fetchResult, error, isLoading } = useSWR<FetchResult<DeltaResponse>>(
     `${API_BASE_URL}/delta`,
-    fetcher,
-    { 
+    fetcherWithTimestamp,
+    {
       refreshInterval: 30000,
       errorRetryCount: 3,
       errorRetryInterval: 5000
     }
   );
+
+  // Extract data and timestamp from enhanced fetcher
+  const data = fetchResult?.data;
+  const timestamp = fetchResult?.timestamp;
+
+  // Fix: Add proper null checks for data.deltas
+  const targetGpu = data?.deltas && Array.isArray(data.deltas) 
+    ? data.deltas.find((d) => d.gpu_model === 'RTX 4090') ?? data.deltas[0]
+    : undefined;
+  const delta = targetGpu?.price_usd_hr;
 
   // State management
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,7 +88,7 @@ const HomePage: React.FC = () => {
   const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [signupMessage, setSignupMessage] = useState('');
 
-  // Find the best deal from the data
+  // Find the best deal from the data - also fix this function
   const getBestDeal = (): GPUPriceDelta | null => {
     if (!data?.deltas || !Array.isArray(data.deltas) || data.deltas.length === 0) {
       return null;
@@ -162,7 +174,7 @@ const HomePage: React.FC = () => {
   return (
     <>
       <Head>
-        <title>GPU Yield Calculator - Maximize Your GPU Earnings</title>
+        <title>GPU Yield Calculator - Live RTX 4090 Yield</title>
         <meta name="description" content="Find the most profitable GPU rental platform in real-time. Calculate your potential earnings and get profit alerts." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -184,6 +196,12 @@ const HomePage: React.FC = () => {
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   Sign In
                 </Button>
+                {/* Add sync status to navigation */}
+                <SyncStatusBadge 
+                  timestamp={timestamp} 
+                  isLoading={isLoading}
+                  className="text-xs"
+                />
               </div>
             </div>
           </div>
@@ -209,30 +227,30 @@ const HomePage: React.FC = () => {
                     Profit Machine
                   </span>
                 </h1>
+
+                <div
+                  className={`mt-3 inline-flex items-center space-x-2 rounded-full bg-slate-800/70 px-4 py-1 text-sm font-medium shadow ${
+                    delta !== undefined && delta < 0 ? 'text-red-400' : 'text-green-400'
+                  }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 animate-pulse"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12l5 5L20 7" />
+                  </svg>
+                  <span>RTX 4090 yield delta {formatYieldDelta(delta)}</span>
+                </div>
                 
                 <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
                   Stop guessing which platform pays the most. Get real-time data on GPU rental rates and maximize your earnings with smart automation.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-                  <Button 
-                    size="lg" 
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-2xl shadow-blue-500/25 transition-all transform hover:scale-105"
-                  >
-                    <Calculator className="w-5 h-5 mr-2" />
-                    Calculate My Profit
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    className="border-white/20 text-white hover:bg-white/10 px-8 py-4 rounded-xl"
-                  >
-                    <BarChart3 className="w-5 h-5 mr-2" />
-                    View Live Data
-                  </Button>
+                <div className="mt-8 w-full flex justify-center">
+                  <EmailCTA onSuccess={() => setIsModalOpen(true)} />
                 </div>
               </div>
 
@@ -242,6 +260,12 @@ const HomePage: React.FC = () => {
                   <CardTitle className="text-white flex items-center justify-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     Live Market Data
+                    {/* Add sync status badge */}
+                    <SyncStatusBadge 
+                      timestamp={timestamp} 
+                      isLoading={isLoading}
+                      className="ml-auto text-xs"
+                    />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -277,12 +301,16 @@ const HomePage: React.FC = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Add MiniROIPreview here */}
+              <MiniROIPreview onClick={() => setIsModalOpen(true)} />
             </div>
           </div>
+          <ScrollCue />
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 bg-black/20">
+        <section id="features" className="pt-24 pb-20 bg-black/20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">

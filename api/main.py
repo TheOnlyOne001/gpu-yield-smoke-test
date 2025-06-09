@@ -17,6 +17,9 @@ from models import (
     DeltaResponse, GPUPriceDelta, ErrorResponse, AlertJob
 )
 from routers import auth
+from crud import get_db_connection, create_user, get_user_by_email, connect_to_db, close_db_connection
+from security import get_password_hash
+from dependencies import redis_dependency, db_dependency
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +36,40 @@ app = FastAPI(
     docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
     redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None
 )
+
+# Application startup and shutdown events
+@app.on_event("startup")
+async def startup_event():
+    """Initialize application resources on startup."""
+    try:
+        logger.info("Starting GPU Yield Calculator API...")
+        
+        # Initialize database connection pool
+        await connect_to_db()
+        logger.info("Database connection pool initialized")
+        
+        # Additional startup tasks can be added here
+        logger.info("API startup completed successfully")
+        
+    except Exception as e:
+        logger.error(f"Error during application startup: {e}")
+        raise
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up application resources on shutdown."""
+    try:
+        logger.info("Shutting down GPU Yield Calculator API...")
+        
+        # Close database connection pool
+        await close_db_connection()
+        logger.info("Database connection pool closed")
+        
+        # Additional cleanup tasks can be added here
+        logger.info("API shutdown completed successfully")
+        
+    except Exception as e:
+        logger.error(f"Error during application shutdown: {e}")
 
 # Include authentication router
 app.include_router(auth.router)
@@ -77,16 +114,29 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 # Dependencies
-def redis_dependency():
-    """Dependency to inject Redis connection into endpoints."""
-    connection = get_redis_connection()
-    if connection is None:
-        logger.error("Redis service unavailable")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Redis service is unavailable"
-        )
-    return connection
+# def redis_dependency():
+#     """Dependency to inject Redis connection into endpoints."""
+#     connection = get_redis_connection()
+#     if connection is None:
+#         logger.error("Redis service unavailable")
+#         raise HTTPException(
+#             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+#             detail="Redis service is unavailable"
+#         )
+#     return connection
+
+# Updated database dependency to work with asyncpg generator
+# async def db_dependency():
+#     """Dependency to inject database connection into endpoints."""
+#     try:
+#         async for connection in get_db_connection():
+#             yield connection
+#     except Exception as e:
+#         logger.error(f"Database connection error: {e}")
+#         raise HTTPException(
+#             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+#             detail="Database service is unavailable"
+#         )
 
 # API Endpoints
 @app.get("/health", response_model=HealthCheck, summary="Health Check Endpoint")
@@ -96,11 +146,23 @@ async def health_check(redis_conn: redis.Redis = Depends(redis_dependency)):
         # Test Redis connection
         redis_conn.ping()
         
+        # Test database connection
+        from crud import check_database_health
+        db_healthy = await check_database_health()
+        
+        if not db_healthy:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable"
+            )
+        
         return HealthCheck(
             status="ok",
             timestamp=datetime.now(timezone.utc).isoformat(),
             version="1.0.0"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         raise HTTPException(
@@ -112,17 +174,28 @@ async def health_check(redis_conn: redis.Redis = Depends(redis_dependency)):
 async def get_delta(redis_conn: redis.Redis = Depends(redis_dependency)):
     """
     Returns the current best GPU prices from different cloud providers.
-    Uses caching to improve performance and reduce API load.
+    Includes X-Updated-At header with timestamp for freshness tracking.
     """
     cache_key = "cache:delta"
+    cache_timestamp_key = "cache:delta:timestamp"
     
     # Check for cached result
     try:
         cached_result = redis_conn.get(cache_key)
+        cached_timestamp = redis_conn.get(cache_timestamp_key)
+        
         if cached_result:
             logger.info("Returning cached delta data")
             cached_data = json.loads(cached_result)
-            return DeltaResponse(**cached_data)
+            
+            # Create response with custom header
+            return JSONResponse(
+                content=cached_data,
+                headers={
+                    "X-Updated-At": cached_timestamp.decode() if cached_timestamp else str(int(time.time() * 1000)),
+                    "Cache-Control": "public, max-age=30"
+                }
+            )
     except Exception as e:
         logger.warning(f"Error reading from cache: {e}")
     
@@ -133,10 +206,17 @@ async def get_delta(redis_conn: redis.Redis = Depends(redis_dependency)):
         
         if not stream_entries:
             logger.warning("No pricing data available in Redis stream")
-            return DeltaResponse(
-                deltas=[],
-                total_count=0,
-                last_updated=datetime.now(timezone.utc).isoformat()
+            response_data = {
+                "deltas": [],
+                "total_count": 0,
+                "last_updated": datetime.now(timezone.utc).isoformat()
+            }
+            return JSONResponse(
+                content=response_data,
+                headers={
+                    "X-Updated-At": str(int(time.time() * 1000)),
+                    "Cache-Control": "public, max-age=30"
+                }
             )
         
         # Dictionary to track best offer per GPU model
@@ -181,15 +261,26 @@ async def get_delta(redis_conn: redis.Redis = Depends(redis_dependency)):
             last_updated=datetime.now(timezone.utc).isoformat()
         )
         
-        # Cache the result for 30 seconds
+        # Get current timestamp
+        current_timestamp = str(int(time.time() * 1000))
+        
+        # Cache the result for 30 seconds with timestamp
         try:
             cache_data = response_data.dict()
             redis_conn.setex(cache_key, 30, json.dumps(cache_data, default=str))
+            redis_conn.setex(cache_timestamp_key, 30, current_timestamp)
             logger.info(f"Cached delta data with {len(deltas)} entries")
         except Exception as e:
             logger.warning(f"Error saving to cache: {e}")
         
-        return response_data
+        # Return response with timestamp header
+        return JSONResponse(
+            content=cache_data,
+            headers={
+                "X-Updated-At": current_timestamp,
+                "Cache-Control": "public, max-age=30"
+            }
+        )
         
     except Exception as e:
         logger.error(f"Error reading from Redis stream: {e}")
@@ -252,9 +343,13 @@ async def calculate_roi(request: ROICalcRequest):
         )
 
 @app.post("/signup", response_model=SignupResponse, summary="User Signup")
-async def signup(request: SignupRequest, redis_conn: redis.Redis = Depends(redis_dependency)):
+async def signup(
+    request: SignupRequest, 
+    conn = Depends(db_dependency),
+    redis_conn: redis.Redis = Depends(redis_dependency)
+):
     """
-    Handles user signup requests with enhanced validation and job queuing.
+    Handles user signup requests with database integration and job queuing.
     """
     try:
         logger.info(f"New signup request from: {request.email}")
@@ -266,27 +361,33 @@ async def signup(request: SignupRequest, redis_conn: redis.Redis = Depends(redis
                 detail="Invalid captcha response"
             )
         
-        # Check if email already exists (basic duplicate prevention)
-        existing_user_key = f"user:email:{request.email}"
-        if redis_conn.exists(existing_user_key):
+        # Check if email already exists in database
+        existing_user = await get_user_by_email(conn, request.email)
+        if existing_user:
+            logger.warning(f"Signup attempt with existing email: {request.email}")
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
             )
         
-        # Generate user ID and store user data
-        user_id = f"user_{int(time.time())}_{hash(request.email) % 10000}"
-        user_data = {
-            "email": request.email,
-            "signup_date": datetime.now(timezone.utc).isoformat(),
-            "gpu_models_interested": json.dumps(request.gpu_models_interested),
-            "min_profit_threshold": request.min_profit_threshold,
-            "status": "active"
-        }
+        # Generate a temporary password (since this is signup without password)
+        # In a real app, you might want to send a password setup email
+        temp_password = f"temp_{int(time.time())}_{hash(request.email) % 10000}"
         
-        # Store user data
-        redis_conn.hset(existing_user_key, mapping=user_data)
-        redis_conn.expire(existing_user_key, 86400 * 365)  # 1 year expiration
+        # Hash the temporary password
+        hashed_password = get_password_hash(temp_password)
+        
+        # Create user in database
+        new_user = await create_user(
+            conn=conn,
+            email=request.email,
+            username=None,  # No username provided in signup request
+            hashed_password=hashed_password,
+            gpu_models_interested=request.gpu_models_interested,
+            min_profit_threshold=request.min_profit_threshold
+        )
+        
+        user_id = str(new_user["id"])
         
         # Queue welcome email job
         welcome_job = AlertJob(
@@ -295,20 +396,46 @@ async def signup(request: SignupRequest, redis_conn: redis.Redis = Depends(redis
             user_id=user_id
         )
         
-        redis_conn.xadd("alert_queue", welcome_job.dict())
+        try:
+            redis_conn.xadd("alert_queue", welcome_job.dict())
+            logger.info(f"Welcome email job queued for user: {request.email}")
+        except Exception as e:
+            logger.warning(f"Failed to queue welcome email for {request.email}: {e}")
+            # Don't fail the signup if email queueing fails
+        
+        # Queue password setup email job
+        password_setup_job = AlertJob(
+            job_type="send_password_setup_email",
+            email=request.email,
+            user_id=user_id
+        )
+        
+        try:
+            redis_conn.xadd("alert_queue", password_setup_job.dict())
+            logger.info(f"Password setup email job queued for user: {request.email}")
+        except Exception as e:
+            logger.warning(f"Failed to queue password setup email for {request.email}: {e}")
         
         logger.info(f"User {request.email} successfully registered with ID {user_id}")
         
         return SignupResponse(
             status="success",
-            message="Signup successful! Welcome email queued.",
+            message="Signup successful! Check your email for account setup instructions.",
             user_id=user_id
         )
         
     except HTTPException:
+        # Re-raise HTTP exceptions (like validation errors)
         raise
+    except ValueError as e:
+        # Handle database constraint errors (like duplicate email)
+        logger.error(f"Database constraint error during signup: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
-        logger.error(f"Error during signup: {e}")
+        logger.error(f"Unexpected error during signup: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during signup"
@@ -316,15 +443,18 @@ async def signup(request: SignupRequest, redis_conn: redis.Redis = Depends(redis
 
 # Additional utility endpoints
 @app.get("/stats", summary="Get API Statistics")
-async def get_stats(redis_conn: redis.Redis = Depends(redis_dependency)):
+async def get_stats(
+    redis_conn: redis.Redis = Depends(redis_dependency),
+    conn = Depends(db_dependency)
+):
     """Get basic API usage statistics."""
     try:
         # Get stream length
         stream_length = redis_conn.xlen("raw_prices")
         
-        # Get number of registered users (approximate)
-        user_keys = redis_conn.keys("user:email:*")
-        user_count = len(user_keys)
+        # Get actual user count from database
+        from crud import get_user_count
+        user_count = await get_user_count(conn)
         
         # Get cache hit ratio (if available)
         cache_info = redis_conn.info("stats")
