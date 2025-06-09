@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import logging
 import schedule
@@ -11,8 +12,14 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
-from utils import init_sentry
+from sentry_utils import init_sentry
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.crypto_rates import get_crypto_rates
+from utils.power_prices import get_power_prices
+from aws_spot import fetch_aws_spot_prices
+from akash import fetch_akash_bids
 # --- Configuration and Setup ---
 
 load_dotenv()
@@ -36,6 +43,8 @@ init_sentry()
 REDIS_URL = os.getenv("REDIS_URL")
 REDIS_STREAM_NAME = "raw_prices"
 MAX_STREAM_LENGTH = 10000  # Prevent stream from growing indefinitely
+
+MIN_DATA_QUALITY_SCORE = float(os.getenv("MIN_DATA_QUALITY_SCORE", 0.5))
 
 @dataclass
 class ScrapingMetrics:
@@ -78,17 +87,23 @@ DATA_SOURCES = {
         "rate_limit": 2  # seconds between requests
     },
     "runpod": {
-        "url": "https://api.runpod.io/graphql",
-        "timeout": 15,
+        "url": "https://api.runpod.io/v2/gpuTypes",
+        "method": "GET",
         "headers": {
-            "User-Agent": "GPU-Yield-Calculator/1.0",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {os.getenv('RUNPOD_API_KEY', '')}",
+            "Content-Type": "application/json",
+            "User-Agent": "GPU-Yield-Calculator/1.0"
         },
-        "method": "POST",
-        "payload": {
-            "query": "{ podTypes { id displayName memoryInGb vcpuCount costPerHr gpuTypeId } }"
-        },
+        "timeout": 15,
         "rate_limit": 3
+    },
+    "aws_spot": {
+        "custom_handler": fetch_aws_spot_prices,
+        "rate_limit": 10
+    },
+    "akash": {
+        "custom_handler": fetch_akash_bids,
+        "rate_limit": 5
     }
 }
 
@@ -130,7 +145,15 @@ def fetch_data(source_name: str, config: Dict[str, Any]) -> Optional[Dict]:
     try:
         # Rate limiting
         time.sleep(config.get('rate_limit', 1))
-        
+
+        # Custom handler support
+        if 'custom_handler' in config:
+            handler = config['custom_handler']
+            data = handler(config)
+            metrics.successful_requests += 1
+            logger.info(f"Successfully fetched custom data from {source_name}")
+            return data
+
         # Prepare request
         method = config.get('method', 'GET').upper()
         url = config['url']
@@ -185,6 +208,28 @@ def fetch_data(source_name: str, config: Dict[str, Any]) -> Optional[Dict]:
         logger.error(f"Unexpected error fetching data from {source_name}: {e}")
         sentry_sdk.capture_exception(e)
     
+    return None
+
+def fetch_data_with_retry(source_name: str, config: Dict[str, Any], max_retries: int = 2) -> Optional[Dict]:
+    """Enhanced data fetching with retry logic for transient failures"""
+    global metrics
+
+    for attempt in range(max_retries + 1):
+        try:
+            result = fetch_data(source_name, config)
+            if result:
+                return result
+            elif attempt < max_retries:
+                logger.warning(f"No data from {source_name}, retrying attempt {attempt + 1}")
+                time.sleep(2 ** attempt)
+        except Exception as e:
+            if attempt < max_retries:
+                logger.warning(f"Retry {attempt + 1} for {source_name}: {e}")
+                time.sleep(2 ** attempt)
+            else:
+                logger.error(f"Final attempt failed for {source_name}: {e}")
+                metrics.failed_requests += 1
+
     return None
 
 def normalize_gpu_name(gpu_name: str) -> str:

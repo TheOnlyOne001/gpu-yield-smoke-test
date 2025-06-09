@@ -2,4 +2,5 @@ redis
 requests
 sentry-sdk
 python-dotenv
+boto3
 schedule

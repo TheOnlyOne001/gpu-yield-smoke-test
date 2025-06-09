@@ -8,7 +8,7 @@ import logging
 
 from models import User, Token
 from security import authenticate_user, create_access_token, get_current_active_user
-from utils import get_redis_connection
+from ..utils import get_redis_connection
 
 logger = logging.getLogger(__name__)
 
