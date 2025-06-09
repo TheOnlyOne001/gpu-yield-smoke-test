@@ -84,6 +84,11 @@ const EnhancedLandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Tailwind Test */}
+      <div className="bg-red-500 text-white p-4 m-4 rounded">
+        Tailwind Test - If this is red, it's working!
+      </div>
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Background Pattern */}
