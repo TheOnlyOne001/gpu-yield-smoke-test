@@ -62,6 +62,13 @@ class ScrapingMetrics:
 # Global metrics tracker
 metrics = ScrapingMetrics()
 
+def reset_metrics_if_needed():
+    """Reset global metrics every hour to avoid memory leak."""
+    global metrics
+    if time.time() - metrics.start_time > 3600:
+        metrics = ScrapingMetrics()
+        metrics.start_time = time.time()
+
 # Enhanced data sources with better endpoint information
 DATA_SOURCES = {
     "vast.ai": {
@@ -333,6 +340,7 @@ def calculate_quality_score(item: Dict) -> float:
 def run_scrape_job():
     """Enhanced main scraping job with comprehensive monitoring."""
     global metrics
+    reset_metrics_if_needed()
     
     logger.info("--- Starting new scrape cycle ---")
     cycle_start = time.time()

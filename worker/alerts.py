@@ -117,7 +117,8 @@ if __name__ == "__main__":
     
     while True:
         try:
-            # Listen for new messages on the stream
+            if not redis_conn.ping():
+                redis_conn = connect_to_redis_with_retry()
             messages = redis_conn.xreadgroup(
                 GROUP_NAME,
                 CONSUMER_NAME,
@@ -153,8 +154,11 @@ if __name__ == "__main__":
                         sentry_sdk.capture_exception(e)
                         # Note: We don't acknowledge failed messages, so they remain in pending
                         
+        except redis.ConnectionError:
+            logger.error("Redis connection lost, reconnecting...")
+            redis_conn = connect_to_redis_with_retry()
+            continue
         except Exception as e:
             logger.error(f"Error in main worker loop: {e}")
             sentry_sdk.capture_exception(e)
-            # Sleep briefly before retrying to avoid tight error loops
             time.sleep(5)
