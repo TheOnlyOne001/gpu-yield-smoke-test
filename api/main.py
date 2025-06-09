@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 
-from .utils import init_sentry, get_redis_connection
+from utils.connections import init_sentry, get_redis_connection
 from models import (
     HealthCheck, ROICalcRequest, ROICalcResponse, SignupRequest, SignupResponse,
     DeltaResponse, GPUPriceDelta, ErrorResponse, AlertJob

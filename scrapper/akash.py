@@ -3,7 +3,7 @@ import os
 import time
 import logging
 from typing import List, Dict
-from utils.crypto_rates import get_crypto_rates
+from crypto_rates import get_crypto_rates
 
 logger = logging.getLogger(__name__)
 

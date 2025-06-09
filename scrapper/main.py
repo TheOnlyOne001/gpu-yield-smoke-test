@@ -14,10 +14,12 @@ from dotenv import load_dotenv
 
 from sentry_utils import init_sentry
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Remove the sys.path line as it's no longer needed
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.crypto_rates import get_crypto_rates
-from utils.power_prices import get_power_prices
+# Use local copies instead of API utils
+from crypto_rates import get_crypto_rates
+from power_prices import get_power_prices
 from aws_spot import fetch_aws_spot_prices
 from akash import fetch_akash_bids
 # --- Configuration and Setup ---
