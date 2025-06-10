@@ -12821,3 +12821,20 @@
 2025-06-10 15:50:51,474 - __main__ - INFO - Records this cycle: 64
 2025-06-10 15:50:51,476 - __main__ - INFO - Success rate: 75.0%
 2025-06-10 15:50:51,477 - __main__ - INFO - Processing rate: 100.0%
+2025-06-10 16:27:46,669 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-10 16:27:46,680 - __main__ - INFO - Successfully connected to Redis
+2025-06-10 16:27:46,683 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-10 16:27:46,746 - __main__ - INFO - Running initial scrape job...
+2025-06-10 16:27:46,751 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-10 16:27:46,757 - __main__ - INFO - Scraping vast.ai...
+2025-06-10 16:27:51,029 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168939 chars)
+2025-06-10 16:27:51,103 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-10 16:27:51,105 - __main__ - INFO - vast.ai: 64 records published
+2025-06-10 16:27:51,113 - __main__ - INFO - Scraping runpod...
+2025-06-10 16:27:54,517 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-10 16:27:54,567 - __main__ - WARNING - No data received from runpod
+2025-06-10 16:27:54,569 - __main__ - INFO - Scraping aws_spot...
+2025-06-10 16:28:05,190 - aws_spot - ERROR - Error fetching AWS Spot prices: Unable to locate credentials
+2025-06-10 16:28:05,199 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-10 16:28:05,205 - __main__ - WARNING - No data received from aws_spot
+2025-06-10 16:28:05,207 - __main__ - INFO - Scraping akash...

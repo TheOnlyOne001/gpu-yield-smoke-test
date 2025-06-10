@@ -74,7 +74,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: gpu-yield-frontend
     ports:
       - "3000:3000"
@@ -89,7 +89,7 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-    command: npm run dev
+    user: "1001:1001"
 
   # Background Worker
   worker:
