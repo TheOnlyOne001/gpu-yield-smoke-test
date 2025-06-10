@@ -15,7 +15,9 @@ import {
   Shield,
   Globe,
   Check,
-  AlertCircle
+  AlertCircle,
+  Cpu,
+  Activity
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,8 @@ import { Badge } from '@/components/ui/badge';
 import EmailCTA from '../components/EmailCTA';
 import ScrollCue from '../components/ScrollCue';
 import MiniROIPreview from '../components/MiniROIPreview';
+import LogoBar from '../components/LogoBar';
+import GpuCounter, { GpuCounterInline } from '../components/GpuCounter';
 import { fetcherWithTimestamp, FetchResult } from '../lib/fetcher';
 import SyncStatusBadge from '../components/SyncStatusBadge';
 
@@ -193,9 +197,14 @@ const HomePage: React.FC = () => {
               <div className="hidden md:flex items-center space-x-6">
                 <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
                 <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</a>
+                
+                {/* Add inline GPU counter to navigation */}
+                <GpuCounterInline className="hidden lg:flex" />
+                
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   Sign In
                 </Button>
+                
                 {/* Add sync status to navigation */}
                 <SyncStatusBadge 
                   timestamp={timestamp} 
@@ -248,6 +257,13 @@ const HomePage: React.FC = () => {
                 <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
                   Stop guessing which platform pays the most. Get real-time data on GPU rental rates and maximize your earnings with smart automation.
                 </p>
+
+                {/* Add GpuCounter component here */}
+                <GpuCounter 
+                  showDetails={true} 
+                  animate={true}
+                  className="justify-center"
+                />
 
                 <div className="mt-8 w-full flex justify-center">
                   <EmailCTA onSuccess={() => setIsModalOpen(true)} />
@@ -413,9 +429,27 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
+        {/* Add LogoBar component here - between Features and Stats */}
+        <LogoBar />
+
+        {/* Enhanced Stats Section with GpuCounter */}
         <section className="py-20">
           <div className="container mx-auto px-4">
+            {/* Add another GpuCounter instance with different styling */}
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Real-Time
+                <span className="block bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                  Market Intelligence
+                </span>
+              </h2>
+              <GpuCounter 
+                showDetails={true} 
+                animate={true}
+                className="justify-center"
+              />
+            </div>
+
             <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
               <div className="text-center">
                 <div className="text-4xl font-bold text-white mb-2">$2.4M+</div>

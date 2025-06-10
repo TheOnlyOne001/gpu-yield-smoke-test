@@ -1,0 +1,16 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="vastai-logo">
+    <!-- V icon -->
+    <path d="M10 15L15 25L20 15" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M25 15L30 25L35 15" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Text -->
+    <path d="M45 25L49 15H51L55 25H53L48 16L48 25H45Z" fill="currentColor"/>
+    <path d="M57 25L61 15H63L67 25H65L64 22H60L59 25H57ZM60.5 20H63.5L62 16L60.5 20Z" fill="currentColor"/>
+    <path d="M69 23.5L70.5 22C71 22.75 71.75 23 72.5 23C73.5 23 74 22.5 74 22C74 21.5 73.5 21.25 72.5 21L71.5 20.75C70 20.25 69 19.5 69 18C69 16.5 70.5 15.5 72.5 15.5C74 15.5 75.25 16 76 17L74.5 18.5C74 17.75 73.25 17.5 72.5 17.5C71.5 17.5 71 18 71 18.5C71 19 71.5 19.25 72.5 19.5L73.5 19.75C75 20.25 76 21 76 22.5C76 24 74.5 25 72.5 25C71 25 69.75 24.5 69 23.5Z" fill="currentColor"/>
+    <path d="M78 17.5H76V15.5H82V17.5H80V25H78V17.5Z" fill="currentColor"/>
+    <circle cx="85" cy="24" r="1.5" fill="#10B981"/>
+    <path d="M89 25L93 15H95L99 25H97L96 22H92L91 25H89ZM92.5 20H95.5L94 16L92.5 20Z" fill="currentColor"/>
+    <path d="M101 25V15H103V25H101Z" fill="currentColor"/>
+  </g>
+</svg>

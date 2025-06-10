@@ -1,0 +1,14 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="akash-logo">
+    <!-- Triangle icon -->
+    <path d="M20 8L32 28H8L20 8Z" fill="#EF4444"/>
+    <path d="M20 14L26 24H14L20 14Z" fill="white"/>
+    
+    <!-- Text -->
+    <path d="M42 25L46 15H48L52 25H50L49 22H45L44 25H42ZM45.5 20H48.5L47 16L45.5 20Z" fill="currentColor"/>
+    <path d="M54 25V15H56V20L60 15H62.5L58.5 19.5L62.5 25H60L56.5 20.5L56 21V25H54Z" fill="currentColor"/>
+    <path d="M64 25L68 15H70L74 25H72L71 22H67L66 25H64ZM67.5 20H70.5L69 16L67.5 20Z" fill="currentColor"/>
+    <path d="M76 23.5L77.5 22C78 22.75 78.75 23 79.5 23C80.5 23 81 22.5 81 22C81 21.5 80.5 21.25 79.5 21L78.5 20.75C77 20.25 76 19.5 76 18C76 16.5 77.5 15.5 79.5 15.5C81 15.5 82.25 16 83 17L81.5 18.5C81 17.75 80.25 17.5 79.5 17.5C78.5 17.5 78 18 78 18.5C78 19 78.5 19.25 79.5 19.5L80.5 19.75C82 20.25 83 21 83 22.5C83 24 81.5 25 79.5 25C78 25 76.75 24.5 76 23.5Z" fill="currentColor"/>
+    <path d="M85 25V15H87V19H91V15H93V25H91V21H87V25H85Z" fill="currentColor"/>
+  </g>
+</svg>

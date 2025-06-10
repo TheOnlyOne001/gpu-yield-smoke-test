@@ -18,6 +18,8 @@ module.exports = {
       },
       animation: {
         'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'bounce': 'bounce 1s infinite',
+        'spin': 'spin 1s linear infinite',
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -63,5 +65,7 @@ module.exports = {
       }
     }
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate")
+  ],
 };

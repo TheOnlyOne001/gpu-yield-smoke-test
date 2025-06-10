@@ -60,12 +60,15 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
 
   // Calculate monthly extra profit
   const monthlyExtra = useMemo(() => {
-    if (!delta || delta <= 0) return null;
+    if (!delta || typeof delta !== 'number' || delta <= 0) return null;
     
     const powerCostPerHour = (POWER_WATT_4090 / 1000) * POWER_COST;
     const netProfitPerHour = delta - powerCostPerHour;
-    const monthlyProfit = netProfitPerHour * HOURS_PER_DAY * DAYS_MONTH;
     
+    // Only return positive values for "extra profit"
+    if (netProfitPerHour <= 0) return null;
+    
+    const monthlyProfit = netProfitPerHour * HOURS_PER_DAY * DAYS_MONTH;
     return monthlyProfit;
   }, [delta]);
 
@@ -138,19 +141,28 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
 
             {/* Profit display */}
             <div className="mb-4">
-              {delta !== undefined && delta !== null ? (
+              {delta !== undefined && delta !== null && typeof delta === 'number' ? (
                 <>
                   <div className="flex items-baseline gap-2">
-                    <p className={`text-4xl font-bold ${monthlyExtra && monthlyExtra > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {monthlyExtra !== null && monthlyExtra !== undefined ? (
-                        monthlyExtra > 0 ? `+${Math.abs(monthlyExtra).toFixed(0)}` : `-${Math.abs(monthlyExtra).toFixed(0)}`
-                      ) : '$0'}
+                    <p className={`text-4xl font-bold ${
+                      monthlyExtra && monthlyExtra > 0 ? 'text-green-400' : 'text-gray-400'
+                    }`}>
+                      {monthlyExtra && monthlyExtra > 0 ? (
+                        `+$${Math.abs(monthlyExtra).toFixed(0)}`
+                      ) : (
+                        '—'
+                      )}
                     </p>
                     <span className="text-lg text-gray-400">/month</span>
                   </div>
                   {rtx4090Data && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Best rate: ${delta?.toFixed(3)}/hr on {rtx4090Data.best_source}
+                      Best rate: ${delta.toFixed(3)}/hr on {rtx4090Data.best_source}
+                      {monthlyExtra === null && (
+                        <span className="text-yellow-400 ml-2">
+                          (Below break-even)
+                        </span>
+                      )}
                     </p>
                   )}
                 </>
@@ -158,6 +170,7 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold text-gray-400">—</p>
                   <span className="text-lg text-gray-400">/month</span>
+                  <span className="text-xs text-gray-500">No data</span>
                 </div>
               )}
             </div>

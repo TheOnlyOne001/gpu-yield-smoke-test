@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator, EmailStr
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from enum import Enum
 
 class HealthCheck(BaseModel):
@@ -178,3 +178,47 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+# Statistics Models
+class StatsResponse(BaseModel):
+    """Response model for API statistics endpoint"""
+    gpu_count: int = Field(..., description="Number of unique GPUs tracked in the last 24 hours")
+    total_providers: int = Field(default=5, description="Number of cloud providers monitored")
+    last_update: Optional[str] = Field(None, description="Timestamp of last data update")
+    active_models: Optional[List[str]] = Field(None, description="List of active GPU models")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "gpu_count": 45678,
+                "total_providers": 5,
+                "last_update": "2024-01-15T10:30:00Z",
+                "active_models": ["RTX 4090", "A100", "H100", "RTX 3090", "V100"]
+            }
+        }
+
+class DetailedStatsResponse(BaseModel):
+    """Extended statistics response with more metrics"""
+    gpu_count: int = Field(..., description="Total unique GPUs tracked")
+    total_providers: int = Field(..., description="Number of cloud providers")
+    active_regions: int = Field(..., description="Number of geographic regions covered")
+    price_range: Dict[str, float] = Field(..., description="Min and max prices observed")
+    top_gpu_models: List[Dict[str, Any]] = Field(..., description="Most tracked GPU models")
+    last_24h_updates: int = Field(..., description="Price updates in last 24 hours")
+    system_health: str = Field(..., description="Overall system health status")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "gpu_count": 45678,
+                "total_providers": 5,
+                "active_regions": 12,
+                "price_range": {"min": 0.15, "max": 2.50},
+                "top_gpu_models": [
+                    {"model": "RTX 4090", "count": 15420, "avg_price": 0.75},
+                    {"model": "A100", "count": 8950, "avg_price": 1.20}
+                ],
+                "last_24h_updates": 125430,
+                "system_health": "excellent"
+            }
+        }

@@ -8,13 +8,13 @@ import os
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from utils.connections import init_sentry, get_redis_connection
 from models import (
     HealthCheck, ROICalcRequest, ROICalcResponse, SignupRequest, SignupResponse,
-    DeltaResponse, GPUPriceDelta, ErrorResponse, AlertJob
+    DeltaResponse, GPUPriceDelta, ErrorResponse, AlertJob, StatsResponse, DetailedStatsResponse
 )
 from routers import auth
 from crud import get_db_connection, create_user, get_user_by_email, connect_to_db, close_db_connection
@@ -441,13 +441,208 @@ async def signup(
             detail="Internal server error during signup"
         )
 
-# Additional utility endpoints
-@app.get("/stats", summary="Get API Statistics")
-async def get_stats(
+# Updated stats endpoint with enhanced functionality
+@app.get("/stats", response_model=StatsResponse, summary="Get GPU Statistics")
+async def get_gpu_stats(
+    redis_conn: redis.Redis = Depends(redis_dependency),
+    detailed: bool = False
+):
+    """
+    Get real-time GPU tracking statistics.
+    
+    Args:
+        redis_conn: Redis connection dependency
+        detailed: Whether to return detailed statistics
+        
+    Returns:
+        Statistics about tracked GPUs and system health
+    """
+    try:
+        # Try to get cached stats first
+        cache_key = "cache:gpu_stats"
+        cached_stats = redis_conn.get(cache_key)
+        
+        if cached_stats and not detailed:
+            logger.info("Returning cached GPU stats")
+            stats_data = json.loads(cached_stats)
+            return JSONResponse(
+                content=stats_data,
+                headers={
+                    "X-Updated-At": str(int(time.time() * 1000)),
+                    "Cache-Control": "public, max-age=60"
+                }
+            )
+        
+        # Calculate stats from Redis stream
+        logger.info("Calculating fresh GPU stats")
+        
+        # Get entries from the last 24 hours
+        current_time = int(time.time() * 1000)
+        past_24h = current_time - (24 * 60 * 60 * 1000)
+        
+        # Read stream entries
+        stream_entries = redis_conn.xrange(
+            "raw_prices",
+            min=f"{past_24h}-0",
+            max=f"{current_time}-0",
+            count=10000  # Limit to prevent memory issues
+        )
+        
+        # Track unique GPUs and models
+        unique_gpus = set()
+        gpu_models = {}
+        provider_set = set()
+        price_updates = 0
+        
+        for entry_id, fields in stream_entries:
+            gpu_model = fields.get('gpu_model')
+            cloud = fields.get('cloud')
+            gpu_id = fields.get('gpu_id', f"{gpu_model}_{cloud}")
+            
+            if gpu_model and cloud:
+                unique_gpus.add(gpu_id)
+                provider_set.add(cloud)
+                price_updates += 1
+                
+                # Count GPU models
+                if gpu_model not in gpu_models:
+                    gpu_models[gpu_model] = 0
+                gpu_models[gpu_model] += 1
+        
+        # Get top GPU models
+        top_models = sorted(gpu_models.items(), key=lambda x: x[1], reverse=True)[:5]
+        active_models = [model for model, _ in top_models]
+        
+        # Basic stats response
+        stats_data = {
+            "gpu_count": len(unique_gpus),
+            "total_providers": len(provider_set),
+            "last_update": datetime.now(timezone.utc).isoformat(),
+            "active_models": active_models
+        }
+        
+        # Cache the result for 1 minute
+        redis_conn.setex(cache_key, 60, json.dumps(stats_data))
+        
+        # Return response with custom headers
+        return JSONResponse(
+            content=stats_data,
+            headers={
+                "X-Updated-At": str(int(time.time() * 1000)),
+                "Cache-Control": "public, max-age=60"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error calculating GPU stats: {e}")
+        # Return fallback data
+        fallback_data = {
+            "gpu_count": 0,
+            "total_providers": 5,
+            "last_update": datetime.now(timezone.utc).isoformat(),
+            "active_models": []
+        }
+        
+        return JSONResponse(
+            content=fallback_data,
+            headers={
+                "X-Updated-At": str(int(time.time() * 1000)),
+                "Cache-Control": "public, max-age=30"
+            }
+        )
+
+@app.get("/stats/detailed", response_model=DetailedStatsResponse, summary="Get Detailed Statistics")
+async def get_detailed_stats(
     redis_conn: redis.Redis = Depends(redis_dependency),
     conn = Depends(db_dependency)
 ):
-    """Get basic API usage statistics."""
+    """
+    Get comprehensive system statistics including database metrics.
+    
+    Returns:
+        Detailed statistics about the GPU tracking system
+    """
+    try:
+        # Get basic stats first
+        basic_stats_response = await get_gpu_stats(redis_conn, detailed=True)
+        basic_stats = json.loads(basic_stats_response.body)
+        
+        # Additional detailed metrics
+        stream_length = redis_conn.xlen("raw_prices")
+        
+        # Get price range from recent entries
+        recent_entries = redis_conn.xrevrange("raw_prices", count=1000)
+        prices = []
+        regions = set()
+        
+        for _, fields in recent_entries:
+            try:
+                price = float(fields.get('price_usd_hr', 0))
+                if 0 < price < 100:  # Reasonable bounds
+                    prices.append(price)
+                
+                region = fields.get('region', 'unknown')
+                if region != 'unknown':
+                    regions.add(region)
+            except (ValueError, TypeError):
+                continue
+        
+        price_range = {
+            "min": min(prices) if prices else 0,
+            "max": max(prices) if prices else 0,
+            "avg": sum(prices) / len(prices) if prices else 0
+        }
+        
+        # Get top GPU models with counts
+        gpu_models_detailed = []
+        for model in basic_stats.get('active_models', []):
+            if isinstance(model, str):
+                # Handle case where active_models is just a list of strings
+                gpu_models_detailed.append({
+                    "model": model,
+                    "count": 1,
+                    "percentage": 1.0
+                })
+        
+        # System health check
+        health_status = "healthy"
+        if basic_stats['gpu_count'] == 0:
+            health_status = "no_data"
+        elif stream_length < 100:
+            health_status = "low_data"
+        
+        detailed_stats = {
+            "gpu_count": basic_stats['gpu_count'],
+            "total_providers": basic_stats['total_providers'],
+            "active_regions": len(regions),
+            "price_range": price_range,
+            "top_gpu_models": gpu_models_detailed[:10],
+            "last_24h_updates": stream_length,
+            "system_health": health_status
+        }
+        
+        return JSONResponse(
+            content=detailed_stats,
+            headers={
+                "X-Updated-At": str(int(time.time() * 1000)),
+                "Cache-Control": "public, max-age=60"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting detailed stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving detailed statistics"
+        )
+
+# Keep the existing simple stats endpoint for backwards compatibility
+@app.get("/stats/simple", summary="Get Simple API Statistics")
+async def get_simple_stats(
+    redis_conn: redis.Redis = Depends(redis_dependency),
+    conn = Depends(db_dependency)
+):
+    """Get basic API usage statistics (legacy endpoint)."""
     try:
         # Get stream length
         stream_length = redis_conn.xlen("raw_prices")
@@ -467,7 +662,7 @@ async def get_stats(
             "uptime_seconds": cache_info.get("uptime_in_seconds", 0)
         }
     except Exception as e:
-        logger.error(f"Error getting stats: {e}")
+        logger.error(f"Error getting simple stats: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving statistics"

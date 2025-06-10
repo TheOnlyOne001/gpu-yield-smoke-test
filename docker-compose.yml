@@ -1,5 +1,3 @@
-
-
 services:
   # Redis for caching and job queues
   redis:
@@ -48,8 +46,12 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # Fixed: Use DATABASE_URL instead of POSTGRES_URL
       - REDIS_URL=redis://redis:6379
-      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - SENTRY_DSN=${SENTRY_DSN}
     env_file:
       - .env
     volumes:
@@ -97,7 +99,7 @@ services:
     container_name: gpu-yield-worker
     environment:
       - REDIS_URL=redis://redis:6379
-      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+      - DATABASE_URL=${DATABASE_URL}
     env_file:
       - .env
     volumes:
@@ -119,7 +121,7 @@ services:
     container_name: gpu-yield-scraper
     environment:
       - REDIS_URL=redis://redis:6379
-      - POSTGRES_URL=postgresql://postgres:password@postgres:5432/gpu_yield_db
+      - DATABASE_URL=${DATABASE_URL}
     env_file:
       - .env
     volumes:
