@@ -3,6 +3,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "framer-motion": "^12.16.0"
   }
 }

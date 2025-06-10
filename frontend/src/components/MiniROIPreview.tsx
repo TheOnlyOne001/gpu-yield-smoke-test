@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import useSWR from 'swr';
 import { 
-  TrendingUp, 
   Calculator, 
   Zap, 
   Clock,
@@ -11,6 +11,12 @@ import {
 } from 'lucide-react';
 import { fetcherWithTimestamp, FetchResult } from '../lib/fetcher';
 import { SyncStatusDot } from './SyncStatusBadge';
+
+// Lazy load heavy icons for better performance
+const TrendingUp = dynamic(() => import('lucide-react').then(mod => ({ default: mod.TrendingUp })), {
+  loading: () => <div className="w-3 h-3 skeleton rounded" />,
+  ssr: true
+});
 
 // Constants for calculations
 const HOURS_PER_DAY = 12;
@@ -117,7 +123,7 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
         <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-xl opacity-30 group-hover:opacity-40 transition-opacity duration-500"></div>
         
         {/* Main card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 shadow-2xl backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:ring-white/20">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 shadow-2xl backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:ring-white/20 gpu-accelerated">
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-green-500/10 to-emerald-500/10 rounded-full blur-2xl"></div>
@@ -144,7 +150,7 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
               {delta !== undefined && delta !== null && typeof delta === 'number' ? (
                 <>
                   <div className="flex items-baseline gap-2">
-                    <p className={`text-4xl font-bold ${
+                    <p className={`text-4xl font-bold transition-colors duration-300 ${
                       monthlyExtra && monthlyExtra > 0 ? 'text-green-400' : 'text-gray-400'
                     }`}>
                       {monthlyExtra && monthlyExtra > 0 ? (
@@ -201,7 +207,8 @@ export default function MiniROIPreview({ onClick }: MiniROIPreviewProps) {
             {/* CTA Button */}
             <button
               onClick={handleClick}
-              className="group/btn w-full relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-[1px] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+              className="group/btn w-full relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-[1px] transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] gpu-accelerated"
+              style={{ willChange: 'transform, opacity' }}
             >
               <div className="relative flex items-center justify-center gap-2 rounded-[11px] bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white transition-all duration-300 group-hover/btn:bg-opacity-90">
                 <Calculator className="w-4 h-4" />

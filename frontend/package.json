@@ -6,13 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "ANALYZE=true next build",
+    "optimize:images": "node scripts/optimize-images.js",
+    "optimize:svg": "svgo -r -f public/logos --config=svgo.config.js",
+    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
     "axios": "^1.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "critters": "^0.0.23",
     "framer-motion": "^12.16.0",
     "lucide-react": "^0.513.0",
     "next": "^14.0.0",
@@ -24,6 +29,8 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "20.19.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
@@ -31,7 +38,11 @@
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
     "postcss": "^8.5.4",
+    "sharp": "^0.33.5",
+    "svgo": "^3.3.2",
     "tailwindcss": "^3.4.0",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "url-loader": "^4.1.1",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }
