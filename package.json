@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
-    "framer-motion": "^12.16.0"
+    "framer-motion": "^12.16.0",
+    "requirements": "^2.0.2"
   }
 }
