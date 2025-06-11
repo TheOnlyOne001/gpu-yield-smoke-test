@@ -188,14 +188,22 @@ def get_all_spot_instance_types(ec2_client) -> Set[str]:
         logger.warning(f"Failed to get instance types: {e}")
         return set()
 
-def fetch_aws_spot_prices() -> List[Dict]:
-    """Fetch AWS Spot instance prices"""
+def fetch_aws_spot_prices(config: Optional[Dict] = None) -> List[Dict]:
+    """
+    Fetch AWS Spot instance prices
+    
+    Args:
+        config: Optional configuration dict from scraper main (accepted for compatibility)
+    """
     global _cache, _cache_time
     
     # Check cache first
     if _cache and time.time() - _cache_time < CACHE_SECONDS:
         logger.debug("Returning cached AWS Spot data")
         return _cache
+    
+    # The config parameter is accepted but not used - this maintains compatibility
+    logger.debug(f"AWS Spot called with config: {config is not None}")
     
     # Check credentials upfront
     if not check_aws_credentials():
@@ -387,7 +395,7 @@ def get_synthetic_aws_data() -> List[Dict]:
                 base_price = base_prices[gpu_type][region]
                 # Add some variance (±10%)
                 variance = base_price * 0.1
-                price = base_price + (variance * (0.5 - (hash(f"{instance_type}{region}") % 100) / 100))
+                price = base_price + (variance * 0.5 - (hash(f"{instance_type}{region}") % 100) / 100)
                 
                 offer = {
                     "model": gpu_type,
@@ -397,16 +405,24 @@ def get_synthetic_aws_data() -> List[Dict]:
                     "instance_type": instance_type,
                     "provider": "aws_spot",
                     "synthetic": True,
-                    "gpu_memory_gb": INSTANCE_GPU_MAP.get(instance_type, {}).get("memory", 16)
+                    "gpu_memory_gb": INSTANCE_GPU_MAP.get(instance_type, {}).get("memory", 16),
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 synthetic_data.append(offer)
     
     return synthetic_data
 
-# Plugin interface
+# Plugin interface - multiple function names for compatibility
 def fetch() -> List[Dict]:
     """Main plugin interface function"""
     return fetch_aws_spot_prices()
 
+def fetch_aws_spot() -> List[Dict]:
+    """Alternative interface function"""
+    return fetch_aws_spot_prices()
+
 # Plugin metadata
 name = "aws_spot"
+description = "AWS Spot instance price fetcher"
+version = "1.0.0"
+supports_gpu = True

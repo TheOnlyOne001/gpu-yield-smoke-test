@@ -82,6 +82,11 @@ def fetch_akash_offers() -> List[Dict]:
     
     return offers
 
+# Alias for backward compatibility
+def fetch_akash_bids() -> List[Dict]:
+    """Alias for fetch_akash_offers for backward compatibility"""
+    return fetch_akash_offers()
+
 def fetch_from_lcd_endpoint(endpoint: str) -> List[Dict]:
     """Try to fetch from a specific LCD endpoint with current API structure"""
     params = {
@@ -473,10 +478,17 @@ def normalize_gpu_name(gpu_name: str) -> str:
     
     return gpu_name.title() if gpu_name != "GPU-GENERIC" else "GPU-Generic"
 
-# Plugin interface
+# Plugin interface - provide both function names for compatibility
 def fetch() -> List[Dict]:
     """Main plugin interface function"""
     return fetch_akash_offers()
 
+# Additional aliases for different import patterns
+fetch_bids = fetch_akash_bids  # Another alias
+get_akash_offers = fetch_akash_offers  # Descriptive alias
+
 # Plugin metadata
 name = "akash"
+description = "Akash Network GPU provider plugin"
+version = "1.0.0"
+supports_gpu = True

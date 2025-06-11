@@ -19066,3 +19066,676 @@
 2025-06-11 05:29:06,426 - __main__ - ERROR - HTTP error fetching data from runpod: 404
 2025-06-11 05:29:06,464 - __main__ - WARNING - No data received from runpod
 2025-06-11 05:29:06,465 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:18:44,977 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-11 16:18:44,985 - __main__ - INFO - Successfully connected to Redis
+2025-06-11 16:18:44,987 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-11 16:18:45,062 - __main__ - INFO - Running initial scrape job...
+2025-06-11 16:18:45,064 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:18:45,066 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:18:49,241 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168968 chars)
+2025-06-11 16:18:49,319 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:18:49,320 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:18:49,323 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:18:49,325 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:18:52,977 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:18:53,004 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:18:53,005 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:19:03,007 - __main__ - ERROR - Unexpected error fetching data from aws_spot: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:19:03,027 - __main__ - WARNING - No data received from aws_spot
+2025-06-11 16:19:03,029 - __main__ - INFO - Scraping akash...
+2025-06-11 16:19:08,031 - __main__ - ERROR - Unexpected error fetching data from akash: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:19:08,050 - __main__ - WARNING - No data received from akash
+2025-06-11 16:19:08,051 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:19:11,373 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c753df576d0>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:19:11,421 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:19:11,422 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:19:11,423 - __main__ - INFO - Duration: 26.36s
+2025-06-11 16:19:11,425 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:19:11,426 - __main__ - INFO - Success rate: 20.0%
+2025-06-11 16:19:11,428 - __main__ - INFO - Processing rate: 100.0%
+2025-06-11 16:20:51,424 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:20:51,425 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:20:55,843 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169097 chars)
+2025-06-11 16:20:55,898 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:20:55,899 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:20:55,901 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:20:55,902 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:20:59,299 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:20:59,325 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:20:59,326 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:21:09,328 - __main__ - ERROR - Unexpected error fetching data from aws_spot: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:21:09,350 - __main__ - WARNING - No data received from aws_spot
+2025-06-11 16:21:09,351 - __main__ - INFO - Scraping akash...
+2025-06-11 16:21:14,352 - __main__ - ERROR - Unexpected error fetching data from akash: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:21:14,375 - __main__ - WARNING - No data received from akash
+2025-06-11 16:21:14,376 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:21:17,694 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c753e015910>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:21:17,722 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:21:17,723 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:21:17,725 - __main__ - INFO - Duration: 26.30s
+2025-06-11 16:21:17,726 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:21:17,728 - __main__ - INFO - Success rate: 20.0%
+2025-06-11 16:21:17,729 - __main__ - INFO - Processing rate: 100.0%
+2025-06-11 16:23:27,729 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:23:27,730 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:23:32,339 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168510 chars)
+2025-06-11 16:23:32,402 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:23:32,404 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:23:32,405 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:23:32,406 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:23:35,805 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:23:35,833 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:23:35,834 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:23:45,836 - __main__ - ERROR - Unexpected error fetching data from aws_spot: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:23:45,868 - __main__ - WARNING - No data received from aws_spot
+2025-06-11 16:23:45,869 - __main__ - INFO - Scraping akash...
+2025-06-11 16:23:50,870 - __main__ - ERROR - Unexpected error fetching data from akash: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:23:50,900 - __main__ - WARNING - No data received from akash
+2025-06-11 16:23:50,901 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:23:54,159 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c753e009090>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:23:54,193 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:23:54,194 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:23:54,197 - __main__ - INFO - Duration: 26.46s
+2025-06-11 16:23:54,198 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:23:54,200 - __main__ - INFO - Success rate: 20.0%
+2025-06-11 16:23:54,201 - __main__ - INFO - Processing rate: 100.0%
+2025-06-11 16:26:04,204 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:26:04,205 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:26:08,148 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168573 chars)
+2025-06-11 16:26:08,188 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:26:08,189 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:26:08,190 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:26:08,191 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:26:11,866 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:26:11,901 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:26:11,903 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:26:21,901 - __main__ - ERROR - Unexpected error fetching data from aws_spot: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:26:21,928 - __main__ - WARNING - No data received from aws_spot
+2025-06-11 16:26:21,929 - __main__ - INFO - Scraping akash...
+2025-06-11 16:26:26,931 - __main__ - ERROR - Unexpected error fetching data from akash: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:26:26,972 - __main__ - WARNING - No data received from akash
+2025-06-11 16:26:26,973 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:26:30,291 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c753dfce490>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:26:30,391 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:26:30,392 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:26:30,393 - __main__ - INFO - Duration: 26.19s
+2025-06-11 16:26:30,395 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:26:30,397 - __main__ - INFO - Success rate: 20.0%
+2025-06-11 16:26:30,399 - __main__ - INFO - Processing rate: 100.0%
+2025-06-11 16:28:40,402 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:28:40,404 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:28:44,411 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169034 chars)
+2025-06-11 16:28:44,470 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:28:44,471 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:28:44,473 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:28:44,475 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:28:47,014 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-11 16:28:47,021 - __main__ - INFO - Successfully connected to Redis
+2025-06-11 16:28:47,023 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-11 16:28:47,062 - __main__ - INFO - Running initial scrape job...
+2025-06-11 16:28:47,065 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:28:47,067 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:28:50,889 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169361 chars)
+2025-06-11 16:28:50,952 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:28:50,953 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:28:50,955 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:28:50,956 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:28:54,305 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:28:54,329 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:28:54,330 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:29:04,331 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-11 16:29:04,332 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7f9141343380>
+2025-06-11 16:29:04,333 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:29:04,335 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:29:04,336 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:29:04,337 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-11 16:29:04,338 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:29:04,339 - __main__ - INFO - 🔍 DEBUG: Calling aws_spot handler without parameters...
+2025-06-11 16:29:04,340 - aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-11 16:29:12,617 - aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-11 16:29:12,618 - aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-11 16:29:27,892 - aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-11 16:29:27,895 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:29:27,897 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-11 16:29:27,899 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,901 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,903 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,904 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,906 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,909 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,910 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,912 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,915 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,917 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,919 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,920 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,922 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,924 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,926 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,928 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,929 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,931 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,933 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,935 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,937 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,939 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,941 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,942 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,944 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,946 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,949 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,950 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,953 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,954 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,956 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,958 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,959 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,961 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,963 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,965 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,967 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,969 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,972 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,977 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,980 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,987 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,990 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,993 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,997 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:27,999 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,002 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,003 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,005 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,006 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,008 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,010 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,012 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,015 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,018 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,019 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,021 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,023 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:29:28,026 - utils.publish - INFO - Published 0/58 offers from aws_spot to Redis
+2025-06-11 16:29:28,027 - __main__ - INFO - aws_spot: 0 records published
+2025-06-11 16:29:28,029 - __main__ - INFO - Scraping akash...
+2025-06-11 16:29:33,031 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-11 16:29:33,032 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7f91413580e0>
+2025-06-11 16:29:33,033 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:29:33,035 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:29:33,036 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:29:33,037 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-11 16:29:33,039 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:29:33,040 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-11 16:29:33,041 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-11 16:29:48,300 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7f913b8e9dd0>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-11 16:29:48,301 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-11 16:29:48,998 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-11 16:29:48,999 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-11 16:29:49,893 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-11 16:29:49,894 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-11 16:29:50,728 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f913b8ea3d0>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-11 16:29:50,729 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-11 16:29:51,634 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-11 16:29:51,636 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-11 16:29:52,050 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f913b8eba90>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-11 16:29:52,052 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-11 16:29:52,559 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f913b0fafd0>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-11 16:29:52,561 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-11 16:29:52,831 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-11 16:29:52,832 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:29:52,834 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-11 16:29:52,836 - utils.publish - WARNING - No offers to publish for akash
+2025-06-11 16:29:52,838 - __main__ - INFO - Published 0/0 records from akash
+2025-06-11 16:29:52,840 - __main__ - INFO - akash: 0 records published
+2025-06-11 16:29:52,842 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:29:56,178 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f913bdf5ed0>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:29:56,222 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:29:56,224 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:29:56,225 - __main__ - INFO - Duration: 69.16s
+2025-06-11 16:29:56,227 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:29:56,228 - __main__ - INFO - Success rate: 60.0%
+2025-06-11 16:29:56,230 - __main__ - INFO - Processing rate: 87.7%
+2025-06-11 16:30:56,231 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:30:56,232 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:31:00,252 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168986 chars)
+2025-06-11 16:31:00,307 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:31:00,308 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:31:00,309 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:31:00,310 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:31:03,686 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:31:03,720 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:31:03,721 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:31:13,724 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-11 16:31:13,725 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7f9141343380>
+2025-06-11 16:31:13,728 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:31:13,730 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:31:13,731 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:31:13,736 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-11 16:31:13,737 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_aws_spot_prices() takes 0 positional arguments but 1 was given
+2025-06-11 16:31:13,739 - __main__ - INFO - 🔍 DEBUG: Calling aws_spot handler without parameters...
+2025-06-11 16:31:13,742 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:31:13,745 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-11 16:31:13,748 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,750 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,752 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,753 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,755 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,762 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,764 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,765 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,767 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,769 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,771 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,773 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,775 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,778 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,780 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,782 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,783 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,785 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,787 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,789 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,791 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,793 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,795 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,796 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,799 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,803 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,806 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,807 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,809 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,812 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,814 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,817 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,819 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,821 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,823 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,824 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,826 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,828 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,830 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,832 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,833 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,835 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,837 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,839 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,841 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,844 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,846 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,848 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,850 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,852 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,854 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,856 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,858 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,860 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,861 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,864 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,866 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,868 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:31:13,870 - utils.publish - INFO - Published 0/58 offers from aws_spot to Redis
+2025-06-11 16:31:13,871 - __main__ - INFO - aws_spot: 0 records published
+2025-06-11 16:31:13,872 - __main__ - INFO - Scraping akash...
+2025-06-11 16:31:18,876 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-11 16:31:18,876 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7f91413580e0>
+2025-06-11 16:31:18,877 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:31:18,879 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:31:18,880 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:31:18,881 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-11 16:31:18,882 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:31:18,884 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-11 16:31:18,885 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:31:18,886 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-11 16:31:18,887 - utils.publish - WARNING - No offers to publish for akash
+2025-06-11 16:31:18,889 - __main__ - INFO - Published 0/0 records from akash
+2025-06-11 16:31:18,890 - __main__ - INFO - akash: 0 records published
+2025-06-11 16:31:18,891 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:31:22,154 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f913b8eab90>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:31:22,195 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:31:22,196 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:31:22,197 - __main__ - INFO - Duration: 25.96s
+2025-06-11 16:31:22,199 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:31:22,200 - __main__ - INFO - Success rate: 60.0%
+2025-06-11 16:31:22,202 - __main__ - INFO - Processing rate: 87.7%
+2025-06-11 16:32:52,739 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-11 16:32:52,756 - __main__ - INFO - Successfully connected to Redis
+2025-06-11 16:32:52,762 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-11 16:32:52,839 - __main__ - INFO - Running initial scrape job...
+2025-06-11 16:32:52,852 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:32:52,855 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:32:56,895 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169097 chars)
+2025-06-11 16:32:56,944 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:32:56,945 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:32:56,948 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:32:56,950 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:33:00,658 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:33:00,681 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:33:00,682 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:33:10,683 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-11 16:33:10,684 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7998973ac680>
+2025-06-11 16:33:10,685 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:33:10,687 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-11 16:33:10,689 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-11 16:33:10,690 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-11 16:33:10,692 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-11 16:33:27,027 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-11 16:33:27,028 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-11 16:33:44,537 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-11 16:33:44,540 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-11 16:33:44,542 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-11 16:33:44,543 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,545 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,546 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,548 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,550 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,552 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,554 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,556 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,559 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,560 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,563 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,565 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,567 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,570 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,572 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,573 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,575 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,577 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,578 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,580 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,583 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,585 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,588 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,592 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,593 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,595 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,597 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,599 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,601 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,603 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,604 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,606 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,608 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,609 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,611 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,613 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,617 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,618 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,620 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,622 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,624 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,626 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,628 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,630 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,632 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,633 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,635 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,637 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,639 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,640 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,642 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,643 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,645 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,647 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,649 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,650 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,652 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,653 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:33:44,655 - utils.publish - INFO - Published 0/58 offers from aws_spot to Redis
+2025-06-11 16:33:44,657 - __main__ - INFO - aws_spot: 0 records published
+2025-06-11 16:33:44,658 - __main__ - INFO - Scraping akash...
+2025-06-11 16:33:49,660 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-11 16:33:49,661 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x799897a00ea0>
+2025-06-11 16:33:49,662 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:33:49,664 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:33:49,665 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:33:49,666 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-11 16:33:49,668 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:33:49,669 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-11 16:33:49,671 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-11 16:34:04,797 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7998956cce50>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-11 16:34:04,798 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-11 16:34:05,921 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-11 16:34:05,922 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-11 16:34:06,846 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-11 16:34:06,857 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-11 16:34:07,690 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7998956cc390>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-11 16:34:07,694 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-11 16:34:08,469 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-11 16:34:08,470 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-11 16:34:08,729 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x799895896a90>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-11 16:34:08,731 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-11 16:34:08,984 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x799895c41250>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-11 16:34:08,985 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-11 16:34:09,164 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-11 16:34:09,166 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:34:09,168 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-11 16:34:09,169 - utils.publish - WARNING - No offers to publish for akash
+2025-06-11 16:34:09,170 - __main__ - INFO - Published 0/0 records from akash
+2025-06-11 16:34:09,177 - __main__ - INFO - akash: 0 records published
+2025-06-11 16:34:09,178 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:34:12,441 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x799895d40950>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:34:12,486 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:34:12,487 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:34:12,488 - __main__ - INFO - Duration: 79.63s
+2025-06-11 16:34:12,491 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:34:12,493 - __main__ - INFO - Success rate: 60.0%
+2025-06-11 16:34:12,495 - __main__ - INFO - Processing rate: 87.7%
+2025-06-11 16:35:02,502 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:35:02,504 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:35:06,746 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168808 chars)
+2025-06-11 16:35:06,873 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:35:06,955 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:35:06,959 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:35:06,964 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:35:10,349 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:35:10,381 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:35:10,382 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:35:20,383 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-11 16:35:20,384 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7998973ac680>
+2025-06-11 16:35:20,386 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:35:20,387 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-11 16:35:20,389 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-11 16:35:20,390 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-11 16:35:20,391 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-11 16:35:20,393 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-11 16:35:20,395 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,397 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,399 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,400 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,402 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,404 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,405 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,407 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,409 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,410 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,412 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,413 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,415 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,417 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,418 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,420 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,421 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,423 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,426 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,429 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,430 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,433 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,436 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,438 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,442 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,445 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,448 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,450 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,453 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,453 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,455 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,457 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,460 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,464 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,466 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,469 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,475 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,477 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,480 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,482 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,485 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,487 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,489 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,492 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,499 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,500 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,503 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,505 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,507 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,510 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,512 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,514 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,517 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,518 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,520 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,522 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,526 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,528 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:35:20,530 - utils.publish - INFO - Published 0/58 offers from aws_spot to Redis
+2025-06-11 16:35:20,532 - __main__ - INFO - aws_spot: 0 records published
+2025-06-11 16:35:20,534 - __main__ - INFO - Scraping akash...
+2025-06-11 16:35:25,535 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-11 16:35:25,536 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x799897a00ea0>
+2025-06-11 16:35:25,538 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:35:25,540 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:35:25,542 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:35:25,544 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-11 16:35:25,545 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:35:25,547 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-11 16:35:25,549 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-11 16:35:25,550 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-11 16:35:25,552 - utils.publish - WARNING - No offers to publish for akash
+2025-06-11 16:35:25,553 - __main__ - INFO - Published 0/0 records from akash
+2025-06-11 16:35:25,554 - __main__ - INFO - akash: 0 records published
+2025-06-11 16:35:25,555 - __main__ - INFO - Scraping io_net...
+2025-06-11 16:35:28,758 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x799895936410>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-11 16:35:28,806 - __main__ - WARNING - No data received from io_net
+2025-06-11 16:35:28,814 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-11 16:35:28,818 - __main__ - INFO - Duration: 26.31s
+2025-06-11 16:35:28,819 - __main__ - INFO - Records this cycle: 64
+2025-06-11 16:35:28,821 - __main__ - INFO - Success rate: 60.0%
+2025-06-11 16:35:28,824 - __main__ - INFO - Processing rate: 87.7%
+2025-06-11 16:36:26,944 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-11 16:36:26,950 - __main__ - INFO - Successfully connected to Redis
+2025-06-11 16:36:26,952 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-11 16:36:26,985 - __main__ - INFO - Running initial scrape job...
+2025-06-11 16:36:26,988 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-11 16:36:26,990 - __main__ - INFO - Scraping vast.ai...
+2025-06-11 16:36:33,061 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169463 chars)
+2025-06-11 16:36:33,119 - utils.publish - INFO - Published 64/64 offers from vast.ai to Redis
+2025-06-11 16:36:33,120 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-11 16:36:33,121 - __main__ - INFO - vast.ai: 64 records published
+2025-06-11 16:36:33,124 - __main__ - INFO - Scraping runpod...
+2025-06-11 16:36:36,607 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-11 16:36:36,656 - __main__ - WARNING - No data received from runpod
+2025-06-11 16:36:36,664 - __main__ - INFO - Scraping aws_spot...
+2025-06-11 16:36:46,672 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-11 16:36:46,674 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7d5d42b60680>
+2025-06-11 16:36:46,676 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:36:46,679 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-11 16:36:46,681 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-11 16:36:46,682 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-11 16:36:46,685 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-11 16:37:03,288 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-11 16:37:03,289 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-11 16:37:20,355 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-11 16:37:20,360 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-11 16:37:20,363 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-11 16:37:20,366 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,368 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,370 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,376 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,378 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,380 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,382 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,384 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,386 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,389 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,391 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,393 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,394 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,396 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,398 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,401 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,403 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,406 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,408 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,418 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,423 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,426 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,429 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,431 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,436 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,440 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,442 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,447 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,450 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,452 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,456 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,459 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,460 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,463 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,465 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,468 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,471 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,473 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,476 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,478 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,480 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,486 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,490 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,492 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,494 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,500 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,502 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,504 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,507 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,509 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,511 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,514 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,518 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,521 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,524 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,526 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,528 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,531 - utils.publish - WARNING - Error publishing offer from aws_spot: Invalid input of type: 'bool'. Convert to a bytes, string, int or float first.
+2025-06-11 16:37:20,536 - utils.publish - INFO - Published 0/58 offers from aws_spot to Redis
+2025-06-11 16:37:20,537 - __main__ - INFO - aws_spot: 0 records published
+2025-06-11 16:37:20,540 - __main__ - INFO - Scraping akash...
+2025-06-11 16:37:25,542 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-11 16:37:25,543 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7d5d431c0ea0>
+2025-06-11 16:37:25,544 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-11 16:37:25,546 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-11 16:37:25,547 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-11 16:37:25,548 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-11 16:37:25,549 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-11 16:37:25,551 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-11 16:37:25,552 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids

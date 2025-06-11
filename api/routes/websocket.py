@@ -3,7 +3,7 @@ import asyncio
 import json
 import logging
 from typing import Set
-import redis.asyncio as redis  # Use async redis
+import redis.asyncio as redis
 import os
 from datetime import datetime, timezone
 
@@ -25,18 +25,29 @@ async def get_redis_connection():
         raise Exception("Redis configuration missing")
 
 def build_offer_from_redis_fields(fields: dict) -> dict:
-    """Build AWS Spot offer from Redis stream fields, handling optional fields properly"""
+    """Build AWS Spot offer from Redis stream fields"""
     offer = {
         'model': fields.get('gpu_model'),
-        'usd_hr': float(fields.get('price_usd_hr', 0)),
         'region': fields.get('region'),
-        'availability': int(fields.get('availability', 1)),
+        'availability': 1,
         'provider': 'aws_spot',
         'timestamp': fields.get('iso_timestamp'),
         'instance_type': fields.get('instance_type', ''),
     }
     
-    # Handle optional fields - only include if they have valid values
+    # Handle price with validation
+    try:
+        offer['usd_hr'] = float(fields.get('price_usd_hr', 0))
+    except (ValueError, TypeError):
+        offer['usd_hr'] = 0
+    
+    # Handle optional fields
+    if fields.get('availability'):
+        try:
+            offer['availability'] = int(fields.get('availability'))
+        except (ValueError, TypeError):
+            offer['availability'] = 1
+    
     if fields.get('total_instance_price'):
         try:
             offer['total_instance_price'] = float(fields.get('total_instance_price'))
@@ -52,9 +63,6 @@ def build_offer_from_redis_fields(fields: dict) -> dict:
     if fields.get('synthetic'):
         offer['synthetic'] = fields.get('synthetic').lower() == 'true'
     
-    # Remove None values and empty strings
-    offer = {k: v for k, v in offer.items() if v is not None and v != ''}
-    
     return offer
 
 @router.websocket("/ws/aws-spot")
@@ -69,7 +77,6 @@ async def aws_spot_websocket(websocket: WebSocket):
         
         # Send initial data
         try:
-            # Use async redis operations
             stream_data = await redis_conn.xrevrange("raw_prices", count=100)
             
             raw_offers = []
@@ -79,16 +86,32 @@ async def aws_spot_websocket(websocket: WebSocket):
                     if offer.get('model') and offer.get('usd_hr', 0) > 0:
                         raw_offers.append(offer)
             
+            # Send synthetic data if no real data
+            if not raw_offers:
+                raw_offers = [
+                    {
+                        'model': 'A100',
+                        'usd_hr': 1.229,
+                        'region': 'us-east-1',
+                        'availability': 8,
+                        'instance_type': 'p4d.24xlarge',
+                        'provider': 'aws_spot',
+                        'synthetic': True,
+                        'timestamp': datetime.now(timezone.utc).isoformat()
+                    }
+                ]
+            
             await websocket.send_text(json.dumps({
                 "type": "aws_spot_update",
                 "offers": raw_offers[:20],
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "dataSource": "synthetic" if any(o.get('synthetic') for o in raw_offers) else "live"
             }))
             
         except Exception as e:
             logger.error(f"Error sending initial WebSocket data: {e}")
         
-        # Keep connection alive
+        # Keep connection alive with periodic updates
         while True:
             await asyncio.sleep(30)
             
@@ -103,11 +126,26 @@ async def aws_spot_websocket(websocket: WebSocket):
                         if offer.get('model') and offer.get('usd_hr', 0) > 0:
                             latest_offers.append(offer)
                 
+                # Send synthetic data if no real data
+                if not latest_offers:
+                    latest_offers = [
+                        {
+                            'model': 'A100',
+                            'usd_hr': 1.229 + (len(active_connections) * 0.01),  # Slight variation
+                            'region': 'us-east-1',
+                            'availability': 8,
+                            'instance_type': 'p4d.24xlarge',
+                            'provider': 'aws_spot',
+                            'synthetic': True,
+                            'timestamp': datetime.now(timezone.utc).isoformat()
+                        }
+                    ]
+                
                 await websocket.send_text(json.dumps({
                     "type": "aws_spot_update",
                     "offers": latest_offers[:20],
                     "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "dataSource": "live"
+                    "dataSource": "synthetic" if any(o.get('synthetic') for o in latest_offers) else "live"
                 }))
                 
             except Exception as e:
@@ -116,12 +154,14 @@ async def aws_spot_websocket(websocket: WebSocket):
                 
     except WebSocketDisconnect:
         active_connections.discard(websocket)
+        logger.info("WebSocket disconnected normally")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         active_connections.discard(websocket)
     finally:
         if redis_conn:
             await redis_conn.close()
+        active_connections.discard(websocket)
 
 async def broadcast_aws_spot_update(data: dict):
     """Broadcast AWS Spot updates to all connected clients"""

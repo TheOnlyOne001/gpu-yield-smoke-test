@@ -14,17 +14,15 @@ from dotenv import load_dotenv
 
 from sentry_utils import init_sentry
 
-# Remove the sys.path line as it's no longer needed
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 # Use local copies instead of API utils
 from crypto_rates import get_crypto_rates
 from power_prices import get_power_prices
-from aws_spot import fetch_aws_spot_prices
-from akash import fetch_akash_bids
+from plugins.aws_spot import fetch_aws_spot_prices
+# FIX: Import from the plugins directory, not the root akash module
+from plugins.akash import fetch_akash_bids
 
 # Add these imports after existing ones
-from plugins import runpod, akash, aws_spot, vast_ai, io_net  # Add io_net here
+from plugins import runpod, akash, aws_spot, vast_ai, io_net
 from utils.publish import publish_to_redis
 
 # Add these exception classes after imports
@@ -172,15 +170,47 @@ def fetch_data(source_name: str, config: Dict[str, Any]) -> Optional[Dict]:
         # Rate limiting
         time.sleep(config.get('rate_limit', 1))
 
-        # Custom handler support
+        # Custom handler support with improved parameter handling
         if 'custom_handler' in config:
             handler = config['custom_handler']
-            data = handler(config)
+            
+            # ADD DEBUGGING HERE
+            logger.info(f"🔍 DEBUG: Calling custom handler for {source_name}")
+            logger.info(f"🔍 DEBUG: Handler function: {handler}")
+            logger.info(f"🔍 DEBUG: Config keys: {list(config.keys())}")
+            
+            # Try to inspect the function signature
+            import inspect
+            try:
+                sig = inspect.signature(handler)
+                logger.info(f"🔍 DEBUG: Function signature: {sig}")
+                logger.info(f"🔍 DEBUG: Parameters: {list(sig.parameters.keys())}")
+            except Exception as e:
+                logger.info(f"🔍 DEBUG: Could not inspect signature: {e}")
+            
+            # Try calling with config first, then without
+            try:
+                logger.info(f"🔍 DEBUG: Attempting to call {source_name} handler with config...")
+                data = handler(config)
+                logger.info(f"🔍 DEBUG: Success calling with config!")
+            except TypeError as e:
+                logger.info(f"🔍 DEBUG: TypeError calling with config: {e}")
+                if "positional arguments" in str(e) or "takes 0" in str(e):
+                    logger.info(f"🔍 DEBUG: Calling {source_name} handler without parameters...")
+                    data = handler()
+                    logger.info(f"🔍 DEBUG: Success calling without parameters!")
+                else:
+                    logger.error(f"🔍 DEBUG: Different TypeError: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"🔍 DEBUG: Unexpected error calling handler: {e}")
+                raise
+            
             metrics.successful_requests += 1
             logger.info(f"Successfully fetched custom data from {source_name}")
             return data
 
-        # Prepare request
+        # Prepare request for URL-based sources
         method = config.get('method', 'GET').upper()
         url = config['url']
         headers = config.get('headers', {})

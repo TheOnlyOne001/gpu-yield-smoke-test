@@ -1,8 +1,8 @@
 // Re-export all AWS Spot types
 export * from './aws-spot';
 
-// Dashboard specific types
-export interface GPUData {
+// Dashboard specific types - Remove conflicts by renaming
+export interface DashboardGPUData {
   model: string;
   platform: string;
   price: number;
@@ -19,7 +19,7 @@ export interface GPUData {
   margin?: number;
 }
 
-export interface MarketData {
+export interface DashboardMarketData {
   timestamp: string;
   price: number;
   volume: number;
@@ -29,3 +29,10 @@ export interface MarketData {
 export interface DashboardProps {
   userId?: string;
 }
+
+// Also export the AWS types with clearer names
+export type { 
+  AWSSpotOffer,
+  EnrichedAWSSpotOffer,
+  AWSSpotDataResponse 
+} from './aws-spot';

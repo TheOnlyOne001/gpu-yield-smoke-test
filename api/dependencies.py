@@ -2,6 +2,7 @@ import redis
 import os
 import logging
 from fastapi import HTTPException, status
+from crud import get_db_connection
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,13 @@ def redis_dependency():
         )
 
 async def db_dependency():
-    """Database dependency placeholder"""
-    # Your existing database connection logic
-    pass
+    """Database dependency that yields database connection"""
+    try:
+        async for connection in get_db_connection():
+            yield connection
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service is unavailable"
+        )

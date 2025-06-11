@@ -11,13 +11,40 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from utils.connections import init_sentry, get_redis_connection
+# Import utilities and connections
+try:
+    from utils.connections import init_sentry, get_redis_connection
+except ImportError:
+    logger = logging.getLogger(__name__)
+    logger.warning("utils.connections not found, using fallbacks")
+    
+    def init_sentry():
+        pass
+    
+    def get_redis_connection():
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        return redis.from_url(redis_url, decode_responses=True)
+
+# Import models
 from models import (
     HealthCheck, ROICalcRequest, ROICalcResponse, SignupRequest, SignupResponse,
     DeltaResponse, GPUPriceDelta, ErrorResponse, AlertJob, StatsResponse, DetailedStatsResponse
 )
-from routers import auth
-from crud import get_db_connection, create_user, get_user_by_email, connect_to_db, close_db_connection
+
+# Import routers
+try:
+    from routers import auth
+except ImportError:
+    logger = logging.getLogger(__name__)
+    logger.warning("Auth router not found")
+    auth = None
+
+# Import CRUD and security
+from crud import (
+    get_db_connection, create_user, get_user_by_email, 
+    connect_to_db, close_db_connection, get_user_count,
+    check_database_health
+)
 from security import get_password_hash
 from dependencies import redis_dependency, db_dependency
 
@@ -48,7 +75,14 @@ async def startup_event():
         await connect_to_db()
         logger.info("Database connection pool initialized")
         
-        # Additional startup tasks can be added here
+        # Test Redis connection
+        try:
+            redis_conn = get_redis_connection()
+            redis_conn.ping()
+            logger.info("Redis connection tested successfully")
+        except Exception as e:
+            logger.warning(f"Redis connection test failed: {e}")
+        
         logger.info("API startup completed successfully")
         
     except Exception as e:
@@ -65,7 +99,6 @@ async def shutdown_event():
         await close_db_connection()
         logger.info("Database connection pool closed")
         
-        # Additional cleanup tasks can be added here
         logger.info("API shutdown completed successfully")
         
     except Exception as e:
@@ -82,7 +115,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Configure this properly for production
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -110,31 +143,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         ).dict()
     )
 
-# Dependencies
-# def redis_dependency():
-#     """Dependency to inject Redis connection into endpoints."""
-#     connection = get_redis_connection()
-#     if connection is None:
-#         logger.error("Redis service unavailable")
-#         raise HTTPException(
-#             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-#             detail="Redis service is unavailable"
-#         )
-#     return connection
-
-# Updated database dependency to work with asyncpg generator
-# async def db_dependency():
-#     """Dependency to inject database connection into endpoints."""
-#     try:
-#         async for connection in get_db_connection():
-#             yield connection
-#     except Exception as e:
-#         logger.error(f"Database connection error: {e}")
-#         raise HTTPException(
-#             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-#             detail="Database service is unavailable"
-#         )
-
 # API Endpoints
 @app.get("/health", response_model=HealthCheck, summary="Health Check Endpoint")
 async def health_check(redis_conn: redis.Redis = Depends(redis_dependency)):
@@ -144,7 +152,6 @@ async def health_check(redis_conn: redis.Redis = Depends(redis_dependency)):
         redis_conn.ping()
         
         # Test database connection
-        from crud import check_database_health
         db_healthy = await check_database_health()
         
         if not db_healthy:
@@ -288,23 +295,22 @@ async def get_delta(redis_conn: redis.Redis = Depends(redis_dependency)):
 
 @app.post("/roi", response_model=ROICalcResponse, summary="Calculate ROI")
 async def calculate_roi(request: ROICalcRequest):
-    """
-    Calculates potential monthly profit based on GPU model and usage parameters.
-    Includes enhanced calculations with daily profit and break-even analysis.
-    """
+    """Calculate potential monthly profit based on GPU model and usage parameters."""
     try:
         # Enhanced calculation logic
-        # Base yield estimate (this should come from real market data)
         base_yield_per_hour = 0.15  # Base estimate in $/hr
         
-        # GPU-specific multipliers (should be data-driven)
+        # GPU-specific multipliers
         gpu_multipliers = {
             "RTX 4090": 1.5,
             "RTX 4080": 1.2,
             "RTX 4070": 1.0,
             "A100": 3.0,
             "H100": 4.0,
-            "V100": 2.0
+            "V100": 2.0,
+            "T4": 0.8,
+            "A10G": 1.1,
+            "K80": 0.6
         }
         
         # Get multiplier for specific GPU or use default
@@ -319,10 +325,11 @@ async def calculate_roi(request: ROICalcRequest):
         
         # Calculate break-even hours
         break_even_hours = None
-        if estimated_hourly_yield > request.power_cost_kwh * 0.4:
+        hourly_cost = request.power_cost_kwh * 0.4
+        if estimated_hourly_yield > hourly_cost:
             break_even_hours = 0  # Profitable from hour 1
-        elif request.power_cost_kwh > 0:
-            break_even_hours = request.power_cost_kwh * 0.4 / estimated_hourly_yield
+        elif hourly_cost > 0:
+            break_even_hours = hourly_cost / estimated_hourly_yield
         
         logger.info(f"ROI calculation for {request.gpu_model}: ${monthly_profit:.2f} monthly")
         
@@ -600,19 +607,202 @@ async def get_detailed_stats(
             detail="Error calculating detailed statistics"
         )
 
-# Include routers
-from routes.aws_spot import router as aws_spot_router
-from routes.websocket import router as websocket_router
+# Include routers with proper error handling
+try:
+    from routes.aws_spot import router as aws_spot_router
+    app.include_router(aws_spot_router, prefix="/api")
+    logger.info("AWS Spot router included successfully")
+except ImportError as e:
+    logger.warning(f"Could not import AWS Spot router: {e}")
 
-# Include AWS Spot router with API prefix
-app.include_router(aws_spot_router, prefix="/api")
+try:
+    from routes.akash import router as akash_router
+    app.include_router(akash_router, prefix="/api")
+    logger.info("Akash router included successfully")
+except ImportError as e:
+    logger.warning(f"Could not import Akash router: {e}")
 
-# Include WebSocket router at root level  
-app.include_router(websocket_router)
+try:
+    from routes.websocket import router as websocket_router
+    app.include_router(websocket_router)
+    logger.info("WebSocket router included successfully")
+except ImportError as e:
+    logger.warning(f"Could not import WebSocket router: {e}")
 
-# Include existing auth router
-app.include_router(auth.router)
+# Include existing auth router if available
+if auth:
+    app.include_router(auth.router)
+    logger.info("Auth router included successfully")
 
 @app.get("/")
 async def root():
-    return {"message": "GPU Yield API"}
+    return {
+        "message": "GPU Yield API", 
+        "status": "running", 
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "1.0.0"
+    }
+
+# Test endpoint for AWS data
+@app.get("/test/aws-spot")
+async def test_aws_spot(redis_conn: redis.Redis = Depends(redis_dependency)):
+    """Test endpoint to check AWS Spot data in Redis"""
+    try:
+        stream_data = redis_conn.xrevrange("raw_prices", count=10)
+        aws_data = []
+        
+        for stream_id, fields in stream_data:
+            if fields.get('cloud') == 'aws_spot':
+                aws_data.append({
+                    'id': stream_id,
+                    'model': fields.get('gpu_model'),
+                    'price': fields.get('price_usd_hr'),
+                    'region': fields.get('region'),
+                    'timestamp': fields.get('iso_timestamp')
+                })
+        
+        return {
+            'total_stream_entries': len(stream_data),
+            'aws_spot_entries': len(aws_data),
+            'sample_data': aws_data[:5],
+            'status': 'success'
+        }
+        
+    except Exception as e:
+        logger.error(f"Error testing AWS Spot data: {e}")
+        return {
+            'error': str(e),
+            'status': 'failed'
+        }
+
+# Add a synthetic data injection endpoint for testing
+@app.post("/test/inject-aws-data")
+async def inject_test_aws_data(redis_conn: redis.Redis = Depends(redis_dependency)):
+    """Inject synthetic AWS Spot data for testing"""
+    try:
+        from utils.aws_spot_enrichment import get_synthetic_aws_data
+        
+        synthetic_data = get_synthetic_aws_data()
+        injected = 0
+        
+        for offer in synthetic_data:
+            # Convert to Redis stream format
+            stream_fields = {
+                'cloud': 'aws_spot',
+                'gpu_model': offer['model'],
+                'price_usd_hr': str(offer['usd_hr']),
+                'region': offer['region'],
+                'availability': str(offer['availability']),
+                'instance_type': offer['instance_type'],
+                'total_instance_price': str(offer['total_instance_price']),
+                'gpu_memory_gb': str(offer['gpu_memory_gb']),
+                'iso_timestamp': offer['timestamp'],
+                'synthetic': 'true'
+            }
+            
+            stream_id = redis_conn.xadd('raw_prices', stream_fields)
+            injected += 1
+        
+        return {
+            'status': 'success',
+            'injected_offers': injected,
+            'message': f'Injected {injected} synthetic AWS Spot offers'
+        }
+        
+    except Exception as e:
+        logger.error(f"Error injecting test data: {e}")
+        return {
+            'status': 'failed',
+            'error': str(e)
+        }
+
+# Add test endpoints for Akash
+@app.get("/test/akash")
+async def test_akash(redis_conn: redis.Redis = Depends(redis_dependency)):
+    """Test endpoint to check Akash data in Redis"""
+    try:
+        stream_data = redis_conn.xrevrange("raw_prices", count=10)
+        akash_data = []
+        
+        for stream_id, fields in stream_data:
+            if fields.get('cloud') == 'akash' or fields.get('provider') == 'akash':
+                akash_data.append({
+                    'id': stream_id,
+                    'model': fields.get('gpu_model') or fields.get('model'),
+                    'price': fields.get('price_usd_hr') or fields.get('usd_hr'),
+                    'region': fields.get('region'),
+                    'timestamp': fields.get('iso_timestamp') or fields.get('timestamp')
+                })
+        
+        return {
+            'total_stream_entries': len(stream_data),
+            'akash_entries': len(akash_data),
+            'sample_data': akash_data[:5],
+            'status': 'success'
+        }
+        
+    except Exception as e:
+        logger.error(f"Error testing Akash data: {e}")
+        return {
+            'error': str(e),
+            'status': 'failed'
+        }
+
+@app.post("/test/inject-akash-data")
+async def inject_test_akash_data(redis_conn: redis.Redis = Depends(redis_dependency)):
+    """Inject synthetic Akash data for testing"""
+    try:
+        synthetic_data = [
+            {
+                'model': 'RTX 4090',
+                'usd_hr': 0.35,
+                'region': 'akash-network',
+                'availability': 1,
+                'provider': 'akash',
+                'provider_address': 'akash1abc123...',
+                'synthetic': True,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            },
+            {
+                'model': 'A100',
+                'usd_hr': 1.40,
+                'region': 'akash-network',
+                'availability': 1,
+                'provider': 'akash',
+                'provider_address': 'akash1def456...',
+                'synthetic': True,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+        ]
+        
+        injected = 0
+        
+        for offer in synthetic_data:
+            # Convert to Redis stream format
+            stream_fields = {
+                'cloud': 'akash',
+                'provider': 'akash',
+                'gpu_model': offer['model'],
+                'price_usd_hr': str(offer['usd_hr']),
+                'region': offer['region'],
+                'availability': str(offer['availability']),
+                'provider_address': offer['provider_address'],
+                'iso_timestamp': offer['timestamp'],
+                'synthetic': 'true'
+            }
+            
+            stream_id = redis_conn.xadd('raw_prices', stream_fields)
+            injected += 1
+        
+        return {
+            'status': 'success',
+            'injected_offers': injected,
+            'message': f'Injected {injected} synthetic Akash offers'
+        }
+        
+    except Exception as e:
+        logger.error(f"Error injecting Akash test data: {e}")
+        return {
+            'status': 'failed',
+            'error': str(e)
+        }

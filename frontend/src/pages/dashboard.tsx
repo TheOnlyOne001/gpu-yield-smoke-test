@@ -23,7 +23,8 @@ import {
   Shield,
   Globe,
   Eye,
-  EyeOff
+  EyeOff,
+  Filter  // Add missing Filter import
 } from 'lucide-react';
 
 // UI Components
@@ -45,16 +46,16 @@ import {
   AWS_INSTANCE_METADATA 
 } from '@/lib/awsUtils';
 
-// Types
+// Types - Use renamed types to avoid conflicts
 import { 
   AWSSpotOffer, 
   EnrichedAWSSpotOffer,
-  GPUData,
-  MarketData,
+  DashboardGPUData as GPUData,  // Use renamed type
+  DashboardMarketData as MarketData,  // Use renamed type
   DashboardProps
 } from '@/types';
 
-// Chart components - you might need to install these
+// Chart components
 import {
   LineChart,
   Line,
@@ -70,38 +71,9 @@ import {
   Bar
 } from 'recharts';
 
-// Dashboard specific interfaces
-interface GPUData {
-  model: string;
-  platform: string;
-  price: number;
-  utilization: number;
-  status: 'active' | 'idle' | 'error';
-  earnings: number;
-  powerDraw: number;
-  temperature: number;
-  lastUpdate: string;
-  region?: string;
-  instanceType?: string;
-  interruptionRisk?: 'low' | 'medium' | 'high';
-  netYield?: number;
-  margin?: number;
-}
-
-interface MarketData {
-  timestamp: string;
-  price: number;
-  volume: number;
-  platform: string;
-}
-
-interface DashboardProps {
-  userId?: string;
-}
-
 // AWS Components
 const InterruptionRiskIndicator: React.FC<{ availability: number }> = ({ availability }) => {
-  const risk = calculateInterruptionRisk(availability); // This will now work
+  const risk = calculateInterruptionRisk(availability);
   const colors = {
     low: 'bg-green-500',
     medium: 'bg-yellow-500',
@@ -128,7 +100,7 @@ const InterruptionRiskIndicator: React.FC<{ availability: number }> = ({ availab
 };
 
 const FreshnessIndicator: React.FC<{ timestamp?: string }> = ({ timestamp }) => {
-  const freshness = calculateFreshness(timestamp); // This will now work
+  const freshness = calculateFreshness(timestamp);
   const colors = {
     live: 'text-green-400',
     recent: 'text-yellow-400',
@@ -207,13 +179,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     error: awsError,
     lastUpdated: awsLastUpdated,
     hasLiveData,
-    averagePrice: awsAvgPrice
+    averagePrice: awsAvgPrice,
+    refetch: refetchAWS
   } = useAWSSpotData({
     autoRefresh: autoRefresh,
     refreshInterval: 30000
   });
 
-  // Mock AWS Spot data generation (keep this as is)
+  // Mock AWS Spot data generation
   const generateAWSSpotData = useCallback((): AWSSpotOffer[] => {
     const baseOffers: AWSSpotOffer[] = [
       {
@@ -264,7 +237,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         timestamp: new Date(Date.now() - Math.random() * 10 * 60 * 1000).toISOString(),
         synthetic: true,
       },
-      // Add more variety to test different scenarios
       {
         model: "H100",
         usd_hr: 2.1500 + (Math.random() - 0.5) * 0.3,
@@ -277,7 +249,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         timestamp: new Date(Date.now() - Math.random() * 15 * 60 * 1000).toISOString(),
         synthetic: true,
       },
-      // Example with minimal optional fields
       {
         model: "K80",
         usd_hr: 0.0900 + (Math.random() - 0.5) * 0.02,
@@ -285,16 +256,15 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         availability: 1,
         instance_type: "p2.xlarge",
         provider: "aws_spot" as const,
-        // Only include timestamp, omit other optional fields
         timestamp: new Date(Date.now() - Math.random() * 45 * 60 * 1000).toISOString(),
         synthetic: true,
       },
     ];
 
-    return baseOffers; // Add this return statement
+    return baseOffers;
   }, []);
 
-  // Regular mock data generation (no WebSocket handling needed here)
+  // Regular mock data generation
   useEffect(() => {
     const generateMockData = () => {
       const gpuModels = ['RTX 4090', 'RTX 4080', 'RTX 3090', 'RTX 3080', 'A100', 'H100'];
@@ -304,7 +274,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         const platform = platforms[index % platforms.length];
         const isAWS = platform === 'AWS Spot';
         
-        // Base GPU data with all required fields
         const baseGPU: GPUData = {
           model,
           platform,
@@ -317,7 +286,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           lastUpdate: new Date().toISOString(),
         };
         
-        // Add AWS-specific optional fields only if it's an AWS platform
         if (isAWS) {
           return {
             ...baseGPU,
@@ -376,7 +344,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     [gpuData]
   );
 
-  // Update AWS metrics calculation to use type guards
+  // AWS metrics calculation with proper typing
   const awsSpotMetrics = useMemo(() => {
     const totalOffers = awsOffers.length;
     const avgPrice = totalOffers > 0 ? awsOffers.reduce((sum, offer) => sum + offer.usd_hr, 0) / totalOffers : 0;
@@ -384,7 +352,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     let lowRiskOffers = 0;
     let liveOffers = 0;
     
-    awsOffers.forEach((offer: EnrichedAWSSpotOffer) => { // Explicit type
+    awsOffers.forEach((offer: EnrichedAWSSpotOffer) => {
       if (offer.interruption_risk === 'low') {
         lowRiskOffers++;
       }
@@ -461,499 +429,179 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
               variant="outline"
               size="sm"
               onClick={() => setShowAWSData(!showAWSData)}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
             >
-              <Cloud className="w-4 h-4 mr-2" />
-              {showAWSData ? 'Hide' : 'Show'} AWS Spot
+              {showAWSData ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+              AWS Data
             </Button>
             
             <Button
               variant="outline"
               size="sm"
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-              {autoRefresh ? 'Auto' : 'Manual'}
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-white/20 text-white hover:bg-white/10"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-white/20 text-white hover:bg-white/10"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+              Auto-refresh
             </Button>
           </div>
         </div>
 
-        {/* Key Metrics - Enhanced with AWS */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm font-medium">Total Earnings</p>
-                  <p className="text-3xl font-bold text-white">${totalEarnings.toFixed(2)}</p>
-                  <div className="flex items-center mt-2">
-                    <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
-                    <span className="text-green-400 text-sm">+12.5%</span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">Total Earnings</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">${totalEarnings.toFixed(2)}</div>
+              <p className="text-xs text-gray-400">
+                +20.1% from last month
+              </p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm font-medium">Active GPUs</p>
-                  <p className="text-3xl font-bold text-white">{activeGPUs}</p>
-                  <div className="flex items-center mt-2">
-                    <Activity className="w-4 h-4 text-blue-400 mr-1" />
-                    <span className="text-blue-400 text-sm">of {gpuData.length} total</span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Server className="w-6 h-6 text-white" />
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">Active GPUs</CardTitle>
+              <Zap className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{activeGPUs}</div>
+              <p className="text-xs text-gray-400">
+                of {gpuData.length} total
+              </p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm font-medium">AWS Spot Offers</p>
-                  <p className="text-3xl font-bold text-white">{awsSpotMetrics.totalOffers}</p>
-                  <div className="flex items-center mt-2">
-                    <Cloud className="w-4 h-4 text-orange-400 mr-1" />
-                    <span className="text-orange-400 text-sm">
-                      ${awsSpotMetrics.avgPrice.toFixed(3)} avg
-                      {hasLiveData && <span className="ml-2 text-green-400">● LIVE</span>}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <Cloud className="w-6 h-6 text-white" />
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">Avg Utilization</CardTitle>
+              <Activity className="h-4 w-4 text-yellow-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{averageUtilization.toFixed(1)}%</div>
+              <p className="text-xs text-gray-400">
+                +5.2% from yesterday
+              </p>
             </CardContent>
           </Card>
 
           <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm font-medium">Power Draw</p>
-                  <p className="text-3xl font-bold text-white">{totalPowerDraw.toFixed(0)}W</p>
-                  <div className="flex items-center mt-2">
-                    <Zap className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="text-yellow-400 text-sm">-5.3%</span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-300">Power Draw</CardTitle>
+              <Zap className="h-4 w-4 text-red-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{totalPowerDraw.toFixed(0)}W</div>
+              <p className="text-xs text-gray-400">
+                Average load
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* AWS Spot Data Table - Conditional Display */}
+        {/* AWS Spot Data Section */}
         {showAWSData && (
           <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Cloud className="w-5 h-5" />
-                  AWS Spot GPU Pricing
-                  {awsLoading && <Loader2 className="w-4 h-4 animate-spin ml-2" />}
-                </CardTitle>
-                {awsLastUpdated && (
-                  <span className="text-sm text-gray-400">
-                    Updated: {new Date(awsLastUpdated).toLocaleTimeString()}
-                  </span>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {awsError && (
-                <div className="text-red-400 mb-4 p-3 bg-red-500/10 rounded">
-                  Error loading AWS data: {awsError}
-                </div>
-              )}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">GPU Model</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">$/hr per GPU</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">Net Yield</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">Region</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">Risk</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">Instance</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">VRAM</th>
-                      <th className="text-left text-gray-400 font-medium py-3 px-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {awsOffers.slice(0, 10).map((offer: EnrichedAWSSpotOffer, index: number) => { // Explicit types
-                      const yieldData = calculateOfferYieldMetrics(offer);
-                      const enriched = ensureEnrichedOffer(offer);
-                      
-                      return (
-                        <tr 
-                          key={`${offer.model}-${offer.region}-${index}`} 
-                          className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                        >
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                                <Cloud className="w-4 h-4 text-white" />
-                              </div>
-                              <span className="text-white font-medium">{offer.model}</span>
-                              {offer.synthetic && (
-                                <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs">
-                                  MOCK
-                                </Badge>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className="text-green-400 font-mono text-lg">
-                              ${offer.usd_hr.toFixed(4)}
-                            </span>
-                            {yieldData.totalInstancePrice > 0 && (
-                              <div className="text-xs text-gray-500">
-                                Total: ${yieldData.totalInstancePrice.toFixed(4)}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-4">
-                            <div>
-                              <span className={yieldData.netYield > 0 ? 'text-green-400' : 'text-red-400'}>
-                                ${yieldData.netYield.toFixed(4)}
-                              </span>
-                              <div className="text-xs text-gray-500">
-                                Power: ${yieldData.powerCostPerHour.toFixed(3)}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20">
-                              {AWS_REGION_DISPLAY[offer.region] ?? offer.region}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-4">
-                            <InterruptionRiskIndicator availability={offer.availability} />
-                          </td>
-                          <td className="py-4 px-4">
-                            <InstanceDetailsTooltip 
-                              instanceType={offer.instance_type} 
-                              className="text-blue-400 hover:text-blue-300"
-                            />
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className="text-white">{yieldData.gpuMemory} GB</span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <FreshnessIndicator timestamp={offer.timestamp} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Charts Row - Enhanced with AWS data in pie chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Price Chart */}
-          <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Price Trends (24h)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="time" 
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="price" 
-                    stroke="#3B82F6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Platform Distribution */}
-          <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Earnings by Platform
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                    formatter={(value: number) => [`${value.toFixed(2)}`, 'Earnings']}
-                  />
-                  <Legend 
-                    wrapperStyle={{ color: '#9CA3AF', fontSize: '12px' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* GPU List */}
-        <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Server className="w-5 h-5" />
-                GPU Overview
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View All
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">GPU</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Platform</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Status</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Price/hr</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Utilization</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Earnings</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Region</th>
-                    <th className="text-left text-gray-400 font-medium py-3 px-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gpuData.map((gpu, index) => (
-                    <tr 
-                      key={index} 
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                    >
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 ${
-                            gpu.platform === 'AWS Spot' 
-                              ? 'bg-gradient-to-r from-orange-500 to-red-600' 
-                              : 'bg-gradient-to-r from-blue-500 to-purple-600'
-                          } rounded-lg flex items-center justify-center`}>
-                            {gpu.platform === 'AWS Spot' ? (
-                              <Cloud className="w-5 h-5 text-white" />
-                            ) : (
-                              <Server className="w-5 h-5 text-white" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-white font-medium">{gpu.model}</p>
-                            <p className="text-gray-400 text-sm">ID: GPU-{index + 1}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge className={`${
-                          gpu.platform === 'AWS Spot'
-                            ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
-                            : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                        }`}>
-                          {gpu.platform}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4">
-                        <Badge className={`${getStatusColor(gpu.status)} flex items-center gap-1 w-fit`}>
-                          {getStatusIcon(gpu.status)}
-                          {gpu.status}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-white font-mono">
-                          ${gpu.price.toFixed(3)}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all"
-                              style={{ width: `${gpu.utilization}%` }}
-                            />
-                          </div>
-                          <span className="text-white text-sm font-mono">
-                            {gpu.utilization.toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-green-400" />
-                          <span className="text-white font-mono">
-                            {gpu.earnings.toFixed(2)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        {gpu.region ? (
-                          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">
-                            {gpu.region}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-500">-</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-400 hover:text-white hover:bg-white/10"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-400 hover:text-white hover:bg-white/10"
-                          >
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* AWS Spot Insights Panel */}
-        {showAWSData && (
-          <Card className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/20 backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Cloud className="w-5 h-5 text-orange-400" />
-                AWS Spot Insights
+                AWS Spot GPU Pricing
+                {awsLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div>
-                  <h3 className="font-medium mb-2 text-orange-400">Cost Efficiency</h3>
-                  <ul className="text-sm space-y-1 text-gray-300">
-                    <li>• Net yield accounts for regional power costs</li>
-                    <li>• EU regions have higher power costs</li>
-                    <li>• US West typically offers best margins</li>
-                  </ul>
+              {awsError ? (
+                <div className="text-red-400 p-4 bg-red-500/10 rounded-lg">
+                  Error loading AWS data: {awsError}
                 </div>
-                <div>
-                  <h3 className="font-medium mb-2 text-orange-400">Interruption Risk</h3>
-                  <ul className="text-sm space-y-1 text-gray-300">
-                    <li>• Multi-GPU instances = lower risk</li>
-                    <li>• Monitor capacity trends</li>
-                    <li>• Have fallback instances ready</li>
-                  </ul>
+              ) : (
+                <div className="space-y-4">
+                  {/* AWS Metrics */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{awsSpotMetrics.totalOffers}</div>
+                      <div className="text-sm text-gray-400">Total Offers</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-green-400">${awsSpotMetrics.avgPrice.toFixed(3)}</div>
+                      <div className="text-sm text-gray-400">Avg Price/hr</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-400">{awsSpotMetrics.lowRiskOffers}</div>
+                      <div className="text-sm text-gray-400">Low Risk</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-400">{awsSpotMetrics.liveOffers}</div>
+                      <div className="text-sm text-gray-400">Live Data</div>
+                    </div>
+                  </div>
+
+                  {/* AWS Offers Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left text-gray-400 pb-2">GPU Model</th>
+                          <th className="text-left text-gray-400 pb-2">Region</th>
+                          <th className="text-left text-gray-400 pb-2">Price/hr</th>
+                          <th className="text-left text-gray-400 pb-2">Instance Type</th>
+                          <th className="text-left text-gray-400 pb-2">Availability</th>
+                          <th className="text-left text-gray-400 pb-2">Risk</th>
+                          <th className="text-left text-gray-400 pb-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {awsOffers.slice(0, 10).map((offer: EnrichedAWSSpotOffer, index: number) => {
+                          const yieldData = calculateOfferYieldMetrics(offer);
+                          const enriched = ensureEnrichedOffer(offer);
+                          
+                          return (
+                            <tr 
+                              key={`${offer.model}-${offer.region}-${index}`} 
+                              className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                            >
+                              <td className="py-2 text-white font-medium">{offer.model}</td>
+                              <td className="py-2 text-gray-300">
+                                {AWS_REGION_DISPLAY[offer.region] || offer.region}
+                              </td>
+                              <td className="py-2 text-green-400 font-mono">
+                                ${offer.usd_hr.toFixed(4)}
+                              </td>
+                              <td className="py-2">
+                                <InstanceDetailsTooltip 
+                                  instanceType={offer.instance_type}
+                                  className="text-blue-400"
+                                />
+                              </td>
+                              <td className="py-2 text-gray-300">{offer.availability}</td>
+                              <td className="py-2">
+                                <InterruptionRiskIndicator availability={offer.availability} />
+                              </td>
+                              <td className="py-2">
+                                <FreshnessIndicator timestamp={offer.timestamp} />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {awsLastUpdated && (
+                    <div className="text-xs text-gray-500 mt-2">
+                      Last updated: {new Date(awsLastUpdated).toLocaleString()}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-medium mb-2 text-orange-400">Best Practices</h3>
-                  <ul className="text-sm space-y-1 text-gray-300">
-                    <li>• Use spot fleets for resilience</li>
-                    <li>• Set competitive max prices</li>
-                    <li>• Diversify across regions</li>
-                  </ul>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         )}
+
+        {/* Charts and additional content would go here */}
       </div>
     </div>
   );

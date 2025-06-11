@@ -1,11 +1,14 @@
 # api/utils/aws_spot_enrichment.py
+import redis
+import os
+import json
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-# Instance metadata for enrichment
+# Instance metadata for enrichment (keeping the existing comprehensive data)
 AWS_INSTANCE_METADATA = {
     # G4dn - T4 instances
     "g4dn.xlarge": {
@@ -121,17 +124,38 @@ AWS_INSTANCE_METADATA = {
         "storage_gb": 30720, "ebs_optimized": True,
         "gpu_count": 8, "gpu_model": "H100"
     },
+    
+    # P2 - K80 instances
+    "p2.xlarge": {
+        "vcpu": 4, "ram_gb": 61, "network": "High", 
+        "ebs_optimized": True,
+        "gpu_count": 1, "gpu_model": "K80"
+    },
+    "p2.8xlarge": {
+        "vcpu": 32, "ram_gb": 488, "network": "10 Gbps", 
+        "ebs_optimized": True,
+        "gpu_count": 8, "gpu_model": "K80"
+    },
+    "p2.16xlarge": {
+        "vcpu": 64, "ram_gb": 732, "network": "20 Gbps", 
+        "ebs_optimized": True,
+        "gpu_count": 16, "gpu_model": "K80"
+    },
 }
 
 # Regional power costs ($/kWh)
 REGION_POWER_COSTS = {
     "us-east-1": 0.12,
     "us-west-2": 0.09,
-    "eu-west-1": 0.18,
     "us-east-2": 0.11,
-    "ap-southeast-1": 0.15,
+    "us-west-1": 0.15,
+    "eu-west-1": 0.18,
     "eu-central-1": 0.20,
+    "ap-southeast-1": 0.15,
     "ap-northeast-1": 0.17,
+    "ap-south-1": 0.13,
+    "ca-central-1": 0.10,
+    "sa-east-1": 0.14,
 }
 
 # GPU TDP values (Watts)
@@ -143,6 +167,22 @@ GPU_TDP_WATTS = {
     "H100": 700,
     "K80": 300,
     "M60": 300,
+    "RTX6000": 300,
+}
+
+# AWS Region display names
+AWS_REGION_DISPLAY = {
+    "us-east-1": "N. Virginia",
+    "us-west-2": "Oregon", 
+    "us-east-2": "Ohio",
+    "us-west-1": "N. California",
+    "eu-west-1": "Ireland",
+    "eu-central-1": "Frankfurt",
+    "ap-southeast-1": "Singapore",
+    "ap-northeast-1": "Tokyo",
+    "ap-south-1": "Mumbai",
+    "ca-central-1": "Canada",
+    "sa-east-1": "São Paulo",
 }
 
 def calculate_interruption_risk(availability: int) -> str:
@@ -158,7 +198,14 @@ def calculate_freshness(timestamp: str) -> str:
     """Calculate data freshness based on timestamp."""
     try:
         if isinstance(timestamp, str):
-            ts = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            # Handle both ISO format and timestamp with Z
+            if timestamp.endswith('Z'):
+                ts = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            elif '+' in timestamp or timestamp.endswith('00:00'):
+                ts = datetime.fromisoformat(timestamp)
+            else:
+                # Assume UTC if no timezone info
+                ts = datetime.fromisoformat(timestamp).replace(tzinfo=timezone.utc)
         else:
             ts = timestamp
             
@@ -171,8 +218,43 @@ def calculate_freshness(timestamp: str) -> str:
         else:
             return "stale"
     except Exception as e:
-        logger.warning(f"Error calculating freshness: {e}")
+        logger.warning(f"Error calculating freshness for timestamp {timestamp}: {e}")
         return "unknown"
+
+def calculate_yield_metrics(offer: Dict) -> Dict:
+    """Calculate yield metrics for an offer."""
+    try:
+        region = offer.get("region", "us-east-1")
+        gpu_model = offer.get("model", "T4")
+        usd_hr = float(offer.get("usd_hr", 0))
+        
+        # Get power cost and TDP
+        power_cost_kwh = REGION_POWER_COSTS.get(region, 0.12)
+        tdp_watts = GPU_TDP_WATTS.get(gpu_model, 300)
+        
+        # Calculate power cost per hour
+        power_cost_per_hour = (tdp_watts / 1000) * power_cost_kwh
+        
+        # Calculate net yield
+        net_yield = usd_hr - power_cost_per_hour
+        
+        # Calculate margin percentage
+        margin = (net_yield / usd_hr * 100) if usd_hr > 0 else 0
+        
+        return {
+            "power_cost_per_hour": round(power_cost_per_hour, 4),
+            "net_yield": round(net_yield, 4),
+            "margin_percent": round(margin, 2),
+            "break_even": net_yield > 0
+        }
+    except Exception as e:
+        logger.warning(f"Error calculating yield metrics: {e}")
+        return {
+            "power_cost_per_hour": 0,
+            "net_yield": 0,
+            "margin_percent": 0,
+            "break_even": False
+        }
 
 def enrich_aws_spot_offer(offer: Dict) -> Dict:
     """Enrich AWS Spot offer with additional metadata."""
@@ -189,6 +271,7 @@ def enrich_aws_spot_offer(offer: Dict) -> Dict:
         "network_performance": metadata.get("network"),
         "storage_gb": metadata.get("storage_gb"),
         "ebs_optimized": metadata.get("ebs_optimized", False),
+        "gpu_count": metadata.get("gpu_count", 1),
     })
     
     # Add risk and freshness indicators
@@ -196,7 +279,15 @@ def enrich_aws_spot_offer(offer: Dict) -> Dict:
         offer.get("availability", 1)
     )
     enriched["data_freshness"] = calculate_freshness(
-        offer.get("timestamp", "")
+        offer.get("timestamp", datetime.now(timezone.utc).isoformat())
+    )
+    
+    # Add yield metrics
+    enriched["yield_metrics"] = calculate_yield_metrics(offer)
+    
+    # Add region display name
+    enriched["region_display"] = AWS_REGION_DISPLAY.get(
+        offer.get("region", ""), offer.get("region", "")
     )
     
     return enriched
@@ -211,9 +302,11 @@ def enrich_aws_spot_batch(offers: List[Dict]) -> List[Dict]:
                 enriched = enrich_aws_spot_offer(offer)
                 enriched_offers.append(enriched)
             else:
+                # For non-AWS offers, just add basic enrichment
                 enriched_offers.append(offer)
         except Exception as e:
             logger.error(f"Error enriching offer: {e}")
+            # Add the offer without enrichment rather than skipping
             enriched_offers.append(offer)
     
     return enriched_offers
@@ -226,33 +319,67 @@ def filter_offers_for_view(offers: List[Dict], view_type: str = "operator") -> L
         filtered_offer = offer.copy()
         
         if view_type == "operator":
-            # Operators don't need total instance price in main view
+            # Operators focus on per-GPU yield, not total instance cost
             filtered_offer.pop("total_instance_price", None)
+            # Keep yield metrics for operators
         elif view_type == "renter":
-            # Renters don't need yield metrics
+            # Renters care about total cost
+            # Remove internal yield calculations
             filtered_offer.pop("yield_metrics", None)
+            filtered_offer.pop("power_cost_per_hour", None)
         
         filtered.append(filtered_offer)
     
     return filtered
 
-# Example usage in API endpoint
-def get_enriched_aws_spot_prices(
-    region: Optional[str] = None,
-    model: Optional[str] = None,
-    min_availability: Optional[int] = None,
-    view_type: str = "operator"
-) -> List[Dict]:
-    """
-    Get enriched AWS Spot prices with filtering.
+def get_aws_spot_offers_from_redis() -> List[Dict]:
+    """Get AWS Spot offers from Redis stream"""
+    try:
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        if not redis_url:
+            logger.warning("No REDIS_URL configured")
+            return []
+        
+        redis_conn = redis.from_url(redis_url, decode_responses=True)
+        redis_conn.ping()  # Test connection
+        
+        # Read recent AWS data from stream
+        stream_data = redis_conn.xrevrange("raw_prices", count=1000)
+        offers = []
+        
+        for stream_id, fields in stream_data:
+            if fields.get('cloud') == 'aws_spot':
+                try:
+                    offer = {
+                        'model': fields.get('gpu_model'),
+                        'usd_hr': float(fields.get('price_usd_hr', 0)),
+                        'region': fields.get('region'),
+                        'availability': int(fields.get('availability', 1)),
+                        'instance_type': fields.get('instance_type', ''),
+                        'provider': 'aws_spot',
+                        'total_instance_price': float(fields.get('total_instance_price', 0)),
+                        'gpu_memory_gb': int(fields.get('gpu_memory_gb', 16)),
+                        'timestamp': fields.get('iso_timestamp'),
+                        'synthetic': fields.get('synthetic', 'false').lower() == 'true'
+                    }
+                    
+                    # Validate essential fields
+                    if offer['model'] and offer['usd_hr'] > 0 and offer['region']:
+                        offers.append(offer)
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error parsing offer from stream {stream_id}: {e}")
+                    continue
+        
+        logger.info(f"Retrieved {len(offers)} AWS Spot offers from Redis")
+        return offers
     
-    This would be called from your FastAPI endpoint.
-    """
-    # Get raw offers from Redis or scraper
-    # raw_offers = get_aws_spot_offers_from_redis()
-    
-    # For demonstration, using dummy data
-    raw_offers = [
+    except Exception as e:
+        logger.error(f"Error reading AWS offers from Redis: {e}")
+        return []
+
+def get_synthetic_aws_data() -> List[Dict]:
+    """Generate synthetic AWS Spot data for testing"""
+    return [
         {
             "model": "A100",
             "usd_hr": 1.2290,
@@ -263,8 +390,73 @@ def get_enriched_aws_spot_prices(
             "total_instance_price": 9.832,
             "gpu_memory_gb": 40,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+            "synthetic": True,
+        },
+        {
+            "model": "T4",
+            "usd_hr": 0.1578,
+            "region": "us-west-2",
+            "availability": 1,
+            "instance_type": "g4dn.xlarge",
+            "provider": "aws_spot",
+            "total_instance_price": 0.1578,
+            "gpu_memory_gb": 16,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "synthetic": True,
+        },
+        {
+            "model": "A10G",
+            "usd_hr": 0.3360,
+            "region": "us-east-1",
+            "availability": 2,
+            "instance_type": "g5.xlarge",
+            "provider": "aws_spot",
+            "total_instance_price": 0.3360,
+            "gpu_memory_gb": 24,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "synthetic": True,
+        },
+        {
+            "model": "V100",
+            "usd_hr": 0.9180,
+            "region": "eu-west-1",
+            "availability": 4,
+            "instance_type": "p3.8xlarge",
+            "provider": "aws_spot",
+            "total_instance_price": 3.672,
+            "gpu_memory_gb": 16,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "synthetic": True,
+        },
+        {
+            "model": "H100",
+            "usd_hr": 2.1500,
+            "region": "us-west-2",
+            "availability": 2,
+            "instance_type": "p5.48xlarge",
+            "provider": "aws_spot",
+            "total_instance_price": 17.200,
+            "gpu_memory_gb": 80,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "synthetic": True,
+        },
     ]
+
+def get_enriched_aws_spot_prices(
+    region: Optional[str] = None,
+    model: Optional[str] = None,
+    min_availability: Optional[int] = None,
+    view_type: str = "operator"
+) -> List[Dict]:
+    """Get enriched AWS Spot prices with filtering."""
+    
+    # Get real offers from Redis
+    raw_offers = get_aws_spot_offers_from_redis()
+    
+    # If no real data, use synthetic data
+    if not raw_offers:
+        logger.info("No real AWS data found, using synthetic data")
+        raw_offers = get_synthetic_aws_data()
     
     # Enrich offers
     enriched = enrich_aws_spot_batch(raw_offers)
@@ -281,3 +473,23 @@ def get_enriched_aws_spot_prices(
     filtered = filter_offers_for_view(enriched, view_type)
     
     return filtered
+
+def get_available_regions() -> List[str]:
+    """Get list of available AWS regions from Redis data"""
+    try:
+        offers = get_aws_spot_offers_from_redis()
+        regions = list(set(offer.get("region") for offer in offers if offer.get("region")))
+        return sorted(regions)
+    except Exception as e:
+        logger.error(f"Error getting available regions: {e}")
+        return list(AWS_REGION_DISPLAY.keys())
+
+def get_available_models() -> List[str]:
+    """Get list of available GPU models from Redis data"""
+    try:
+        offers = get_aws_spot_offers_from_redis()
+        models = list(set(offer.get("model") for offer in offers if offer.get("model")))
+        return sorted(models)
+    except Exception as e:
+        logger.error(f"Error getting available models: {e}")
+        return ["A100", "H100", "V100", "T4", "A10G", "K80"]
