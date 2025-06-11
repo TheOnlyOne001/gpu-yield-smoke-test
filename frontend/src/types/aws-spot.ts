@@ -1,33 +1,42 @@
 export interface AWSSpotOffer {
-  // Core fields from scraper
-  model: string;           // GPU model (A100, T4, V100, etc.)
-  usd_hr: number;         // Per-GPU hourly price
-  region: string;         // AWS region (us-east-1, etc.)
-  availability: number;   // GPU count per instance (1-8)
-  instance_type: string;  // EC2 instance type (p4d.24xlarge, etc.)
+  // Required fields
+  model: string;
+  usd_hr: number;
+  region: string;
+  availability: number;
+  instance_type: string;
   provider: 'aws_spot';
   
-  // Additional fields from scraper
-  total_instance_price?: number;  // Total hourly cost for entire instance
-  gpu_memory_gb?: number;         // VRAM per GPU
-  timestamp?: string;             // ISO timestamp of price fetch
-  synthetic?: boolean;           // Flag for synthetic data
+  // Optional fields
+  total_instance_price?: number;
+  gpu_memory_gb?: number;
+  timestamp?: string;
+  synthetic?: boolean;
 }
 
-// Extended offer with derived fields
 export interface EnrichedAWSSpotOffer extends AWSSpotOffer {
-  // Derived fields from enrichment
-  interruption_risk?: 'low' | 'medium' | 'high';
-  freshness?: 'live' | 'recent' | 'stale';
+  // Computed fields added by enrichment
+  interruption_risk: 'low' | 'medium' | 'high';
+  freshness: 'live' | 'recent' | 'stale';
   vcpu_count?: number;
   ram_gb?: number;
   network_performance?: string;
   storage_gb?: number;
   ebs_optimized?: boolean;
-  yield_metrics?: {
-    power_cost_hr: number;
-    net_yield_hr: number;
-    margin_percentage: number;
-    break_even: boolean;
+}
+
+export interface AWSSpotDataResponse {
+  offers: AWSSpotOffer[];
+  total_count: number;
+  metadata: {
+    last_updated: string;
+    regions_available: string[];
+    models_available: string[];
+    data_source: 'live' | 'synthetic' | 'none';
   };
 }
+
+// Export individual types
+export type { AWSSpotOffer as AWSSpotOfferType };
+export type { EnrichedAWSSpotOffer as EnrichedAWSSpotOfferType };
+export type { AWSSpotDataResponse as AWSSpotDataResponseType };

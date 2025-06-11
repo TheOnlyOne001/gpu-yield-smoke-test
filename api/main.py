@@ -601,13 +601,18 @@ async def get_detailed_stats(
         )
 
 # Include routers
-from routes import aws_spot, websocket
+from routes.aws_spot import router as aws_spot_router
+from routes.websocket import router as websocket_router
 
 # Include AWS Spot router with API prefix
-app.include_router(aws_spot.router, prefix="/api")
+app.include_router(aws_spot_router, prefix="/api")
 
 # Include WebSocket router at root level  
-app.include_router(websocket.router)
+app.include_router(websocket_router)
 
 # Include existing auth router
 app.include_router(auth.router)
+
+@app.get("/")
+async def root():
+    return {"message": "GPU Yield API"}

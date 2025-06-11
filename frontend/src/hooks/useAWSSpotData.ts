@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AWSSpotOffer, EnrichedAWSSpotOffer } from '../types/aws-spot';
-import { enrichAWSSpotOffer } from '../lib/awsUtils';
+import { AWSSpotOffer, EnrichedAWSSpotOffer, AWSSpotDataResponse } from '@/types/aws-spot';
+import { enrichAWSSpotOffer, isValidOffer } from '@/lib/awsUtils';
 
 interface UseAWSSpotDataParams {
   region?: string;
@@ -30,7 +30,7 @@ export function useAWSSpotData({
   minAvailability,
   viewType = 'operator',
   autoRefresh = true,
-  refreshInterval = 30000 // 30 seconds
+  refreshInterval = 30000
 }: UseAWSSpotDataParams = {}) {
   const [data, setData] = useState<AWSSpotDataState>({
     offers: [],
@@ -45,9 +45,9 @@ export function useAWSSpotData({
     }
   });
 
-  // Add WebSocket connection for real-time updates
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
 
+  // Fetch data from API
   const fetchAWSSpotData = useCallback(async () => {
     try {
       setData(prev => ({ ...prev, loading: true, error: null }));
@@ -60,7 +60,6 @@ export function useAWSSpotData({
       params.append('include_synthetic', 'true');
       params.append('limit', '100');
 
-      // Use environment variable for API URL
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/api/aws-spot/prices?${params}`);
       
@@ -69,12 +68,11 @@ export function useAWSSpotData({
         throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const result = await response.json();
+      const result: AWSSpotDataResponse = await response.json();
       
-      // Enrich offers on the frontend for additional calculations
-      const enrichedOffers = result.offers.map((offer: AWSSpotOffer) => 
-        enrichAWSSpotOffer(offer)
-      );
+      // Validate and enrich offers
+      const validOffers = result.offers.filter(isValidOffer);
+      const enrichedOffers = validOffers.map(enrichAWSSpotOffer);
 
       setData({
         offers: enrichedOffers,
@@ -83,9 +81,9 @@ export function useAWSSpotData({
         lastUpdated: result.metadata.last_updated,
         totalCount: result.total_count,
         metadata: {
-          regionsAvailable: result.metadata.regions_available || [],
-          modelsAvailable: result.metadata.models_available || [],
-          dataSource: result.metadata.data_source || 'none'
+          regionsAvailable: result.metadata.regions_available,
+          modelsAvailable: result.metadata.models_available,
+          dataSource: result.metadata.data_source
         }
       });
 
@@ -99,13 +97,14 @@ export function useAWSSpotData({
     }
   }, [region, model, minAvailability, viewType]);
 
-  // WebSocket setup for real-time updates
+  // WebSocket for real-time updates
   useEffect(() => {
     if (!autoRefresh) return;
 
-    // Try to connect to WebSocket for real-time updates
     try {
-      const wsUrl = `ws://localhost:8000/ws/aws-spot`;
+      // Use proper WebSocket URL with same host as API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const wsUrl = apiUrl.replace('http', 'ws') + '/ws/aws-spot';
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
@@ -117,11 +116,48 @@ export function useAWSSpotData({
         try {
           const update = JSON.parse(event.data);
           if (update.type === 'aws_spot_update') {
-            // Update data with new offers
+            const validOffers = update.offers
+              .filter((offer: any) => {
+                return offer.model && 
+                       offer.usd_hr !== undefined && 
+                       offer.region && 
+                       offer.availability !== undefined && 
+                       offer.instance_type;
+              })
+              .map((offer: any) => {
+                const validOffer: AWSSpotOffer = {
+                  model: offer.model,
+                  usd_hr: Number(offer.usd_hr),
+                  region: offer.region,
+                  availability: Number(offer.availability),
+                  instance_type: offer.instance_type,
+                  provider: 'aws_spot' as const,
+                };
+
+                // Add optional fields
+                if (offer.total_instance_price !== undefined) {
+                  validOffer.total_instance_price = Number(offer.total_instance_price);
+                }
+                if (offer.gpu_memory_gb !== undefined) {
+                  validOffer.gpu_memory_gb = Number(offer.gpu_memory_gb);
+                }
+                if (offer.timestamp) {
+                  validOffer.timestamp = offer.timestamp;
+                }
+                if (offer.synthetic !== undefined) {
+                  validOffer.synthetic = Boolean(offer.synthetic);
+                }
+
+                return validOffer;
+              });
+
+            const enrichedOffers = validOffers.map(enrichAWSSpotOffer);
+
             setData(prev => ({
               ...prev,
-              offers: update.offers.map((offer: AWSSpotOffer) => enrichAWSSpotOffer(offer)),
+              offers: enrichedOffers,
               lastUpdated: update.timestamp,
+              totalCount: enrichedOffers.length,
               metadata: {
                 ...prev.metadata,
                 dataSource: update.dataSource || 'live'
@@ -155,7 +191,7 @@ export function useAWSSpotData({
     fetchAWSSpotData();
   }, [fetchAWSSpotData]);
 
-  // Auto-refresh setup (fallback if WebSocket fails)
+  // Polling fallback
   useEffect(() => {
     if (!autoRefresh || wsConnection) return;
 
@@ -163,71 +199,16 @@ export function useAWSSpotData({
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, fetchAWSSpotData, wsConnection]);
 
+  // Utility functions
   const refetch = useCallback(() => {
     fetchAWSSpotData();
   }, [fetchAWSSpotData]);
 
-  // Utility functions for data analysis
-  const getBestPriceByModel = useCallback(() => {
-    const modelPrices: Record<string, EnrichedAWSSpotOffer> = {};
-    
-    data.offers.forEach(offer => {
-      if (!modelPrices[offer.model] || offer.usd_hr < modelPrices[offer.model].usd_hr) {
-        modelPrices[offer.model] = offer;
-      }
-    });
-    
-    return modelPrices;
-  }, [data.offers]);
-
-  const getRegionSummary = useCallback(() => {
-    const regionStats: Record<string, {
-      offerCount: number;
-      avgPrice: number;
-      models: Set<string>;
-    }> = {};
-
-    data.offers.forEach(offer => {
-      if (!regionStats[offer.region]) {
-        regionStats[offer.region] = {
-          offerCount: 0,
-          avgPrice: 0,
-          models: new Set()
-        };
-      }
-      
-      regionStats[offer.region].offerCount++;
-      regionStats[offer.region].avgPrice += offer.usd_hr;
-      regionStats[offer.region].models.add(offer.model);
-    });
-
-    // Calculate averages
-    Object.keys(regionStats).forEach(region => {
-      regionStats[region].avgPrice /= regionStats[region].offerCount;
-    });
-
-    return regionStats;
-  }, [data.offers]);
-
-  const getLowRiskOffers = useCallback(() => {
-    return data.offers.filter(offer => offer.interruption_risk === 'low');
-  }, [data.offers]);
-
-  const getLiveDataOffers = useCallback(() => {
-    return data.offers.filter(offer => offer.freshness === 'live');
-  }, [data.offers]);
-
   return {
     ...data,
     refetch,
-    // Utility functions
-    getBestPriceByModel,
-    getRegionSummary,
-    getLowRiskOffers,
-    getLiveDataOffers,
-    // Computed values - Fix Set iteration issue
     hasLiveData: data.offers.some(o => o.freshness === 'live'),
-    hasSyntheticData: data.offers.some(o => o.synthetic),
+    hasSyntheticData: data.offers.some(o => o.synthetic === true),
     averagePrice: data.offers.length > 0 
       ? data.offers.reduce((sum, o) => sum + o.usd_hr, 0) / data.offers.length 
       : 0,
@@ -245,7 +226,8 @@ export function useAWSRegions() {
   useEffect(() => {
     async function fetchRegions() {
       try {
-        const response = await fetch('/api/aws-spot/regions');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiUrl}/api/aws-spot/regions`);
         if (!response.ok) throw new Error('Failed to fetch regions');
         
         const data = await response.json();
@@ -272,7 +254,8 @@ export function useAWSModels() {
   useEffect(() => {
     async function fetchModels() {
       try {
-        const response = await fetch('/api/aws-spot/models');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiUrl}/api/aws-spot/models`);
         if (!response.ok) throw new Error('Failed to fetch models');
         
         const data = await response.json();

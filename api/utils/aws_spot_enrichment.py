@@ -1,7 +1,7 @@
 # api/utils/aws_spot_enrichment.py
+import logging
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -174,32 +174,6 @@ def calculate_freshness(timestamp: str) -> str:
         logger.warning(f"Error calculating freshness: {e}")
         return "unknown"
 
-def calculate_yield_metrics(offer: Dict) -> Dict:
-    """Calculate yield metrics for operators."""
-    gpu_model = offer.get("model", "Unknown")
-    region = offer.get("region", "us-east-1")
-    usd_hr = offer.get("usd_hr", 0)
-    
-    # Get power costs
-    power_cost_kwh = REGION_POWER_COSTS.get(region, 0.12)
-    gpu_tdp = GPU_TDP_WATTS.get(gpu_model, 300)
-    
-    # Calculate power cost per hour
-    power_cost_hr = (gpu_tdp / 1000) * power_cost_kwh
-    
-    # Calculate net yield
-    net_yield = usd_hr - power_cost_hr
-    
-    # Calculate margin percentage
-    margin_pct = (net_yield / usd_hr * 100) if usd_hr > 0 else 0
-    
-    return {
-        "power_cost_hr": round(power_cost_hr, 4),
-        "net_yield_hr": round(net_yield, 4),
-        "margin_percentage": round(margin_pct, 2),
-        "break_even": net_yield > 0
-    }
-
 def enrich_aws_spot_offer(offer: Dict) -> Dict:
     """Enrich AWS Spot offer with additional metadata."""
     enriched = offer.copy()
@@ -224,23 +198,6 @@ def enrich_aws_spot_offer(offer: Dict) -> Dict:
     enriched["data_freshness"] = calculate_freshness(
         offer.get("timestamp", "")
     )
-    
-    # Add yield metrics for operators
-    yield_metrics = calculate_yield_metrics(offer)
-    enriched["yield_metrics"] = yield_metrics
-    
-    # Add per-GPU memory if not present
-    if "gpu_memory_gb" not in enriched and metadata.get("gpu_model"):
-        gpu_memory_map = {
-            "T4": 16,
-            "A10G": 24,
-            "V100": 16,
-            "A100": 40,
-            "H100": 80,
-        }
-        enriched["gpu_memory_gb"] = gpu_memory_map.get(
-            metadata["gpu_model"], 16
-        )
     
     return enriched
 

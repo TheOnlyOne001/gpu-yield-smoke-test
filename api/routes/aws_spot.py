@@ -1,23 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List, Optional, Dict, Any
-import logging
-from datetime import datetime, timezone
-import redis
-import json
 import os
+import sys
+import json
+import logging
+from typing import List, Optional, Dict, Any
+from datetime import datetime, timezone
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+import redis
+
+# Import enrichment utilities
 from ..utils.aws_spot_enrichment import (
     enrich_aws_spot_batch,
     filter_offers_for_view,
     get_enriched_aws_spot_prices
 )
+
+# Import models
 from ..models import ErrorResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/aws-spot", tags=["AWS Spot"])
 
-# Redis connection
+# Redis connection function
 def get_redis_connection():
     """Get Redis connection for reading AWS Spot data"""
     redis_url = os.getenv("REDIS_URL")
@@ -25,27 +30,48 @@ def get_redis_connection():
         raise HTTPException(status_code=500, detail="Redis configuration missing")
     return redis.from_url(redis_url, decode_responses=True)
 
-@router.get("/prices", 
+# Import synthetic data function
+def get_synthetic_aws_data():
+    """Fallback synthetic data when scraper plugin is not available"""
+    return [
+        {
+            'model': 'A100',
+            'usd_hr': 1.2290,
+            'region': 'us-east-1',
+            'availability': 8,
+            'instance_type': 'p4d.24xlarge',
+            'provider': 'aws_spot',
+            'total_instance_price': 9.832,
+            'gpu_memory_gb': 40,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'synthetic': True
+        },
+        {
+            'model': 'T4',
+            'usd_hr': 0.1578,
+            'region': 'us-west-2',
+            'availability': 1,
+            'instance_type': 'g4dn.xlarge',
+            'provider': 'aws_spot',
+            'total_instance_price': 0.1578,
+            'gpu_memory_gb': 16,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'synthetic': True
+        }
+    ]
+
+@router.get("/prices",
            summary="Get AWS Spot GPU Prices",
            description="Retrieve current AWS Spot instance prices with enrichment")
 async def get_aws_spot_prices(
     region: Optional[str] = Query(None, description="Filter by AWS region"),
     model: Optional[str] = Query(None, description="Filter by GPU model"),
     min_availability: Optional[int] = Query(None, ge=1, description="Minimum GPU count"),
-    view_type: str = Query("operator", regex="^(operator|renter)$", description="View type: operator or renter"),
-    include_synthetic: bool = Query(True, description="Include synthetic data when real data unavailable"),
-    limit: int = Query(50, ge=1, le=200, description="Maximum number of results")
+    view_type: str = Query("operator", regex="^(operator|renter)$", description="View type"),
+    include_synthetic: bool = Query(True, description="Include synthetic data"),
+    limit: int = Query(50, ge=1, le=200, description="Maximum results")
 ) -> Dict[str, Any]:
-    """
-    Get enriched AWS Spot GPU pricing data with filtering options.
-    
-    - **region**: Filter by specific AWS region (us-east-1, us-west-2, etc.)
-    - **model**: Filter by GPU model (A100, T4, V100, etc.)
-    - **min_availability**: Minimum number of GPUs per instance
-    - **view_type**: Either 'operator' (includes yield metrics) or 'renter' (includes total costs)
-    - **include_synthetic**: Whether to include synthetic data as fallback
-    - **limit**: Maximum number of results to return
-    """
+    """Get enriched AWS Spot GPU pricing data with filtering options."""
     try:
         # Get data from Redis stream
         redis_conn = get_redis_connection()
@@ -53,12 +79,10 @@ async def get_aws_spot_prices(
         # Read recent AWS Spot data from Redis stream
         raw_offers = []
         try:
-            # Get recent entries from the raw_prices stream
             stream_data = redis_conn.xrevrange("raw_prices", count=1000)
             
             for stream_id, fields in stream_data:
                 if fields.get('cloud') == 'aws_spot':
-                    # Reconstruct offer from Redis data
                     offer = {
                         'model': fields.get('gpu_model'),
                         'usd_hr': float(fields.get('price_usd_hr', 0)),
@@ -71,7 +95,6 @@ async def get_aws_spot_prices(
                         'gpu_memory_gb': int(fields.get('gpu_memory_gb', 16))
                     }
                     
-                    # Only include valid offers
                     if offer['model'] and offer['usd_hr'] > 0:
                         raw_offers.append(offer)
         
@@ -82,30 +105,7 @@ async def get_aws_spot_prices(
         # If no real data and synthetic allowed, get synthetic data
         if not raw_offers and include_synthetic:
             logger.info("No real AWS data found, using synthetic data")
-            # Fix import path - remove relative import
-            try:
-                import sys
-                import os
-                sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'scrapper'))
-                from plugins.aws_spot import get_synthetic_aws_data
-                raw_offers = get_synthetic_aws_data()
-            except ImportError as e:
-                logger.error(f"Could not import synthetic data generator: {e}")
-                # Fallback to basic synthetic data
-                raw_offers = [
-                    {
-                        'model': 'A100',
-                        'usd_hr': 1.2290,
-                        'region': 'us-east-1',
-                        'availability': 8,
-                        'instance_type': 'p4d.24xlarge',
-                        'provider': 'aws_spot',
-                        'total_instance_price': 9.832,
-                        'gpu_memory_gb': 40,
-                        'timestamp': datetime.now(timezone.utc).isoformat(),
-                        'synthetic': True
-                    }
-                ]
+            raw_offers = get_synthetic_aws_data()
         
         if not raw_offers:
             return {

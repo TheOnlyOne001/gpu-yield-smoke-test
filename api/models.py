@@ -228,3 +228,35 @@ class DetailedStatsResponse(BaseModel):
                 "system_health": "excellent"
             }
         }
+
+# Auth related models
+
+# User model for authentication
+class User(BaseModel):
+    id: str
+    email: EmailStr
+    username: Optional[str] = None
+    hashed_password: str
+    is_active: bool = True
+    created_at: Optional[datetime] = None
+    gpu_models_interested: Optional[List[str]] = []
+    min_profit_threshold: float = 0.0
+
+    class Config:
+        orm_mode = True
+
+# Token models
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: Optional[int] = Field(None, description="Token expiry in seconds")
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+# Alert Job model for Redis queue
+class AlertJob(BaseModel):
+    job_type: str
+    email: str
+    user_id: str
+    data: Optional[dict] = None

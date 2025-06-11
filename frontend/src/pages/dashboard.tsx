@@ -1,57 +1,74 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts';
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
   Zap,
-  Clock,
-  Server,
+  TrendingUp,
+  DollarSign,
   Activity,
-  AlertTriangle,
+  RefreshCw,
+  Settings,
+  Download,
   CheckCircle,
   XCircle,
+  Clock,
+  AlertTriangle,
   Loader2,
-  RefreshCw,
-  Download,
-  Settings,
-  Bell,
-  Filter,
-  Calendar,
-  Eye,
-  BarChart3,
-  X,
+  Cloud,
+  Server,
   Cpu,
   HardDrive,
   Wifi,
-  Cloud
+  BarChart3,
+  PieChart,
+  Users,
+  Shield,
+  Globe,
+  Eye,
+  EyeOff
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+// UI Components
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+
+// Hooks and Utils
 import { useAWSSpotData } from '@/hooks/useAWSSpotData';
-import { AWSSpotOffer, EnrichedAWSSpotOffer } from '@/types/aws-spot';
 import { 
   enrichAWSSpotOffer, 
+  ensureEnrichedOffer,
+  calculateOfferYieldMetrics,
+  calculateInterruptionRisk,
+  calculateFreshness,
   AWS_REGION_DISPLAY, 
   REGION_POWER_COSTS, 
   GPU_TDP_WATTS,
   AWS_INSTANCE_METADATA 
 } from '@/lib/awsUtils';
+
+// Types
+import { 
+  AWSSpotOffer, 
+  EnrichedAWSSpotOffer,
+  GPUData,
+  MarketData,
+  DashboardProps
+} from '@/types';
+
+// Chart components - you might need to install these
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Cell,
+  BarChart,
+  Bar
+} from 'recharts';
 
 // Dashboard specific interfaces
 interface GPUData {
@@ -82,35 +99,9 @@ interface DashboardProps {
   userId?: string;
 }
 
-// Utility functions
-const calculateInterruptionRisk = (availability: number): 'low' | 'medium' | 'high' => {
-  if (availability >= 4) return 'low';
-  if (availability >= 2) return 'medium';
-  return 'high';
-};
-
-const calculateYieldMetrics = (offer: AWSSpotOffer) => {
-  const powerCost = REGION_POWER_COSTS[offer.region] ?? 0.12;
-  const tdp = GPU_TDP_WATTS[offer.model] ?? 300;
-  const powerCostPerHour = (tdp / 1000) * powerCost;
-  const netYield = offer.usd_hr - powerCostPerHour;
-  const margin = (netYield / offer.usd_hr) * 100;
-  return { netYield, margin, powerCostPerHour };
-};
-
-const calculateFreshness = (timestamp?: string): 'live' | 'recent' | 'stale' => {
-  if (!timestamp) return 'stale';
-  const age = Date.now() - new Date(timestamp).getTime();
-  const hours = age / (1000 * 60 * 60);
-  
-  if (hours < 1) return 'live';
-  if (hours < 6) return 'recent';
-  return 'stale';
-};
-
 // AWS Components
 const InterruptionRiskIndicator: React.FC<{ availability: number }> = ({ availability }) => {
-  const risk = calculateInterruptionRisk(availability);
+  const risk = calculateInterruptionRisk(availability); // This will now work
   const colors = {
     low: 'bg-green-500',
     medium: 'bg-yellow-500',
@@ -137,20 +128,17 @@ const InterruptionRiskIndicator: React.FC<{ availability: number }> = ({ availab
 };
 
 const FreshnessIndicator: React.FC<{ timestamp?: string }> = ({ timestamp }) => {
-  const freshness = calculateFreshness(timestamp);
-  const indicators = {
-    live: { color: 'text-green-400', icon: '🟢' },
-    recent: { color: 'text-yellow-400', icon: '🟡' },
-    stale: { color: 'text-red-400', icon: '🔴' }
+  const freshness = calculateFreshness(timestamp); // This will now work
+  const colors = {
+    live: 'text-green-400',
+    recent: 'text-yellow-400',
+    stale: 'text-red-400'
   };
   
-  const indicator = indicators[freshness];
-  
   return (
-    <div className={`flex items-center gap-1 text-xs ${indicator.color}`}>
-      <span>{indicator.icon}</span>
-      <span className="capitalize">{freshness}</span>
-    </div>
+    <span className={`text-xs ${colors[freshness]} capitalize`}>
+      {freshness}
+    </span>
   );
 };
 
@@ -212,7 +200,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [showAWSData, setShowAWSData] = useState(false);
 
-  // Add AWS Spot data hook
+  // Use the AWS Spot data hook - this handles WebSocket automatically
   const { 
     offers: awsOffers, 
     loading: awsLoading, 
@@ -225,7 +213,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     refreshInterval: 30000
   });
 
-  // Mock AWS Spot data generation
+  // Mock AWS Spot data generation (keep this as is)
   const generateAWSSpotData = useCallback((): AWSSpotOffer[] => {
     const baseOffers: AWSSpotOffer[] = [
       {
@@ -234,10 +222,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         region: "us-east-1",
         availability: 8,
         instance_type: "p4d.24xlarge",
-        provider: "aws_spot",
+        provider: "aws_spot" as const,
         total_instance_price: 9.832,
         gpu_memory_gb: 40,
         timestamp: new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString(),
+        synthetic: true,
       },
       {
         model: "T4",
@@ -245,10 +234,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         region: "us-west-2",
         availability: 1,
         instance_type: "g4dn.xlarge",
-        provider: "aws_spot",
+        provider: "aws_spot" as const,
         total_instance_price: 0.1578,
         gpu_memory_gb: 16,
         timestamp: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000).toISOString(),
+        synthetic: true,
       },
       {
         model: "A10G",
@@ -256,10 +246,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         region: "us-east-1",
         availability: 1,
         instance_type: "g5.xlarge",
-        provider: "aws_spot",
+        provider: "aws_spot" as const,
         total_instance_price: 0.3360,
         gpu_memory_gb: 24,
         timestamp: new Date(Date.now() - Math.random() * 30 * 60 * 1000).toISOString(),
+        synthetic: true,
       },
       {
         model: "V100",
@@ -267,17 +258,43 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         region: "eu-west-1",
         availability: 4,
         instance_type: "p3.8xlarge",
-        provider: "aws_spot",
+        provider: "aws_spot" as const,
         total_instance_price: 3.672,
         gpu_memory_gb: 16,
         timestamp: new Date(Date.now() - Math.random() * 10 * 60 * 1000).toISOString(),
+        synthetic: true,
+      },
+      // Add more variety to test different scenarios
+      {
+        model: "H100",
+        usd_hr: 2.1500 + (Math.random() - 0.5) * 0.3,
+        region: "us-west-2",
+        availability: 2,
+        instance_type: "p5.48xlarge",
+        provider: "aws_spot" as const,
+        total_instance_price: 17.200,
+        gpu_memory_gb: 80,
+        timestamp: new Date(Date.now() - Math.random() * 15 * 60 * 1000).toISOString(),
+        synthetic: true,
+      },
+      // Example with minimal optional fields
+      {
+        model: "K80",
+        usd_hr: 0.0900 + (Math.random() - 0.5) * 0.02,
+        region: "ap-southeast-1",
+        availability: 1,
+        instance_type: "p2.xlarge",
+        provider: "aws_spot" as const,
+        // Only include timestamp, omit other optional fields
+        timestamp: new Date(Date.now() - Math.random() * 45 * 60 * 1000).toISOString(),
+        synthetic: true,
       },
     ];
 
-    return baseOffers;
+    return baseOffers; // Add this return statement
   }, []);
 
-  // Enhanced mock data generation with AWS integration
+  // Regular mock data generation (no WebSocket handling needed here)
   useEffect(() => {
     const generateMockData = () => {
       const gpuModels = ['RTX 4090', 'RTX 4080', 'RTX 3090', 'RTX 3080', 'A100', 'H100'];
@@ -287,7 +304,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
         const platform = platforms[index % platforms.length];
         const isAWS = platform === 'AWS Spot';
         
-        return {
+        // Base GPU data with all required fields
+        const baseGPU: GPUData = {
           model,
           platform,
           price: Math.random() * 2 + 0.5,
@@ -297,15 +315,21 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
           powerDraw: Math.random() * 400 + 200,
           temperature: Math.random() * 30 + 50,
           lastUpdate: new Date().toISOString(),
-          // AWS-specific fields
-          ...(isAWS && {
+        };
+        
+        // Add AWS-specific optional fields only if it's an AWS platform
+        if (isAWS) {
+          return {
+            ...baseGPU,
             region: ['us-east-1', 'us-west-2', 'eu-west-1'][Math.floor(Math.random() * 3)],
             instanceType: ['p4d.24xlarge', 'g4dn.xlarge', 'g5.xlarge'][Math.floor(Math.random() * 3)],
             interruptionRisk: calculateInterruptionRisk(Math.floor(Math.random() * 8) + 1),
             netYield: Math.random() * 1.5 + 0.5,
             margin: Math.random() * 80 + 20
-          })
-        };
+          };
+        }
+        
+        return baseGPU;
       });
 
       const mockMarket: MarketData[] = Array.from({ length: 24 }, (_, i) => ({
@@ -352,21 +376,22 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     [gpuData]
   );
 
-  // Update AWS metrics calculation - fix property access
+  // Update AWS metrics calculation to use type guards
   const awsSpotMetrics = useMemo(() => {
     const totalOffers = awsOffers.length;
     const avgPrice = totalOffers > 0 ? awsOffers.reduce((sum, offer) => sum + offer.usd_hr, 0) / totalOffers : 0;
     
-    // Fix property access for enriched offers
-    const lowRiskOffers = awsOffers.filter(offer => {
-      const enriched = enrichAWSSpotOffer(offer);
-      return enriched.interruption_risk === 'low';
-    }).length;
+    let lowRiskOffers = 0;
+    let liveOffers = 0;
     
-    const liveOffers = awsOffers.filter(offer => {
-      const enriched = enrichAWSSpotOffer(offer);
-      return enriched.freshness === 'live';
-    }).length;
+    awsOffers.forEach((offer: EnrichedAWSSpotOffer) => { // Explicit type
+      if (offer.interruption_risk === 'low') {
+        lowRiskOffers++;
+      }
+      if (offer.freshness === 'live') {
+        liveOffers++;
+      }
+    });
     
     return { totalOffers, avgPrice, lowRiskOffers, liveOffers };
   }, [awsOffers]);
@@ -588,12 +613,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {awsOffers.slice(0, 10).map((offer, index) => {
-                      const yieldData = calculateYieldMetrics(offer);
-                      const enrichedOffer = enrichAWSSpotOffer(offer);
+                    {awsOffers.slice(0, 10).map((offer: EnrichedAWSSpotOffer, index: number) => { // Explicit types
+                      const yieldData = calculateOfferYieldMetrics(offer);
+                      const enriched = ensureEnrichedOffer(offer);
+                      
                       return (
                         <tr 
-                          key={index} 
+                          key={`${offer.model}-${offer.region}-${index}`} 
                           className="border-b border-white/5 hover:bg-white/5 transition-colors"
                         >
                           <td className="py-4 px-4">
@@ -602,12 +628,22 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
                                 <Cloud className="w-4 h-4 text-white" />
                               </div>
                               <span className="text-white font-medium">{offer.model}</span>
+                              {offer.synthetic && (
+                                <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs">
+                                  MOCK
+                                </Badge>
+                              )}
                             </div>
                           </td>
                           <td className="py-4 px-4">
                             <span className="text-green-400 font-mono text-lg">
                               ${offer.usd_hr.toFixed(4)}
                             </span>
+                            {yieldData.totalInstancePrice > 0 && (
+                              <div className="text-xs text-gray-500">
+                                Total: ${yieldData.totalInstancePrice.toFixed(4)}
+                              </div>
+                            )}
                           </td>
                           <td className="py-4 px-4">
                             <div>
@@ -634,7 +670,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
                             />
                           </td>
                           <td className="py-4 px-4">
-                            <span className="text-white">{offer.gpu_memory_gb} GB</span>
+                            <span className="text-white">{yieldData.gpuMemory} GB</span>
                           </td>
                           <td className="py-4 px-4">
                             <FreshnessIndicator timestamp={offer.timestamp} />
@@ -724,7 +760,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
                       borderRadius: '8px',
                       color: '#fff'
                     }}
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Earnings']}
+                    formatter={(value: number) => [`${value.toFixed(2)}`, 'Earnings']}
                   />
                   <Legend 
                     wrapperStyle={{ color: '#9CA3AF', fontSize: '12px' }}
