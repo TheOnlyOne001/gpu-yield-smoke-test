@@ -2,19 +2,21 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dependencies as root first
-COPY package*.json ./
-RUN npm ci
-
-# Create a non-root user
+# Create a non-root user first
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
+
+# Copy package files and install dependencies as root
+COPY package*.json ./
+RUN npm ci
 
 # Copy application code
 COPY . .
 
-# Create .next directory and set permissions
-RUN mkdir -p .next && chown -R nextjs:nodejs /app
+# Create necessary directories and set proper permissions
+RUN mkdir -p .next/static .next/cache node_modules/.cache
+RUN chown -R nextjs:nodejs /app
+RUN chmod -R 755 /app
 
 # Switch to non-root user
 USER nextjs
