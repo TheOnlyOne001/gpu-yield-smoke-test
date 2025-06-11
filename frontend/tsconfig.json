@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2018",           // Changed from ES5 to ES2018 to support Set iteration
+    "lib": ["dom", "dom.iterable", "es2015", "es2017", "es2018"],
+    "downlevelIteration": true,   // Add this to support Set iteration
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,10 +19,7 @@
         "name": "next"
       }
     ],
-    // The two lines below work together to fix the alias error.
-    // baseUrl defines the root for path resolution.
     "baseUrl": ".",
-    // paths defines the alias itself.
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -71,9 +71,6 @@ async def shutdown_event():
     except Exception as e:
         logger.error(f"Error during application shutdown: {e}")
 
-# Include authentication router
-app.include_router(auth.router)
-
 # Security middleware
 app.add_middleware(
     TrustedHostMiddleware,
@@ -485,7 +482,7 @@ async def get_gpu_stats(
             "raw_prices",
             min=f"{past_24h}-0",
             max=f"{current_time}-0",
-            count=10000  # Limit to prevent memory issues
+            count=10000
         )
         
         # Track unique GPUs and models
@@ -495,36 +492,32 @@ async def get_gpu_stats(
         price_updates = 0
         
         for entry_id, fields in stream_entries:
-            gpu_model = fields.get('gpu_model')
-            cloud = fields.get('cloud')
-            gpu_id = fields.get('gpu_id', f"{gpu_model}_{cloud}")
-            
-            if gpu_model and cloud:
-                unique_gpus.add(gpu_id)
-                provider_set.add(cloud)
-                price_updates += 1
+            try:
+                gpu_model = fields.get('gpu_model')
+                cloud = fields.get('cloud')
                 
-                # Count GPU models
-                if gpu_model not in gpu_models:
-                    gpu_models[gpu_model] = 0
-                gpu_models[gpu_model] += 1
+                if gpu_model and cloud:
+                    unique_gpus.add(f"{gpu_model}_{cloud}")
+                    gpu_models[gpu_model] = gpu_models.get(gpu_model, 0) + 1
+                    provider_set.add(cloud)
+                    price_updates += 1
+            except Exception as e:
+                continue
         
         # Get top GPU models
         top_models = sorted(gpu_models.items(), key=lambda x: x[1], reverse=True)[:5]
-        active_models = [model for model, _ in top_models]
         
-        # Basic stats response
-        stats_data = {
-            "gpu_count": len(unique_gpus),
-            "total_providers": len(provider_set),
-            "last_update": datetime.now(timezone.utc).isoformat(),
-            "active_models": active_models
-        }
+        # Create response
+        stats_data = StatsResponse(
+            gpu_count=len(unique_gpus),
+            total_providers=len(provider_set),
+            last_update=datetime.now(timezone.utc).isoformat(),
+            active_models=[model for model, _ in top_models]
+        ).dict()
         
-        # Cache the result for 1 minute
-        redis_conn.setex(cache_key, 60, json.dumps(stats_data))
+        # Cache for 60 seconds
+        redis_conn.setex(cache_key, 60, json.dumps(stats_data, default=str))
         
-        # Return response with custom headers
         return JSONResponse(
             content=stats_data,
             headers={
@@ -534,21 +527,10 @@ async def get_gpu_stats(
         )
         
     except Exception as e:
-        logger.error(f"Error calculating GPU stats: {e}")
-        # Return fallback data
-        fallback_data = {
-            "gpu_count": 0,
-            "total_providers": 5,
-            "last_update": datetime.now(timezone.utc).isoformat(),
-            "active_models": []
-        }
-        
-        return JSONResponse(
-            content=fallback_data,
-            headers={
-                "X-Updated-At": str(int(time.time() * 1000)),
-                "Cache-Control": "public, max-age=30"
-            }
+        logger.error(f"Error calculating stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error calculating statistics"
         )
 
 @app.get("/stats/detailed", response_model=DetailedStatsResponse, summary="Get Detailed Statistics")
@@ -557,117 +539,75 @@ async def get_detailed_stats(
     conn = Depends(db_dependency)
 ):
     """
-    Get comprehensive system statistics including database metrics.
-    
-    Returns:
-        Detailed statistics about the GPU tracking system
+    Get detailed system statistics including AWS Spot data.
     """
     try:
         # Get basic stats first
-        basic_stats_response = await get_gpu_stats(redis_conn, detailed=True)
-        basic_stats = json.loads(basic_stats_response.body)
+        basic_stats = await get_gpu_stats(redis_conn, detailed=True)
         
-        # Additional detailed metrics
-        stream_length = redis_conn.xlen("raw_prices")
+        # Get additional metrics for detailed view
+        stream_entries = redis_conn.xrange("raw_prices", count=5000)
         
-        # Get price range from recent entries
-        recent_entries = redis_conn.xrevrange("raw_prices", count=1000)
         prices = []
-        regions = set()
+        aws_count = 0
+        total_updates = 0
         
-        for _, fields in recent_entries:
+        for entry_id, fields in stream_entries:
             try:
                 price = float(fields.get('price_usd_hr', 0))
-                if 0 < price < 100:  # Reasonable bounds
+                if price > 0:
                     prices.append(price)
                 
-                region = fields.get('region', 'unknown')
-                if region != 'unknown':
-                    regions.add(region)
-            except (ValueError, TypeError):
+                if fields.get('cloud') == 'aws_spot':
+                    aws_count += 1
+                
+                total_updates += 1
+            except Exception:
                 continue
         
+        # Calculate price range
         price_range = {
             "min": min(prices) if prices else 0,
-            "max": max(prices) if prices else 0,
-            "avg": sum(prices) / len(prices) if prices else 0
+            "max": max(prices) if prices else 0
         }
         
-        # Get top GPU models with counts
-        gpu_models_detailed = []
-        for model in basic_stats.get('active_models', []):
-            if isinstance(model, str):
-                # Handle case where active_models is just a list of strings
-                gpu_models_detailed.append({
-                    "model": model,
-                    "count": 1,
-                    "percentage": 1.0
-                })
+        # Get user count from database
+        try:
+            user_count = await get_user_count(conn)
+        except Exception:
+            user_count = 0
         
-        # System health check
-        health_status = "healthy"
-        if basic_stats['gpu_count'] == 0:
-            health_status = "no_data"
-        elif stream_length < 100:
-            health_status = "low_data"
-        
-        detailed_stats = {
-            "gpu_count": basic_stats['gpu_count'],
-            "total_providers": basic_stats['total_providers'],
-            "active_regions": len(regions),
-            "price_range": price_range,
-            "top_gpu_models": gpu_models_detailed[:10],
-            "last_24h_updates": stream_length,
-            "system_health": health_status
-        }
-        
-        return JSONResponse(
-            content=detailed_stats,
-            headers={
-                "X-Updated-At": str(int(time.time() * 1000)),
-                "Cache-Control": "public, max-age=60"
-            }
+        # Build detailed response
+        detailed_stats = DetailedStatsResponse(
+            gpu_count=len(set(f"{fields.get('gpu_model')}_{fields.get('cloud')}" 
+                             for _, fields in stream_entries if fields.get('gpu_model'))),
+            total_providers=len(set(fields.get('cloud') for _, fields in stream_entries 
+                                  if fields.get('cloud'))),
+            active_regions=len(set(fields.get('region') for _, fields in stream_entries 
+                                 if fields.get('region'))),
+            price_range=price_range,
+            top_gpu_models=[],  # Can be populated from gpu_models calculation above
+            last_24h_updates=total_updates,
+            system_health="excellent" if total_updates > 1000 else "good" if total_updates > 100 else "poor"
         )
+        
+        return detailed_stats
         
     except Exception as e:
-        logger.error(f"Error getting detailed stats: {e}")
+        logger.error(f"Error calculating detailed stats: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving detailed statistics"
+            detail="Error calculating detailed statistics"
         )
 
-# Keep the existing simple stats endpoint for backwards compatibility
-@app.get("/stats/simple", summary="Get Simple API Statistics")
-async def get_simple_stats(
-    redis_conn: redis.Redis = Depends(redis_dependency),
-    conn = Depends(db_dependency)
-):
-    """Get basic API usage statistics (legacy endpoint)."""
-    try:
-        # Get stream length
-        stream_length = redis_conn.xlen("raw_prices")
-        
-        # Get actual user count from database
-        from crud import get_user_count
-        user_count = await get_user_count(conn)
-        
-        # Get cache hit ratio (if available)
-        cache_info = redis_conn.info("stats")
-        
-        return {
-            "total_price_records": stream_length,
-            "registered_users": user_count,
-            "cache_hits": cache_info.get("keyspace_hits", 0),
-            "cache_misses": cache_info.get("keyspace_misses", 0),
-            "uptime_seconds": cache_info.get("uptime_in_seconds", 0)
-        }
-    except Exception as e:
-        logger.error(f"Error getting simple stats: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving statistics"
-        )
+# Include routers
+from routes import aws_spot, websocket
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Include AWS Spot router with API prefix
+app.include_router(aws_spot.router, prefix="/api")
+
+# Include WebSocket router at root level  
+app.include_router(websocket.router)
+
+# Include existing auth router
+app.include_router(auth.router)

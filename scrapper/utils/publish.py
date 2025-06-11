@@ -17,7 +17,7 @@ def publish_to_redis(source_name: str, offers: List[Dict], redis_conn: Optional[
     Publish GPU offers to Redis stream.
     
     Args:
-        source_name: Name of the data source (e.g., 'runpod', 'akash')
+        source_name: Name of the data source (e.g., 'runpod', 'akash', 'aws_spot')
         offers: List of standardized offer dictionaries
         redis_conn: Redis connection (optional, will create if None)
         
@@ -56,7 +56,7 @@ def publish_to_redis(source_name: str, offers: List[Dict], redis_conn: Optional[
                     logger.warning(f"Skipping incomplete offer from {source_name}: {offer}")
                     continue
                 
-                # Create Redis stream payload
+                # Create Redis stream payload with AWS-specific fields
                 payload = {
                     'timestamp': timestamp,
                     'iso_timestamp': iso_timestamp,
@@ -68,6 +68,16 @@ def publish_to_redis(source_name: str, offers: List[Dict], redis_conn: Optional[
                     'source_record_id': offer.get('id', ''),
                     'data_quality_score': offer.get('quality_score', 1.0)
                 }
+                
+                # Add AWS-specific fields if available
+                if source_name == 'aws_spot':
+                    payload.update({
+                        'instance_type': offer.get('instance_type', ''),
+                        'total_instance_price': offer.get('total_instance_price', 0),
+                        'gpu_memory_gb': offer.get('gpu_memory_gb', 16),
+                        'provider': offer.get('provider', 'aws_spot'),
+                        'synthetic': offer.get('synthetic', False)
+                    })
                 
                 # Add to Redis stream
                 redis_conn.xadd(stream_name, payload)
@@ -88,4 +98,64 @@ def publish_to_redis(source_name: str, offers: List[Dict], redis_conn: Optional[
         
     except Exception as e:
         logger.error(f"Redis publishing error for {source_name}: {e}")
+        raise
+
+def get_recent_offers(
+    redis_conn: Optional[redis.Redis] = None,
+    source_name: Optional[str] = None,
+    count: int = 100
+) -> List[Dict]:
+    """
+    Get recent offers from Redis stream.
+    
+    Args:
+        redis_conn: Redis connection
+        source_name: Filter by specific source (optional)
+        count: Number of recent entries to fetch
+        
+    Returns:
+        List of offer dictionaries
+    """
+    if redis_conn is None:
+        redis_url = os.getenv("REDIS_URL")
+        if not redis_url:
+            raise ValueError("REDIS_URL environment variable not set")
+        redis_conn = redis.from_url(redis_url, decode_responses=True)
+    
+    try:
+        stream_data = redis_conn.xrevrange("raw_prices", count=count)
+        offers = []
+        
+        for stream_id, fields in stream_data:
+            # Filter by source if specified
+            if source_name and fields.get('cloud') != source_name:
+                continue
+            
+            # Reconstruct offer
+            offer = {
+                'model': fields.get('gpu_model'),
+                'usd_hr': float(fields.get('price_usd_hr', 0)),
+                'region': fields.get('region'),
+                'availability': int(fields.get('availability', 1)),
+                'timestamp': fields.get('iso_timestamp'),
+                'source': fields.get('cloud'),
+                'quality_score': float(fields.get('data_quality_score', 1.0))
+            }
+            
+            # Add AWS-specific fields if available
+            if fields.get('cloud') == 'aws_spot':
+                offer.update({
+                    'instance_type': fields.get('instance_type', ''),
+                    'total_instance_price': float(fields.get('total_instance_price', 0)),
+                    'gpu_memory_gb': int(fields.get('gpu_memory_gb', 16)),
+                    'provider': fields.get('provider', 'aws_spot'),
+                    'synthetic': fields.get('synthetic', 'false').lower() == 'true'
+                })
+            
+            offers.append(offer)
+        
+        return offers
+        
+    except Exception as e:
+        logger.error(f"Error reading from Redis stream: {e}")
         raise

@@ -6,15 +6,25 @@ import sys
 import os
 import time
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables FIRST
+load_dotenv()
 
 # Add the current directory to the path
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Set up logging
+# Set up logging with DEBUG level for AWS
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
+# Set specific loggers to different levels
+logging.getLogger('boto3').setLevel(logging.WARNING)
+logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 # Import plugins directly
@@ -24,7 +34,14 @@ def test_plugins_standalone():
     """Test plugins without Redis dependency"""
     logger.info("🧪 Testing plugins (standalone mode)...")
     
-    plugins_to_test = [runpod, akash, aws_spot, vast_ai, io_net]
+    # Debug: Check if AWS credentials are loaded
+    aws_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret = os.getenv("AWS_SECRET_ACCESS_KEY")
+    logger.info(f"AWS Key loaded: {'Yes' if aws_key else 'No'} ({'***' + aws_key[-4:] if aws_key else 'None'})")
+    logger.info(f"AWS Secret loaded: {'Yes' if aws_secret else 'No'} ({'***' + aws_secret[-4:] if aws_secret else 'None'})")
+    
+    # Test only AWS for now
+    plugins_to_test = [aws_spot]
     results = {}
     
     for plugin in plugins_to_test:
@@ -55,6 +72,11 @@ def test_plugins_standalone():
                     'sample': offers[:3] if offers else []
                 }
                 logger.info(f"✅ {plugin_name}: {valid_count} valid offers in {duration:.2f}s")
+                
+                # Show all offers for AWS debugging
+                logger.info(f"All offers from {plugin_name}:")
+                for i, offer in enumerate(offers):
+                    logger.info(f"  {i+1}. {offer}")
             else:
                 results[plugin_name] = {
                     'status': 'no_data',

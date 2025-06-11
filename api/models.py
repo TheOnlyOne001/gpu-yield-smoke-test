@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator, EmailStr
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from enum import Enum
+from datetime import datetime
 
 class HealthCheck(BaseModel):
     status: str = "ok"
@@ -18,8 +19,79 @@ class GPUModel(str, Enum):
     A100 = "A100"
     H100 = "H100"
     V100 = "V100"
+    T4 = "T4"
+    A10G = "A10G"
+    K80 = "K80"
     OTHER = "Other"
 
+# AWS Spot specific models
+class AWSSpotOffer(BaseModel):
+    """AWS Spot GPU offer with enrichment"""
+    model: str = Field(..., description="GPU model (A100, T4, V100, etc.)")
+    usd_hr: float = Field(..., ge=0, description="Per-GPU hourly price in USD")
+    region: str = Field(..., description="AWS region (us-east-1, etc.)")
+    availability: int = Field(..., ge=1, description="Number of GPUs per instance")
+    instance_type: str = Field(..., description="EC2 instance type")
+    provider: str = Field(default="aws_spot", description="Provider identifier")
+    
+    # Additional fields from scraper
+    total_instance_price: Optional[float] = Field(None, description="Total hourly cost for entire instance")
+    gpu_memory_gb: Optional[int] = Field(None, description="VRAM per GPU in GB")
+    timestamp: Optional[str] = Field(None, description="ISO timestamp of price fetch")
+    synthetic: Optional[bool] = Field(False, description="Whether this is synthetic data")
+    
+    # Enriched fields
+    interruption_risk: Optional[str] = Field(None, description="Spot interruption risk: low/medium/high")
+    data_freshness: Optional[str] = Field(None, description="Data age: live/recent/stale")
+    vcpu_count: Optional[int] = Field(None, description="Number of vCPUs")
+    ram_gb: Optional[int] = Field(None, description="RAM in GB")
+    network_performance: Optional[str] = Field(None, description="Network performance")
+    storage_gb: Optional[int] = Field(None, description="Local storage in GB")
+    ebs_optimized: Optional[bool] = Field(None, description="EBS optimization support")
+    
+    # Yield metrics (for operators)
+    yield_metrics: Optional[Dict[str, Any]] = Field(None, description="Yield calculation metrics")
+
+class AWSSpotResponse(BaseModel):
+    """Response for AWS Spot pricing endpoint"""
+    offers: List[AWSSpotOffer]
+    total_count: int
+    metadata: Dict[str, Any]
+
+class AWSRegion(BaseModel):
+    """AWS Region information"""
+    code: str = Field(..., description="Region code (us-east-1, etc.)")
+    name: str = Field(..., description="Human-readable region name")
+    available: bool = Field(True, description="Whether region has current data")
+
+class AWSRegionsResponse(BaseModel):
+    """Response for AWS regions endpoint"""
+    regions: List[AWSRegion]
+    total_count: int
+
+class GPUModelInfo(BaseModel):
+    """GPU Model information"""
+    name: str = Field(..., description="GPU model name")
+    available: bool = Field(True, description="Whether model has current data")
+    category: Optional[str] = Field(None, description="GPU category (datacenter/gaming)")
+
+class AWSModelsResponse(BaseModel):
+    """Response for AWS GPU models endpoint"""
+    models: List[GPUModelInfo]
+    total_count: int
+
+class AWSSpotSummary(BaseModel):
+    """Summary statistics for AWS Spot pricing"""
+    total_offers: int
+    unique_models: int
+    unique_regions: int
+    price_range: Dict[str, float]
+    avg_price: float
+    last_updated: Optional[str]
+    models: Optional[List[str]] = None
+    regions: Optional[List[str]] = None
+
+# Existing models...
 class ROICalcRequest(BaseModel):
     gpu_model: str = Field(..., min_length=1, max_length=50, description="GPU model name")
     hours_per_day: float = Field(..., gt=0, le=24, description="Hours of operation per day")
@@ -114,74 +186,8 @@ class ErrorResponse(BaseModel):
     detail: Optional[str] = None
     timestamp: Optional[str] = None
 
-# Alert Models for the worker
-class AlertJob(BaseModel):
-    job_type: str
-    email: Optional[str] = None
-    user_id: Optional[str] = None
-    gpu_model: Optional[str] = None
-    target_profit: Optional[float] = None
-    current_profit: Optional[float] = None
-
-class PriceAlert(BaseModel):
-    gpu_model: str
-    platform: str
-    current_price: float
-    previous_price: Optional[float] = None
-    profit_margin: float
-    alert_threshold: float
-
-# Authentication Models
-class UserCreate(BaseModel):
-    """Model for creating a new user"""
-    email: EmailStr = Field(..., description="Valid email address")
-    username: Optional[str] = Field(None, min_length=3, max_length=50, description="Username")
-    password: str = Field(..., min_length=8, max_length=100, description="Password")
-    gpu_models_interested: Optional[List[str]] = Field(default=[], description="List of GPU models of interest")
-    min_profit_threshold: Optional[float] = Field(default=0.0, ge=0, description="Minimum profit threshold for alerts")
-    
-    @field_validator('email')
-    @classmethod
-    def validate_email(cls, v):
-        return v.lower().strip()
-    
-    @field_validator('username')
-    @classmethod
-    def validate_username(cls, v):
-        if v:
-            v = v.strip()
-            if not v.replace('_', '').replace('-', '').isalnum():
-                raise ValueError('Username can only contain letters, numbers, hyphens, and underscores')
-        return v
-    
-    @field_validator('password')
-    @classmethod
-    def validate_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        return v
-
-class User(BaseModel):
-    id: Optional[str] = None
-    email: EmailStr
-    username: Optional[str] = None
-    hashed_password: str
-    is_active: bool = True
-    created_at: Optional[str] = None
-    gpu_models_interested: Optional[List[str]] = Field(default=[])
-    min_profit_threshold: Optional[float] = Field(default=0.0, ge=0)
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    expires_in: Optional[int] = None
-
-class TokenData(BaseModel):
-    email: Optional[str] = None
-
-# Statistics Models
+# Additional existing models...
 class StatsResponse(BaseModel):
-    """Response model for API statistics endpoint"""
     gpu_count: int = Field(..., description="Number of unique GPUs tracked in the last 24 hours")
     total_providers: int = Field(default=5, description="Number of cloud providers monitored")
     last_update: Optional[str] = Field(None, description="Timestamp of last data update")
@@ -203,7 +209,7 @@ class DetailedStatsResponse(BaseModel):
     total_providers: int = Field(..., description="Number of cloud providers")
     active_regions: int = Field(..., description="Number of geographic regions covered")
     price_range: Dict[str, float] = Field(..., description="Min and max prices observed")
-    top_gpu_models: List[Dict[str, Any]] = Field(..., description="Most tracked GPU models")
+    top_gpu_models: List[Dict[str, Union[str, float]]] = Field(..., description="Most tracked GPU models")
     last_24h_updates: int = Field(..., description="Price updates in last 24 hours")
     system_health: str = Field(..., description="Overall system health status")
     

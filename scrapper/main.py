@@ -305,7 +305,20 @@ def normalize_and_publish(data: Any, source_name: str, r_conn: redis.Redis) -> i
     records_published = 0
     
     try:
-        # Handle different data structures
+        # Handle AWS Spot data differently for better structure
+        if source_name == "aws_spot":
+            # AWS data is already well-structured from the plugin
+            if isinstance(data, list):
+                offers = data
+            else:
+                offers = [data] if isinstance(data, dict) else []
+                
+            # Use the specialized publish function for AWS
+            records_published = publish_to_redis(source_name, offers, r_conn)
+            metrics.total_records_published += records_published
+            return records_published
+        
+        # Handle other data sources
         if source_name == "vast.ai":
             offers = data.get('offers', []) if isinstance(data, dict) else []
         elif source_name == "runpod":
@@ -322,6 +335,9 @@ def normalize_and_publish(data: Any, source_name: str, r_conn: redis.Redis) -> i
             return 0
         
         metrics.total_records_processed += len(offers)
+        
+        # Convert to standardized format
+        standardized_offers = []
         
         for item in offers:
             try:
@@ -352,36 +368,26 @@ def normalize_and_publish(data: Any, source_name: str, r_conn: redis.Redis) -> i
                 if not validated_price:
                     continue  # Skip invalid prices
                 
-                # Create payload
-                payload = {
-                    'timestamp': int(time.time()),
-                    'iso_timestamp': datetime.now(timezone.utc).isoformat(),
-                    'cloud': source_name,
-                    'gpu_model': gpu_model,
-                    'price_usd_hr': validated_price,
+                # Create standardized offer
+                offer = {
+                    'model': gpu_model,
+                    'usd_hr': validated_price,
                     'region': str(region)[:50],  # Limit region length
                     'availability': max(1, int(availability)) if availability else 1,
-                    'source_record_id': item.get('id', ''),
-                    'data_quality_score': calculate_quality_score(item)
+                    'id': item.get('id', ''),
+                    'quality_score': calculate_quality_score(item)
                 }
                 
-                # Only publish high-quality records
-                if payload['data_quality_score'] >= 0.5:
-                    r_conn.xadd(REDIS_STREAM_NAME, payload)
-                    records_published += 1
+                standardized_offers.append(offer)
                 
             except Exception as e:
                 logger.warning(f"Error processing record from {source_name}: {e}")
                 continue
         
-        # Trim stream to prevent unlimited growth
-        try:
-            r_conn.xtrim(REDIS_STREAM_NAME, maxlen=MAX_STREAM_LENGTH, approximate=True)
-        except Exception as e:
-            logger.warning(f"Error trimming stream: {e}")
-        
+        # Use the publish utility
+        records_published = publish_to_redis(source_name, standardized_offers, r_conn)
         metrics.total_records_published += records_published
-        logger.info(f"Published {records_published}/{len(offers)} records from {source_name}")
+        logger.info(f"Published {records_published}/{len(standardized_offers)} records from {source_name}")
         
     except Exception as e:
         logger.error(f"Error in normalize_and_publish for {source_name}: {e}")
