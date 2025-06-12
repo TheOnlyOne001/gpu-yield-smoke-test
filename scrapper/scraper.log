@@ -20786,3 +20786,592 @@
 2025-06-11 17:28:53,391 - __main__ - INFO - Records this cycle: 122
 2025-06-11 17:28:53,392 - __main__ - INFO - Success rate: 60.0%
 2025-06-11 17:28:53,393 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:43:14,320 - sentry_utils - INFO - Sentry initialized successfully.
+2025-06-12 03:43:14,334 - __main__ - INFO - Successfully connected to Redis
+2025-06-12 03:43:14,335 - __main__ - INFO - 🚀 Enhanced GPU Price Scraper starting...
+2025-06-12 03:43:14,386 - __main__ - INFO - Running initial scrape job...
+2025-06-12 03:43:14,391 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:43:14,392 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:43:18,725 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168813 chars)
+2025-06-12 03:43:18,781 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:43:18,781 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:43:18,783 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:43:18,784 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:43:22,703 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:43:22,728 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:43:22,729 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:43:32,730 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:43:32,731 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:43:32,732 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:43:32,733 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:43:32,735 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:43:32,735 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:43:32,736 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-12 03:43:40,769 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-12 03:43:40,772 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-12 03:43:58,453 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-12 03:43:58,457 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:43:58,459 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:43:58,523 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:43:58,524 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:43:58,525 - __main__ - INFO - Scraping akash...
+2025-06-12 03:44:03,526 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:44:03,528 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:44:03,534 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:44:03,538 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:44:03,539 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:44:03,540 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:44:03,542 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:44:03,543 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:44:03,546 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-12 03:44:18,830 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7c39d447b790>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-12 03:44:18,832 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-12 03:44:20,163 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:44:20,166 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-12 03:44:21,110 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:44:21,112 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-12 03:44:21,760 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d49f5990>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-12 03:44:21,761 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-12 03:44:22,729 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-12 03:44:22,731 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-12 03:44:23,656 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4902550>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-12 03:44:23,657 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-12 03:44:24,365 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4dec2d0>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-12 03:44:24,366 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-12 03:44:24,852 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-12 03:44:24,853 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:44:24,854 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:44:24,855 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:44:24,856 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:44:24,857 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:44:24,858 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:44:28,381 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d43d9a50>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:44:28,436 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:44:28,438 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:44:28,439 - __main__ - INFO - Duration: 74.05s
+2025-06-12 03:44:28,441 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:44:28,443 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:44:28,444 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:45:18,449 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:45:18,451 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:45:22,377 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169097 chars)
+2025-06-12 03:45:22,435 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:45:22,436 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:45:22,437 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:45:22,438 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:45:25,799 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:45:25,829 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:45:25,830 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:45:35,831 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:45:35,832 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:45:35,833 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:45:35,834 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:45:35,836 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:45:35,837 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:45:35,838 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:45:35,839 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:45:35,894 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:45:35,895 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:45:35,896 - __main__ - INFO - Scraping akash...
+2025-06-12 03:45:40,898 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:45:40,899 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:45:40,904 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:45:40,912 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:45:40,914 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:45:40,918 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:45:40,920 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:45:40,926 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:45:40,929 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:45:40,931 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:45:40,932 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:45:40,933 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:45:40,935 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:45:40,936 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:45:44,456 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d6499dd0>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:45:44,490 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:45:44,491 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:45:44,491 - __main__ - INFO - Duration: 26.04s
+2025-06-12 03:45:44,492 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:45:44,493 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:45:44,495 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:47:54,490 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:47:54,491 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:47:58,787 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168814 chars)
+2025-06-12 03:47:58,838 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:47:58,839 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:47:58,840 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:47:58,841 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:48:02,277 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:48:02,335 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:48:02,336 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:48:12,338 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:48:12,339 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:48:12,341 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:48:12,342 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:48:12,343 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:48:12,346 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:48:12,347 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:48:12,349 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:48:12,441 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:48:12,472 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:48:12,546 - __main__ - INFO - Scraping akash...
+2025-06-12 03:48:17,573 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:48:17,573 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:48:17,574 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:48:17,575 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:48:17,576 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:48:17,578 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:48:17,578 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:48:17,579 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:48:17,581 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:48:17,581 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:48:17,583 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:48:17,584 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:48:17,584 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:48:17,586 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:48:21,115 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d64502d0>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:48:21,241 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:48:21,243 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:48:21,246 - __main__ - INFO - Duration: 26.75s
+2025-06-12 03:48:21,249 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:48:21,251 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:48:21,254 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:50:31,254 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:50:31,263 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:50:35,468 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169038 chars)
+2025-06-12 03:50:35,551 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:50:35,553 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:50:35,557 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:50:35,561 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:50:39,636 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:50:39,686 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:50:39,689 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:50:49,691 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:50:49,692 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:50:49,694 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:50:49,696 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:50:49,697 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:50:49,699 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:50:49,701 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-12 03:50:57,519 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-12 03:50:57,520 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-12 03:51:15,453 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-12 03:51:15,458 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:51:15,458 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:51:15,500 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:51:15,501 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:51:15,502 - __main__ - INFO - Scraping akash...
+2025-06-12 03:51:20,503 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:51:20,504 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:51:20,505 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:51:20,506 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:51:20,508 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:51:20,509 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:51:20,510 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:51:20,511 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:51:20,512 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-12 03:51:35,747 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7c39d431e410>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-12 03:51:35,748 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-12 03:51:37,355 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:51:37,356 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-12 03:51:38,474 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:51:38,476 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-12 03:51:39,122 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d64a6390>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-12 03:51:39,123 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-12 03:51:40,112 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-12 03:51:40,114 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-12 03:51:40,990 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4b14910>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-12 03:51:40,995 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-12 03:51:41,868 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4b157d0>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-12 03:51:41,869 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-12 03:51:42,460 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-12 03:51:42,461 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:51:42,464 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:51:42,465 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:51:42,467 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:51:42,469 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:51:42,471 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:51:45,986 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4e28b90>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:51:46,024 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:51:46,025 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:51:46,027 - __main__ - INFO - Duration: 74.76s
+2025-06-12 03:51:46,028 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:51:46,029 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:51:46,030 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:53:56,025 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:53:56,026 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:54:00,208 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169289 chars)
+2025-06-12 03:54:00,275 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:54:00,276 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:54:00,277 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:54:00,278 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:54:03,693 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:54:03,727 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:54:03,728 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:54:13,730 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:54:13,731 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:54:13,732 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:54:13,733 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:54:13,735 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:54:13,736 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:54:13,737 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:54:13,738 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:54:13,787 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:54:13,789 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:54:13,790 - __main__ - INFO - Scraping akash...
+2025-06-12 03:54:18,792 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:54:18,793 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:54:18,794 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:54:18,795 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:54:18,796 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:54:18,797 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:54:18,798 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:54:18,799 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:54:18,800 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:54:18,801 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:54:18,802 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:54:18,803 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:54:18,804 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:54:18,805 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:54:22,330 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d49d9d90>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:54:22,363 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:54:22,364 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:54:22,365 - __main__ - INFO - Duration: 26.34s
+2025-06-12 03:54:22,366 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:54:22,368 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:54:22,369 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:56:32,368 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:56:32,369 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 03:56:36,421 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169161 chars)
+2025-06-12 03:56:36,470 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 03:56:36,472 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 03:56:36,473 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 03:56:36,475 - __main__ - INFO - Scraping runpod...
+2025-06-12 03:56:40,483 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 03:56:40,516 - __main__ - WARNING - No data received from runpod
+2025-06-12 03:56:40,516 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 03:56:50,517 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 03:56:50,519 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 03:56:50,520 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:56:50,522 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 03:56:50,523 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 03:56:50,524 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 03:56:50,525 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-12 03:56:58,908 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-12 03:56:58,909 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-12 03:57:18,631 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-12 03:57:18,635 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 03:57:18,637 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 03:57:18,751 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 03:57:18,752 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 03:57:18,753 - __main__ - INFO - Scraping akash...
+2025-06-12 03:57:23,753 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 03:57:23,754 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 03:57:23,757 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 03:57:23,758 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 03:57:23,759 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 03:57:23,760 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 03:57:23,761 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 03:57:23,763 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 03:57:23,764 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-12 03:57:39,300 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7c39d4bbcc50>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-12 03:57:39,302 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-12 03:57:40,555 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:57:40,557 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-12 03:57:41,603 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 03:57:41,604 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-12 03:57:42,221 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4bbcad0>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-12 03:57:42,222 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-12 03:57:43,233 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-12 03:57:43,235 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-12 03:57:43,869 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4bb5a90>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-12 03:57:43,870 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-12 03:57:44,614 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4d5eed0>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-12 03:57:44,615 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-12 03:57:45,087 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-12 03:57:45,088 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 03:57:45,088 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 03:57:45,089 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 03:57:45,090 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 03:57:45,091 - __main__ - INFO - akash: 0 records published
+2025-06-12 03:57:45,092 - __main__ - INFO - Scraping io_net...
+2025-06-12 03:57:48,610 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4d5f350>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 03:57:48,644 - __main__ - WARNING - No data received from io_net
+2025-06-12 03:57:48,645 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 03:57:48,647 - __main__ - INFO - Duration: 76.28s
+2025-06-12 03:57:48,649 - __main__ - INFO - Records this cycle: 122
+2025-06-12 03:57:48,650 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 03:57:48,651 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 03:59:58,652 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 03:59:58,653 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 04:00:03,403 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168916 chars)
+2025-06-12 04:00:03,462 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 04:00:03,463 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 04:00:03,464 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 04:00:03,466 - __main__ - INFO - Scraping runpod...
+2025-06-12 04:00:06,833 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 04:00:06,860 - __main__ - WARNING - No data received from runpod
+2025-06-12 04:00:06,860 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 04:00:16,861 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 04:00:16,863 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 04:00:16,864 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:00:16,865 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 04:00:16,866 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 04:00:16,868 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 04:00:16,869 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 04:00:16,870 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 04:00:16,911 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 04:00:16,911 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 04:00:16,912 - __main__ - INFO - Scraping akash...
+2025-06-12 04:00:21,913 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 04:00:21,914 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 04:00:21,915 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:00:21,916 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 04:00:21,917 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 04:00:21,918 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 04:00:21,919 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 04:00:21,920 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 04:00:21,921 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 04:00:21,922 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 04:00:21,923 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 04:00:21,924 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 04:00:21,925 - __main__ - INFO - akash: 0 records published
+2025-06-12 04:00:21,926 - __main__ - INFO - Scraping io_net...
+2025-06-12 04:00:25,454 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d48f7410>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 04:00:25,486 - __main__ - WARNING - No data received from io_net
+2025-06-12 04:00:25,487 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 04:00:25,488 - __main__ - INFO - Duration: 26.83s
+2025-06-12 04:00:25,489 - __main__ - INFO - Records this cycle: 122
+2025-06-12 04:00:25,490 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 04:00:25,491 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 04:02:35,489 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 04:02:35,490 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 04:02:39,814 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168928 chars)
+2025-06-12 04:02:39,857 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 04:02:39,858 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 04:02:39,859 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 04:02:39,860 - __main__ - INFO - Scraping runpod...
+2025-06-12 04:02:43,869 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 04:02:43,907 - __main__ - WARNING - No data received from runpod
+2025-06-12 04:02:43,908 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 04:02:53,908 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 04:02:53,908 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 04:02:53,909 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:02:53,910 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 04:02:53,911 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 04:02:53,912 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 04:02:53,913 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-12 04:03:10,154 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-12 04:03:10,156 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-12 04:03:25,166 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-12 04:03:25,169 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 04:03:25,170 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 04:03:25,217 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 04:03:25,218 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 04:03:25,219 - __main__ - INFO - Scraping akash...
+2025-06-12 04:03:30,220 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 04:03:30,221 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 04:03:30,222 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:03:30,223 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 04:03:30,225 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 04:03:30,225 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 04:03:30,227 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 04:03:30,228 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 04:03:30,229 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-12 04:03:45,463 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7c39d4363d90>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-12 04:03:45,464 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-12 04:03:46,637 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 04:03:46,639 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-12 04:03:47,724 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 04:03:47,726 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-12 04:03:48,362 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4a75dd0>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-12 04:03:48,363 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-12 04:03:49,442 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-12 04:03:49,443 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-12 04:03:50,254 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4a77590>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-12 04:03:50,255 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-12 04:03:50,655 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4c99850>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-12 04:03:50,656 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-12 04:03:51,131 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-12 04:03:51,132 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 04:03:51,133 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 04:03:51,134 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 04:03:51,135 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 04:03:51,136 - __main__ - INFO - akash: 0 records published
+2025-06-12 04:03:51,137 - __main__ - INFO - Scraping io_net...
+2025-06-12 04:03:54,561 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4c9b590>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 04:03:54,613 - __main__ - WARNING - No data received from io_net
+2025-06-12 04:03:54,614 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 04:03:54,615 - __main__ - INFO - Duration: 79.12s
+2025-06-12 04:03:54,616 - __main__ - INFO - Records this cycle: 122
+2025-06-12 04:03:54,617 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 04:03:54,618 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 04:06:04,624 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 04:06:04,627 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 04:06:08,912 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169441 chars)
+2025-06-12 04:06:08,961 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 04:06:08,962 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 04:06:08,964 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 04:06:08,965 - __main__ - INFO - Scraping runpod...
+2025-06-12 04:06:12,387 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 04:06:12,423 - __main__ - WARNING - No data received from runpod
+2025-06-12 04:06:12,424 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 04:06:22,425 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 04:06:22,427 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 04:06:22,428 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:06:22,430 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 04:06:22,431 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 04:06:22,432 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 04:06:22,433 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 04:06:22,434 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 04:06:22,499 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 04:06:22,500 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 04:06:22,501 - __main__ - INFO - Scraping akash...
+2025-06-12 04:06:27,501 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 04:06:27,502 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 04:06:27,503 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:06:27,505 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 04:06:27,506 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 04:06:27,507 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 04:06:27,508 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 04:06:27,509 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 04:06:27,510 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 04:06:27,512 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 04:06:27,513 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 04:06:27,514 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 04:06:27,515 - __main__ - INFO - akash: 0 records published
+2025-06-12 04:06:27,516 - __main__ - INFO - Scraping io_net...
+2025-06-12 04:06:31,037 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4a77950>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 04:06:31,069 - __main__ - WARNING - No data received from io_net
+2025-06-12 04:06:31,070 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 04:06:31,071 - __main__ - INFO - Duration: 26.44s
+2025-06-12 04:06:31,073 - __main__ - INFO - Records this cycle: 122
+2025-06-12 04:06:31,074 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 04:06:31,076 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 04:08:41,074 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 04:08:41,077 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 04:08:45,283 - __main__ - INFO - Successfully fetched data from vast.ai (size: 169064 chars)
+2025-06-12 04:08:45,395 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 04:08:45,396 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 04:08:45,398 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 04:08:45,399 - __main__ - INFO - Scraping runpod...
+2025-06-12 04:08:49,428 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 04:08:49,459 - __main__ - WARNING - No data received from runpod
+2025-06-12 04:08:49,460 - __main__ - INFO - Scraping aws_spot...
+2025-06-12 04:08:59,459 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for aws_spot
+2025-06-12 04:08:59,460 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_aws_spot_prices at 0x7c39d65d4a40>
+2025-06-12 04:08:59,461 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:08:59,463 - __main__ - INFO - 🔍 DEBUG: Function signature: (config: Optional[Dict] = None) -> List[Dict]
+2025-06-12 04:08:59,464 - __main__ - INFO - 🔍 DEBUG: Parameters: ['config']
+2025-06-12 04:08:59,465 - __main__ - INFO - 🔍 DEBUG: Attempting to call aws_spot handler with config...
+2025-06-12 04:08:59,466 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-east-1
+2025-06-12 04:09:16,287 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-east-1
+2025-06-12 04:09:16,287 - plugins.aws_spot - INFO - Fetching AWS Spot prices for region: us-west-2
+2025-06-12 04:09:33,325 - plugins.aws_spot - INFO - Successfully fetched 29 AWS Spot offers from us-west-2
+2025-06-12 04:09:33,330 - __main__ - INFO - 🔍 DEBUG: Success calling with config!
+2025-06-12 04:09:33,333 - __main__ - INFO - Successfully fetched custom data from aws_spot
+2025-06-12 04:09:33,397 - utils.publish - INFO - Successfully published 58/58 offers from aws_spot to Redis
+2025-06-12 04:09:33,398 - __main__ - INFO - aws_spot: 58 records published
+2025-06-12 04:09:33,399 - __main__ - INFO - Scraping akash...
+2025-06-12 04:09:38,400 - __main__ - INFO - 🔍 DEBUG: Calling custom handler for akash
+2025-06-12 04:09:38,401 - __main__ - INFO - 🔍 DEBUG: Handler function: <function fetch_akash_bids at 0x7c39d6c28ea0>
+2025-06-12 04:09:38,402 - __main__ - INFO - 🔍 DEBUG: Config keys: ['custom_handler', 'rate_limit']
+2025-06-12 04:09:38,403 - __main__ - INFO - 🔍 DEBUG: Function signature: () -> List[Dict]
+2025-06-12 04:09:38,404 - __main__ - INFO - 🔍 DEBUG: Parameters: []
+2025-06-12 04:09:38,406 - __main__ - INFO - 🔍 DEBUG: Attempting to call akash handler with config...
+2025-06-12 04:09:38,407 - __main__ - INFO - 🔍 DEBUG: TypeError calling with config: fetch_akash_bids() takes 0 positional arguments but 1 was given
+2025-06-12 04:09:38,408 - __main__ - INFO - 🔍 DEBUG: Calling akash handler without parameters...
+2025-06-12 04:09:38,409 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.stakecito.com/akash/market/v1beta4/bids
+2025-06-12 04:09:53,654 - plugins.akash - WARNING - Connection error with https://akash-api.stakecito.com/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash-api.stakecito.com', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x7c39d4c39910>, 'Connection to akash-api.stakecito.com timed out. (connect timeout=15)'))
+2025-06-12 04:09:53,655 - plugins.akash - INFO - Trying Akash LCD endpoint: https://rest.cosmos.directory/akash/akash/market/v1beta4/bids
+2025-06-12 04:09:54,419 - plugins.akash - WARNING - Akash endpoint https://rest.cosmos.directory/akash/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 04:09:54,421 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-api.polkachu.com/akash/market/v1beta4/bids
+2025-06-12 04:09:55,464 - plugins.akash - WARNING - Akash endpoint https://akash-api.polkachu.com/akash/market/v1beta4/bids returned 501: {
+  "code": 12,
+  "message": "Not Implemented",
+  "details": [
+  ]
+}
+2025-06-12 04:09:55,465 - plugins.akash - INFO - Trying Akash LCD endpoint: https://api.akash.smartnodes.one/akash/market/v1beta4/bids
+2025-06-12 04:09:56,077 - plugins.akash - WARNING - Connection error with https://api.akash.smartnodes.one/akash/market/v1beta4/bids: HTTPSConnectionPool(host='api.akash.smartnodes.one', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4c38250>: Failed to resolve 'api.akash.smartnodes.one' ([Errno -2] Name or service not known)"))
+2025-06-12 04:09:56,078 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash-rest.publicnode.com/akash/market/v1beta4/bids
+2025-06-12 04:09:57,124 - plugins.akash - WARNING - Akash endpoint https://akash-rest.publicnode.com/akash/market/v1beta4/bids returned 501: {"jsonrpc":"","error":{"code":-32701,"message":"not implemented"}}
+
+2025-06-12 04:09:57,125 - plugins.akash - INFO - Trying Akash LCD endpoint: https://akash.api.m.stavr.tech/akash/market/v1beta4/bids
+2025-06-12 04:09:58,133 - plugins.akash - WARNING - Connection error with https://akash.api.m.stavr.tech/akash/market/v1beta4/bids: HTTPSConnectionPool(host='akash.api.m.stavr.tech', port=443): Max retries exceeded with url: /akash/market/v1beta4/bids?pagination.state=active&pagination.limit=50&pagination.count_total=true (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d4e1ee50>: Failed to resolve 'akash.api.m.stavr.tech' ([Errno -2] Name or service not known)"))
+2025-06-12 04:09:58,134 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://api.cloudmos.io/v1/providers
+2025-06-12 04:09:58,845 - plugins.akash - WARNING - Marketplace API https://api.cloudmos.io/v1/providers failed: HTTPSConnectionPool(host='api.cloudmos.io', port=443): Max retries exceeded with url: /v1/providers (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d48f4b10>: Failed to resolve 'api.cloudmos.io' ([Errno -2] Name or service not known)"))
+2025-06-12 04:09:58,846 - plugins.akash - INFO - Trying Akash marketplace endpoint: https://console.akash.network/api/v1/providers
+2025-06-12 04:09:59,356 - plugins.akash - WARNING - All Akash endpoints failed, using synthetic data
+2025-06-12 04:09:59,358 - __main__ - INFO - 🔍 DEBUG: Success calling without parameters!
+2025-06-12 04:09:59,359 - __main__ - INFO - Successfully fetched custom data from akash
+2025-06-12 04:09:59,360 - utils.publish - WARNING - No offers to publish for akash
+2025-06-12 04:09:59,361 - __main__ - INFO - Published 0/0 records from akash
+2025-06-12 04:09:59,362 - __main__ - INFO - akash: 0 records published
+2025-06-12 04:09:59,363 - __main__ - INFO - Scraping io_net...
+2025-06-12 04:10:02,895 - __main__ - ERROR - Network error fetching data from io_net: HTTPSConnectionPool(host='api.io.net', port=443): Max retries exceeded with url: /v1/devices (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7c39d8262d50>: Failed to resolve 'api.io.net' ([Errno -2] Name or service not known)"))
+2025-06-12 04:10:02,962 - __main__ - WARNING - No data received from io_net
+2025-06-12 04:10:02,964 - __main__ - INFO - --- Scrape cycle completed ---
+2025-06-12 04:10:02,967 - __main__ - INFO - Duration: 81.89s
+2025-06-12 04:10:02,972 - __main__ - INFO - Records this cycle: 122
+2025-06-12 04:10:02,973 - __main__ - INFO - Success rate: 60.0%
+2025-06-12 04:10:02,975 - __main__ - INFO - Processing rate: 167.1%
+2025-06-12 04:12:12,975 - __main__ - INFO - --- Starting new scrape cycle ---
+2025-06-12 04:12:12,977 - __main__ - INFO - Scraping vast.ai...
+2025-06-12 04:12:17,046 - __main__ - INFO - Successfully fetched data from vast.ai (size: 168875 chars)
+2025-06-12 04:12:17,104 - utils.publish - INFO - Successfully published 64/64 offers from vast.ai to Redis
+2025-06-12 04:12:17,105 - __main__ - INFO - Published 64/64 records from vast.ai
+2025-06-12 04:12:17,106 - __main__ - INFO - vast.ai: 64 records published
+2025-06-12 04:12:17,107 - __main__ - INFO - Scraping runpod...
+2025-06-12 04:12:20,484 - __main__ - ERROR - HTTP error fetching data from runpod: 404
+2025-06-12 04:12:20,512 - __main__ - WARNING - No data received from runpod
+2025-06-12 04:12:20,513 - __main__ - INFO - Scraping aws_spot...
