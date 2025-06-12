@@ -1,6 +1,6 @@
 {
   "name": "gpu-yield-frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,14 +10,26 @@
     "analyze": "ANALYZE=true next build",
     "optimize:images": "node scripts/optimize-images.js",
     "optimize:svg": "svgo -r -f public/logos --config=svgo.config.js",
-    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html"
+    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "axios": "^1.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",
+    "date-fns": "^3.0.0",
     "framer-motion": "^12.16.0",
     "lucide-react": "^0.513.0",
     "next": "^14.0.0",
@@ -26,11 +38,14 @@
     "recharts": "^2.15.3",
     "swr": "^2.2.4",
     "tailwind-merge": "^3.3.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/node": "20.19.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

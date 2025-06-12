@@ -22,7 +22,8 @@ import {
   Shield,
   CreditCard,
   Mail,
-  Activity
+  Activity,
+  Cloud
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,6 +86,7 @@ const Layout: React.FC<LayoutProps> = ({
     { name: 'Earnings', href: '/earnings', icon: DollarSign, badge: 'New' },
     { name: 'Market', href: '/market', icon: TrendingUp },
     { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'AWS Spot', href: '/aws-spot', icon: Cloud },
   ];
 
   const userMenuItems = [
