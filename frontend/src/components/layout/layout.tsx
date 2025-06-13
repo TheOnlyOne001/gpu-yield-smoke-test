@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useAuth } from '@/contexts/AuthContext'; // ADD THIS IMPORT
 import {
   Home,
   BarChart3,
@@ -49,6 +50,7 @@ const Layout: React.FC<LayoutProps> = ({
   showSidebar = true 
 }) => {
   const router = useRouter();
+  const { user, logout } = useAuth(); // ADD THIS - Get real user data
   
   // Auto-generate title based on route if not provided
   const pageTitle = title || (() => {
@@ -93,16 +95,44 @@ const Layout: React.FC<LayoutProps> = ({
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Billing', href: '/billing', icon: CreditCard },
     { name: 'Security', href: '/security', icon: Shield },
-    { name: 'Support', href: '/support', icon: HelpCircle },
-  ];
+    { name: 'Support', href: '/support', icon: HelpCircle },  ];
 
-  // Mock user data
-  const user = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: '/api/placeholder/32/32',
-    plan: 'Pro',
-    earnings: '$1,247.82'
+  // Helper function to get user display name
+  const getUserDisplayName = () => {
+    if (!user) return 'Guest';
+    return user.full_name || user.username || user.email?.split('@')[0] || 'User';
+  };
+
+  // Helper function to get user avatar
+  const getUserAvatar = () => {
+    if (user?.avatar_url) return user.avatar_url;
+    // Return a default avatar or initials
+    const initials = getUserDisplayName().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(getUserDisplayName())}&background=6366f1&color=ffffff&size=32`;
+  };
+  // Helper function to get user plan
+  const getUserPlan = () => {
+    if (!user) return 'Free';
+    // You can add logic here to determine the user's plan based on their data
+    // For now, we'll use a default (assuming is_admin exists on the User type)
+    return (user as any).is_admin ? 'Admin' : 'Pro';
+  };
+
+  // Helper function to get user earnings (placeholder)
+  const getUserEarnings = () => {
+    // This should come from your earnings API or user data
+    // For now, return a placeholder
+    return '$0.00';
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   // Close sidebar on route change
@@ -159,21 +189,25 @@ const Layout: React.FC<LayoutProps> = ({
               >
                 <X className="w-5 h-5" />
               </Button>
-            </div>
-
-            {/* User info */}
+            </div>            {/* User info - UPDATED with real user data */}
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
+                <img
+                  className="h-10 w-10 rounded-full border-2 border-gray-200 dark:border-gray-600"
+                  src={getUserAvatar()}
+                  alt={getUserDisplayName()}
+                  onError={(e) => {
+                    // Fallback to initials avatar if image fails to load
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(getUserDisplayName())}&background=6366f1&color=ffffff&size=40`;
+                  }}
+                />
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium truncate">{user.name}</p>
+                  <p className="text-white font-medium truncate">{getUserDisplayName()}</p>
                   <div className="flex items-center space-x-2">
                     <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">
-                      {user.plan}
+                      {getUserPlan()}
                     </Badge>
-                    <span className="text-green-400 text-sm font-mono">{user.earnings}</span>
+                    <span className="text-green-400 text-sm font-mono">{getUserEarnings()}</span>
                   </div>
                 </div>
               </div>
@@ -315,21 +349,24 @@ const Layout: React.FC<LayoutProps> = ({
                     e.stopPropagation();
                     setUserMenuOpen(!userMenuOpen);
                   }}
-                  className="flex items-center space-x-2 text-gray-400 hover:text-white"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
+                  className="flex items-center space-x-2 text-gray-400 hover:text-white"                >
+                  <img
+                    className="w-8 h-8 rounded-full"
+                    src={getUserAvatar()}
+                    alt={getUserDisplayName()}
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(getUserDisplayName())}&background=6366f1&color=ffffff&size=32`;
+                    }}
+                  />
                   <ChevronDown className="w-4 h-4" />
                 </Button>
 
                 {/* User menu dropdown */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl py-2 z-50">
-                    {/* User info */}
+                  <div className="absolute right-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl py-2 z-50">                    {/* User info */}
                     <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-white font-medium">{user.name}</p>
-                      <p className="text-gray-400 text-sm">{user.email}</p>
+                      <p className="text-white font-medium">{getUserDisplayName()}</p>
+                      <p className="text-gray-400 text-sm">{user?.email}</p>
                     </div>
 
                     {/* Menu items */}
@@ -342,11 +379,12 @@ const Layout: React.FC<LayoutProps> = ({
                           </div>
                         </Link>
                       ))}
-                    </div>
-
-                    {/* Logout */}
+                    </div>                    {/* Logout */}
                     <div className="border-t border-white/10 pt-2">
-                      <button className="flex items-center space-x-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors w-full">
+                      <button 
+                        onClick={handleLogout}
+                        className="flex items-center space-x-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors w-full"
+                      >
                         <LogOut className="w-4 h-4" />
                         <span>Sign out</span>
                       </button>
