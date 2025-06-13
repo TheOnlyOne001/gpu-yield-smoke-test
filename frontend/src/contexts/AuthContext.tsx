@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [oauthCallbackProcessed, setOauthCallbackProcessed] = useState(false);
   const router = useRouter();
 
   // Check authentication status on mount
@@ -158,19 +159,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check authentication status
   const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const data = await apiCall('/auth/me');
-      setUser(data);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('access_token');
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      console.log('No token found');
       setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Checking auth status with token...');
+      setLoading(true);
+      
+      // ✅ CORRECT ENDPOINT
+      const data = await apiCall('/auth/users/me');
+      console.log('User data received:', data);
+      setUser(data);
+      setError(null);
+      
+    } catch (error) {
+      console.error('Auth check error:', error);
+      
+      // Only remove token if we're not in OAuth callback
+      if (!window.location.pathname.includes('/auth/success')) {
+        localStorage.removeItem('access_token');
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -181,7 +196,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!localStorage.getItem('access_token')) return;
 
     try {
-      const data = await apiCall('/auth/me');
+      // ✅ CORRECT ENDPOINT
+      const data = await apiCall('/auth/users/me');
       setUser(data);
     } catch (error) {
       console.error('Failed to refresh user:', error);
@@ -390,39 +406,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const error = urlParams.get('error');
       const provider = urlParams.get('provider');
 
+      console.log('OAuth callback detected:', { token: !!token, error, provider });
+
       if (token) {
-        localStorage.setItem('access_token', token);
-        
         try {
+          // Store token first
+          localStorage.setItem('access_token', token);
+          
+          // Set loading state to prevent flickering
+          setLoading(true);
+          
+          // Check auth status with the new token
           await checkAuthStatus();
           recordLoginAttempt(true);
+          
+          console.log('OAuth login successful, redirecting...');
+          
+          // Clear the URL parameters to prevent re-execution
+          window.history.replaceState({}, document.title, window.location.pathname);
           
           // Redirect to intended page
           const returnTo = sessionStorage.getItem('auth_return_to') || '/dashboard';
           sessionStorage.removeItem('auth_return_to');
-          router.push(returnTo);
+          
+          // Use setTimeout to ensure state updates complete
+          setTimeout(() => {
+            router.push(returnTo);
+          }, 100);
+          
         } catch (error) {
           console.error('OAuth callback error:', error);
+          localStorage.removeItem('access_token'); // Clean up on failure
           setError('Authentication failed');
           router.push('/login');
+        } finally {
+          setLoading(false);
         }
       } else if (error) {
         console.error('OAuth error:', error);
         recordLoginAttempt(false);
         setError(`${provider} authentication failed: ${error}`);
+        
+        // Clear URL and redirect to login
+        window.history.replaceState({}, document.title, '/login');
         router.push('/login');
       }
     };
 
-    // Check if this is an OAuth callback
-    if (router.pathname.includes('/auth/success')) {
+    // Check if this is an OAuth callback - be more specific
+    const isOAuthCallback = (
+      router.pathname.includes('/auth/success') || 
+      router.pathname.includes('/auth/error')
+    ) && router.isReady;
+
+    if (isOAuthCallback && !oauthCallbackProcessed) {
+      console.log('Processing OAuth callback...');
+      setOauthCallbackProcessed(true);
       handleOAuthCallback();
-    } else if (router.pathname.includes('/auth/error')) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const error = urlParams.get('message') || 'Authentication failed';
-      setError(error);
     }
-  }, [router.pathname, router.query]);
+  }, [router.pathname, router.query, router.isReady, oauthCallbackProcessed]); // Add router.isReady and oauthCallbackProcessed
 
   // Auto-refresh token
   useEffect(() => {

@@ -1,6 +1,7 @@
 import os
 import httpx
 import secrets
+import json  # Add this import at the top
 from datetime import timedelta, datetime, timezone
 from typing import Optional, Dict, Any
 from urllib.parse import urlencode, quote
@@ -44,10 +45,11 @@ OAUTH_ENDPOINTS = {
         'scope': 'openid email profile'
     },
     'twitter': {
+        # FIXED Twitter OAuth 2.0 URLs
         'auth_url': 'https://twitter.com/i/oauth2/authorize',
         'token_url': 'https://api.twitter.com/2/oauth2/token',
-        'user_info_url': 'https://api.twitter.com/2/users/me?user.fields=profile_image_url,email',
-        'scope': 'users.read tweet.read'
+        'user_info_url': 'https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,username,public_metrics&expansions=pinned_tweet_id',
+        'scope': 'tweet.read users.read offline.access'  # UPDATED SCOPES
     },
     'discord': {
         'auth_url': 'https://discord.com/api/oauth2/authorize',
@@ -128,8 +130,8 @@ async def google_callback(
             error_url = f"{FRONTEND_URL}/auth/error?message=Missing authorization code or state"
             return RedirectResponse(url=error_url)
         
-        # Verify state
-        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
+        # Verify state (NO await - fixed from earlier)
+        provider = verify_oauth_state(redis_conn, state)
         if provider != "google":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
@@ -175,14 +177,17 @@ async def google_callback(
         # Handle user creation/login
         user, access_token = await handle_oauth_user(conn, oauth_user, request)
         
-        # Redirect to frontend with token
-        user_data = quote(str({
+        # ✅ FIXED: Proper JSON serialization
+        user_data = quote(json.dumps({
             'id': user.id,
             'email': user.email,
+            'username': getattr(user, 'username', None),
             'full_name': user.full_name,
             'avatar_url': user.avatar_url
         }))
+        
         redirect_url = f"{FRONTEND_URL}/auth/success?token={access_token}&provider=google&user={user_data}"
+        logger.info(f"Google OAuth success, redirecting to: {redirect_url}")
         return RedirectResponse(url=redirect_url)
         
     except Exception as e:
@@ -201,8 +206,20 @@ async def twitter_login(
         if not TWITTER_CLIENT_ID:
             raise HTTPException(status_code=500, detail="Twitter OAuth not configured")
         
-        state = create_oauth_state(redis_conn, "twitter")  # REMOVED await
+        state = create_oauth_state(redis_conn, "twitter")
         redirect_uri = f"{request.base_url}auth/twitter/callback"
+        
+        # FIXED: Proper PKCE for Twitter OAuth 2.0
+        import hashlib
+        import base64
+        
+        # Generate code verifier and challenge
+        code_verifier = secrets.token_urlsafe(96)
+        code_challenge_bytes = hashlib.sha256(code_verifier.encode('utf-8')).digest()
+        code_challenge = base64.urlsafe_b64encode(code_challenge_bytes).decode('utf-8').rstrip('=')
+        
+        # Store code verifier in Redis for callback
+        redis_conn.setex(f"twitter_verifier:{state}", 600, code_verifier)
         
         params = {
             'client_id': TWITTER_CLIENT_ID,
@@ -210,8 +227,8 @@ async def twitter_login(
             'scope': OAUTH_ENDPOINTS['twitter']['scope'],
             'redirect_uri': redirect_uri,
             'state': state,
-            'code_challenge': 'challenge',
-            'code_challenge_method': 'plain'
+            'code_challenge': code_challenge,
+            'code_challenge_method': 'S256'  # FIXED: Use proper SHA256
         }
         
         auth_url = f"{OAUTH_ENDPOINTS['twitter']['auth_url']}?{urlencode(params)}"
@@ -243,11 +260,21 @@ async def twitter_callback(
             error_url = f"{FRONTEND_URL}/auth/error?message=Missing authorization code or state"
             return RedirectResponse(url=error_url)
         
-        # Verify state
-        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
+        # Verify state (NO await)
+        provider = verify_oauth_state(redis_conn, state)
         if provider != "twitter":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
+        
+        # Get stored code verifier
+        code_verifier = redis_conn.get(f"twitter_verifier:{state}")
+        if not code_verifier:
+            error_url = f"{FRONTEND_URL}/auth/error?message=Code verifier not found"
+            return RedirectResponse(url=error_url)
+        
+        # Clean up verifier
+        redis_conn.delete(f"twitter_verifier:{state}")
+        code_verifier = code_verifier.decode('utf-8') if isinstance(code_verifier, bytes) else code_verifier
         
         # Exchange code for token
         redirect_uri = f"{request.base_url}auth/twitter/callback"
@@ -257,18 +284,25 @@ async def twitter_callback(
             'code': code,
             'grant_type': 'authorization_code',
             'redirect_uri': redirect_uri,
-            'code_verifier': 'challenge'
+            'code_verifier': code_verifier  # FIXED: Use stored verifier
         }
         
         async with httpx.AsyncClient() as client:
+            # FIXED: Proper Authorization header for Twitter
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Basic {base64.b64encode(f"{TWITTER_CLIENT_ID}:{TWITTER_CLIENT_SECRET}".encode()).decode()}'
+            }
+            
             token_response = await client.post(
                 OAUTH_ENDPOINTS['twitter']['token_url'],
                 data=token_data,
-                headers={'Content-Type': 'application/x-www-form-urlencoded'}
+                headers=headers
             )
             token_json = token_response.json()
             
             if 'error' in token_json:
+                logger.error(f"Twitter token error: {token_json}")
                 raise Exception(f"Token exchange error: {token_json['error']}")
             
             # Get user info
@@ -277,13 +311,18 @@ async def twitter_callback(
                 OAUTH_ENDPOINTS['twitter']['user_info_url'],
                 headers=headers
             )
+            
+            if user_response.status_code != 200:
+                logger.error(f"Twitter user info error: {user_response.text}")
+                raise Exception(f"User info error: {user_response.status_code}")
+            
             user_data = user_response.json()['data']
         
         # Create OAuth user data
         oauth_user = UserOAuth(
             provider=AuthProvider.TWITTER,
             provider_id=user_data['id'],
-            email=user_data.get('email'),  # May be None if not granted
+            email=user_data.get('email'),  # May be None
             username=user_data['username'],
             full_name=user_data['name'],
             avatar_url=user_data.get('profile_image_url'),
@@ -293,14 +332,15 @@ async def twitter_callback(
         # Handle user creation/login
         user, access_token = await handle_oauth_user(conn, oauth_user, request)
         
-        # Redirect to frontend with token
-        user_data = quote(str({
+        # ✅ FIXED: Proper JSON serialization
+        user_data = quote(json.dumps({
             'id': user.id,
             'email': user.email,
-            'username': user.username,
+            'username': getattr(user, 'username', None),
             'full_name': user.full_name,
             'avatar_url': user.avatar_url
         }))
+        
         redirect_url = f"{FRONTEND_URL}/auth/success?token={access_token}&provider=twitter&user={user_data}"
         return RedirectResponse(url=redirect_url)
         
@@ -360,8 +400,8 @@ async def discord_callback(
             error_url = f"{FRONTEND_URL}/auth/error?message=Missing authorization code or state"
             return RedirectResponse(url=error_url)
         
-        # Verify state
-        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
+        # Verify state - REMOVED await
+        provider = verify_oauth_state(redis_conn, state)
         if provider != "discord":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
@@ -414,14 +454,15 @@ async def discord_callback(
         # Handle user creation/login
         user, access_token = await handle_oauth_user(conn, oauth_user, request)
         
-        # Redirect to frontend with token
-        user_data = quote(str({
+        # ✅ FIXED: Proper JSON serialization
+        user_data = quote(json.dumps({
             'id': user.id,
             'email': user.email,
-            'username': user.username,
+            'username': getattr(user, 'username', None),
             'full_name': user.full_name,
             'avatar_url': user.avatar_url
         }))
+        
         redirect_url = f"{FRONTEND_URL}/auth/success?token={access_token}&provider=discord&user={user_data}"
         return RedirectResponse(url=redirect_url)
         
@@ -475,14 +516,14 @@ async def handle_oauth_user(conn, oauth_user: UserOAuth, request: Request) -> tu
                 conn, user.id, user.email, client_ip, user_agent,
                 oauth_user.provider.value, True
             )
-        
-        # Create access token
+          # ✅ FIXED: Create access token with ONLY email (same as regular login)
         access_token_expires = timedelta(minutes=30)
         access_token = create_access_token(
-            data={"sub": user.email, "provider": oauth_user.provider.value, "user_id": user.id},
+            data={"sub": user.email},  # Only email, no extra fields
             expires_delta=access_token_expires
         )
         
+        logger.info(f"OAuth user processed successfully: {user.email}")
         return user, access_token
         
     except Exception as e:

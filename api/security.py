@@ -148,8 +148,7 @@ async def get_current_user(
         if not user_record:
             logger.warning(f"User not found in database: {token_data.email}")
             raise credentials_exception
-        
-        # Convert database record to User model
+          # ✅ FIXED: Convert database record to User model with ALL required fields
         user = User(
             id=str(user_record.get("id", "")),
             email=user_record.get("email", ""),
@@ -158,7 +157,15 @@ async def get_current_user(
             is_active=user_record.get("is_active", True),
             created_at=user_record.get("created_at"),
             gpu_models_interested=user_record.get("gpu_models_interested", []),
-            min_profit_threshold=user_record.get("min_profit_threshold", 0.0)
+            min_profit_threshold=user_record.get("min_profit_threshold", 0.0),
+            # ADD MISSING REQUIRED FIELDS:
+            auth_provider=user_record.get("auth_provider", "email"),
+            provider_id=user_record.get("provider_id"),
+            avatar_url=user_record.get("avatar_url"),
+            full_name=user_record.get("full_name"),
+            is_admin=user_record.get("is_admin", False),
+            updated_at=user_record.get("updated_at"),
+            last_login=user_record.get("last_login")
         )
         
         logger.info(f"Current user retrieved successfully: {user.email}")
@@ -168,6 +175,7 @@ async def get_current_user(
         raise
     except Exception as e:
         logger.error(f"Error retrieving current user {token_data.email}: {e}")
+        logger.error(f"User record keys: {list(user_record.keys()) if user_record else 'None'}")
         raise credentials_exception
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:

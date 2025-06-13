@@ -12,50 +12,86 @@ const AuthSuccessPage: React.FC = () => {
   const [countdown, setCountdown] = useState(3);
   const [isProcessing, setIsProcessing] = useState(true);
   const [userInfo, setUserInfo] = useState<any>(null);
-
   useEffect(() => {
-    // Handle OAuth token from URL
-    const { token, provider, user } = router.query;
-    
-    if (token && typeof token === 'string') {
-      // Store token in localStorage
-      localStorage.setItem('access_token', token);
-      
-      // Parse user info if available
-      if (user && typeof user === 'string') {
-        try {
-          setUserInfo(JSON.parse(decodeURIComponent(user)));
-        } catch (error) {
-          console.error('Error parsing user info:', error);
-        }
-      }
-      
-      // Refresh user context
-      refreshUser().then(() => {
-        setIsProcessing(false);
-        
-        // Start countdown to redirect
-        const timer = setInterval(() => {
-          setCountdown((prev) => {
-            if (prev <= 1) {
-              clearInterval(timer);
-              router.push('/dashboard');
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+    const handleOAuthSuccess = async () => {
+      const { token, provider, user } = router.query;
 
-        return () => clearInterval(timer);
+      console.log('OAuth success page loaded:', { 
+        token: !!token, 
+        provider, 
+        user: !!user 
       });
-    } else {
-      // No token found, redirect to login
-      router.push('/login?error=no_token');
-    }
-  }, [router, refreshUser]);
 
+      if (token && typeof token === 'string') {
+        try {
+          // Store token
+          localStorage.setItem('access_token', token);
+          console.log('Token stored successfully');
+
+          // Parse user data with better error handling
+          if (user && typeof user === 'string') {
+            try {
+              const decodedUser = decodeURIComponent(user);
+              console.log('Decoded user data:', decodedUser);
+              
+              const parsedUser = JSON.parse(decodedUser);
+              console.log('Parsed user data:', parsedUser);
+              setUserInfo(parsedUser);
+            } catch (parseError) {
+              console.warn('Could not parse user data (non-critical):', parseError);
+              // Don't fail the entire flow if user data parsing fails
+            }
+          }
+
+          // Refresh user data from server (this is the important part)
+          console.log('Refreshing user data from server...');
+          await refreshUser();
+          
+          console.log('OAuth success processing complete');
+          setIsProcessing(false);
+          
+          // Start countdown to redirect
+          const timer = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                
+                // Redirect to intended page
+                const returnTo = sessionStorage.getItem('auth_return_to') || '/dashboard';
+                sessionStorage.removeItem('auth_return_to');
+                
+                // Use replace to prevent back button issues
+                router.replace(returnTo);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return () => clearInterval(timer);
+          
+        } catch (error) {
+          console.error('OAuth success processing error:', error);
+          
+          // Clean up and redirect to login
+          localStorage.removeItem('access_token');
+          router.replace('/login?error=oauth_processing_failed');
+        }
+      } else {
+        console.error('No token found in OAuth success callback');
+        router.replace('/login?error=no_token');
+      }
+    };
+
+    // Only run if router is ready and we have query params
+    if (router.isReady && (router.query.token || router.query.error)) {
+      handleOAuthSuccess();
+    }
+  }, [router.isReady, router.query, refreshUser]);
   const handleContinue = () => {
-    router.push('/dashboard');
+    const returnTo = sessionStorage.getItem('auth_return_to') || '/dashboard';
+    sessionStorage.removeItem('auth_return_to');
+    router.replace(returnTo);
   };
 
   if (isProcessing) {

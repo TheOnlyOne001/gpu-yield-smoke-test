@@ -1,155 +1,166 @@
 #!/usr/bin/env python3
 """
-Fixed OAuth Debug Script - Properly loads .env file
+User Database Verification Script
+Check if the OAuth user exists in the database
 """
 
 import os
-import sys
-from pathlib import Path
+import asyncio
+import asyncpg
 
-def load_env_file():
-    """Manually load .env file to ensure variables are available."""
-    env_path = Path('.env')
-    if not env_path.exists():
-        print("❌ .env file not found in current directory")
-        return False
-    
-    with open('.env', 'r') as f:
-        for line_num, line in enumerate(f, 1):
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                try:
-                    key, value = line.split('=', 1)
+# Load environment variables
+def load_env():
+    if os.path.exists('.env'):
+        with open('.env', 'r') as f:
+            for line in f:
+                if '=' in line and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
                     os.environ[key] = value
-                except ValueError:
-                    print(f"⚠️  Line {line_num}: Could not parse '{line}'")
-    
-    print("✅ .env file loaded successfully")
-    return True
 
-def check_oauth_env_vars():
-    """Check OAuth environment variables after loading .env."""
-    print("🔍 OAuth Environment Variables Check")
+async def check_user_in_database():
+    """Check if the OAuth user exists in the database."""
+    
+    print("🔍 User Database Verification")
     print("=" * 40)
     
-    oauth_vars = {
-        'Google': ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
-        'Twitter': ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'],
-        'Discord': ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET']
-    }
+    # Load environment
+    load_env()
     
-    configured_providers = []
+    # Get database URL
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        print("❌ DATABASE_URL not found in environment variables")
+        return
     
-    for provider, vars_list in oauth_vars.items():
-        client_id = os.getenv(vars_list[0])
-        client_secret = os.getenv(vars_list[1])
+    # Handle postgres:// URLs
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    # Your OAuth user email (from the logs)
+    test_email = "shayanahmad78600@gmail.com"
+    
+    try:
+        # Connect to database
+        conn = await asyncpg.connect(database_url)
+        print("✅ Connected to database")
         
-        if client_id and client_secret:
-            configured_providers.append(provider)
-            print(f"   ✅ {provider}: Configured")
-            print(f"      Client ID: {client_id[:20]}...")
-            print(f"      Client Secret: {client_secret[:10]}...")
+        # Check if user exists
+        print(f"\n🔄 Checking user: {test_email}")
+        
+        user_query = """
+        SELECT id, email, username, full_name, auth_provider, provider_id, 
+               is_active, is_verified, created_at, last_login
+        FROM signups 
+        WHERE email = $1
+        """
+        
+        user_record = await conn.fetchrow(user_query, test_email)
+        
+        if user_record:
+            print("✅ User found in database:")
+            print(f"   ID: {user_record['id']}")
+            print(f"   Email: {user_record['email']}")
+            print(f"   Username: {user_record['username']}")
+            print(f"   Full Name: {user_record['full_name']}")
+            print(f"   Auth Provider: {user_record['auth_provider']}")
+            print(f"   Provider ID: {user_record['provider_id']}")
+            print(f"   Is Active: {user_record['is_active']}")
+            print(f"   Is Verified: {user_record['is_verified']}")
+            print(f"   Created: {user_record['created_at']}")
+            print(f"   Last Login: {user_record['last_login']}")
+            
+            # Check for issues
+            issues = []
+            if not user_record['is_active']:
+                issues.append("User is not active")
+            if not user_record['is_verified']:
+                issues.append("User is not verified")
+            if not user_record['email']:
+                issues.append("User has no email")
+            
+            if issues:
+                print("\n⚠️  Potential Issues:")
+                for issue in issues:
+                    print(f"   - {issue}")
+            else:
+                print("\n✅ User record looks good")
+                
         else:
-            print(f"   ❌ {provider}: Missing credentials")
-            if not client_id:
-                print(f"      - Missing {vars_list[0]}")
-            if not client_secret:
-                print(f"      - Missing {vars_list[1]}")
-    
-    return configured_providers
+            print("❌ User NOT found in database")
+            print("   This could be why JWT validation fails")
+            
+            # Check if any similar users exist
+            similar_query = """
+            SELECT email, auth_provider FROM signups 
+            WHERE email ILIKE $1 OR email ILIKE $2
+            """
+            
+            similar_users = await conn.fetch(
+                similar_query, 
+                f"%{test_email.split('@')[0]}%",
+                f"%{test_email.split('@')[1]}%"
+            )
+            
+            if similar_users:
+                print("\n🔍 Similar users found:")
+                for user in similar_users:
+                    print(f"   - {user['email']} ({user['auth_provider']})")
+        
+        # Check total OAuth users
+        oauth_query = """
+        SELECT auth_provider, COUNT(*) as count
+        FROM signups 
+        WHERE auth_provider != 'email'
+        GROUP BY auth_provider
+        """
+        
+        oauth_stats = await conn.fetch(oauth_query)
+        
+        print(f"\n📊 OAuth Users in Database:")
+        for stat in oauth_stats:
+            print(f"   {stat['auth_provider']}: {stat['count']} users")
+        
+        await conn.close()
+        
+    except Exception as e:
+        print(f"❌ Database check failed: {e}")
 
-def check_other_important_vars():
-    """Check other important environment variables."""
-    print("\n🔍 Other Important Variables")
-    print("=" * 35)
+async def test_user_lookup_function():
+    """Test the actual user lookup function used by JWT validation."""
     
-    important_vars = [
-        'DATABASE_URL',
-        'REDIS_URL', 
-        'JWT_SECRET_KEY',
-        'FRONTEND_URL',
-        'BACKEND_URL'
-    ]
-    
-    for var in important_vars:
-        value = os.getenv(var)
-        if value:
-            print(f"   ✅ {var}: {value[:30]}...")
-        else:
-            print(f"   ❌ {var}: Not set")
-
-def test_backend_with_details():
-    """Test backend endpoints with better error reporting."""
-    print("\n🔍 Backend Endpoint Detailed Test")
+    print("\n🧪 Testing User Lookup Function")
     print("=" * 40)
     
     try:
-        import requests
+        # Try to import and use the actual function
+        import sys
+        sys.path.append('api')
         
-        # Test status endpoint
-        try:
-            response = requests.get("http://localhost:8000/auth/status", timeout=5)
-            print(f"   Status Endpoint: {response.status_code}")
-            if response.status_code == 200:
-                data = response.json()
-                print(f"   Status Data: {data}")
-        except Exception as e:
-            print(f"   ❌ Status endpoint failed: {e}")
+        from crud import get_user_by_email
+        from dependencies import db_dependency
         
-        # Test individual OAuth endpoints
-        providers = ['google', 'twitter', 'discord']
-        for provider in providers:
-            try:
-                response = requests.get(
-                    f"http://localhost:8000/auth/{provider}/login", 
-                    timeout=5, 
-                    allow_redirects=False
-                )
-                print(f"   {provider.title()} Login: {response.status_code}")
-                
-                if response.status_code == 500:
-                    try:
-                        error_data = response.json()
-                        print(f"      Error: {error_data}")
-                    except:
-                        print(f"      Error Text: {response.text[:200]}...")
-                        
-            except Exception as e:
-                print(f"   ❌ {provider.title()} endpoint failed: {e}")
-                
-    except ImportError:
-        print("   ⚠️  requests library not available for testing")
-        print("   💡 Install with: pip install requests")
-
-def main():
-    print("🔧 Fixed OAuth Debug Script")
-    print("=" * 50)
-    
-    # Load .env file manually
-    if not load_env_file():
-        return
-    
-    # Check OAuth variables
-    configured_providers = check_oauth_env_vars()
-    
-    # Check other important variables
-    check_other_important_vars()
-    
-    # Test backend
-    test_backend_with_details()
-    
-    # Summary
-    print("\n📋 Summary:")
-    if configured_providers:
-        print(f"   ✅ {len(configured_providers)} OAuth providers configured: {', '.join(configured_providers)}")
-        print("   🔧 If you're still getting 500 errors, check your FastAPI server logs")
-    else:
-        print("   ❌ No OAuth providers configured properly")
-    
-    print("\n💡 Next Steps:")
-    print("   1. If OAuth vars show as configured, the issue is in your server code")
-    print("   2. Check your FastAPI server console for Python tracebacks")
-    print("   3. Look for 500 error details when you click social login buttons")
+        test_email = "shayanahmad78600@gmail.com"
+        
+        # Get database connection using the same method as the app
+        async for conn in db_dependency():
+            print(f"🔄 Testing get_user_by_email('{test_email}')")
+            
+            user_record = await get_user_by_email(conn, test_email)
+            
+            if user_record:
+                print("✅ get_user_by_email() found user")
+                print(f"   User ID: {user_record.get('id')}")
+                print(f"   Email: {user_record.get('email')}")
+                print(f"   Active: {user_record.get('is_active')}")
+            else:
+                print("❌ get_user_by_email() returned None")
+                print("   This is why JWT validation fails!")
+            break
+            
+    except Exception as e:
+        print(f"⚠️  Could not test user lookup function: {e}")
+        print("   This is normal if running outside the API directory")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(check_user_in_database())
+    asyncio.run(test_user_lookup_function())
