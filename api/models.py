@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, field_validator, EmailStr
 from typing import List, Optional, Dict, Any, Union
 from enum import Enum
 from datetime import datetime
+import logging
+import os
 
 class HealthCheck(BaseModel):
     status: str = "ok"
@@ -243,7 +245,7 @@ class User(BaseModel):
     min_profit_threshold: float = 0.0
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Token models
 class Token(BaseModel):
@@ -260,3 +262,295 @@ class AlertJob(BaseModel):
     email: str
     user_id: str
     data: Optional[dict] = None
+
+# Add these new models for OAuth authentication
+
+class AuthProvider(str, Enum):
+    """Enumeration of supported authentication providers."""
+    EMAIL = "email"
+    GOOGLE = "google"
+    TWITTER = "twitter"
+    DISCORD = "discord"
+
+class UserBase(BaseModel):
+    """Base user model with common fields."""
+    email: EmailStr
+    username: Optional[str] = None
+    is_active: bool = True
+    is_verified: bool = False
+    gpu_models_interested: Optional[List[str]] = []
+    min_profit_threshold: Optional[float] = Field(default=10.0, ge=0, le=1000)
+
+class UserCreate(UserBase):
+    """User creation model."""
+    password: Optional[str] = None  # Optional for OAuth users
+    auth_provider: AuthProvider = AuthProvider.EMAIL
+    provider_id: Optional[str] = None  # OAuth provider user ID
+    avatar_url: Optional[str] = None
+    full_name: Optional[str] = None
+
+class UserOAuth(BaseModel):
+    """OAuth user data model."""
+    provider: AuthProvider
+    provider_id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+    username: Optional[str] = None
+    avatar_url: Optional[str] = None
+    raw_data: Optional[Dict[str, Any]] = {}
+
+class User(UserBase):
+    """Complete user model."""
+    id: int
+    auth_provider: AuthProvider
+    provider_id: Optional[str] = None
+    avatar_url: Optional[str] = None
+    full_name: Optional[str] = None
+    is_admin: bool = False
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserInDB(User):
+    """User model with sensitive data for database operations."""
+    hashed_password: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserProfile(BaseModel):
+    """User profile update model."""
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    gpu_models_interested: Optional[List[str]] = None
+    min_profit_threshold: Optional[float] = Field(None, ge=0, le=1000)
+
+class UserStats(BaseModel):
+    """User statistics model."""
+    total_users: int
+    verified_users: int
+    verification_rate: float
+    recent_signups: int
+    active_users: int
+    activity_rate: float
+    auth_providers: Dict[str, int]
+
+# Update your existing Token model
+class Token(BaseModel):
+    """JWT Token model."""
+    access_token: str
+    token_type: str
+    expires_in: int
+    refresh_token: Optional[str] = None
+    user: Optional[User] = None
+
+class TokenData(BaseModel):
+    """JWT Token data model."""
+    email: Optional[str] = None
+    provider: Optional[AuthProvider] = None
+
+# Update your existing SignupRequest model
+class SignupRequest(BaseModel):
+    """User signup request model."""
+    email: EmailStr
+    password: Optional[str] = None
+    username: Optional[str] = None
+    gpu_models_interested: Optional[List[str]] = []
+    min_profit_threshold: Optional[float] = Field(default=10.0, ge=0, le=1000)
+    hcaptcha_response: str = Field(..., min_length=1)
+    auth_provider: AuthProvider = AuthProvider.EMAIL
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        return v.lower().strip()
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v, info):
+        # Password required for email auth, optional for OAuth
+        if info.data.get('auth_provider') == AuthProvider.EMAIL and not v:
+            raise ValueError('Password is required for email authentication')
+        if v and len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
+# Update your existing SignupResponse model  
+class SignupResponse(BaseModel):
+    """User signup response model."""
+    status: str
+    message: str
+    user_id: Optional[str] = None
+    requires_verification: bool = True
+
+class LoginRequest(BaseModel):
+    """Login request model."""
+    email: EmailStr
+    password: str
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        return v.lower().strip()
+
+class OAuthLoginRequest(BaseModel):
+    """OAuth login request model."""
+    provider: AuthProvider
+    code: Optional[str] = None
+    state: Optional[str] = None
+    redirect_uri: Optional[str] = None
+
+class OAuthState(BaseModel):
+    """OAuth state management model."""
+    state_token: str
+    provider: AuthProvider
+    redirect_url: Optional[str] = None
+    created_at: datetime
+    expires_at: datetime
+
+class OAuthCallback(BaseModel):
+    """OAuth callback data model."""
+    code: str
+    state: str
+    provider: AuthProvider
+    error: Optional[str] = None
+    error_description: Optional[str] = None
+
+class PasswordResetRequest(BaseModel):
+    """Password reset request model."""
+    email: EmailStr
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        return v.lower().strip()
+
+class PasswordResetConfirm(BaseModel):
+    """Password reset confirmation model."""
+    token: str
+    new_password: str = Field(..., min_length=8)
+    
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
+class ChangePasswordRequest(BaseModel):
+    """Change password request model."""
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+    
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
+class EmailVerificationRequest(BaseModel):
+    """Email verification request model."""
+    email: Optional[EmailStr] = None  # Optional - uses current user if not provided
+
+class EmailVerificationResponse(BaseModel):
+    """Email verification response model."""
+    message: str
+    expires_in: int
+
+class VerificationStatusResponse(BaseModel):
+    """Verification status response model."""
+    email: str
+    is_verified: bool
+    auth_provider: AuthProvider
+    requires_verification: bool
+
+class LoginHistoryEntry(BaseModel):
+    """Login history entry model."""
+    login_time: datetime
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    auth_provider: str
+    success: bool
+    failure_reason: Optional[str] = None
+
+class UserActivity(BaseModel):
+    """User activity summary model."""
+    user_id: int
+    last_login: Optional[datetime] = None
+    login_count: int = 0
+    failed_login_attempts: int = 0
+    last_login_ip: Optional[str] = None
+    account_locked: bool = False
+
+class OAuthProviderConfig(BaseModel):
+    """OAuth provider configuration model."""
+    provider: AuthProvider
+    display_name: str
+    is_enabled: bool
+    client_id: Optional[str] = None
+    redirect_uri: Optional[str] = None
+    scope: Optional[str] = None
+
+class OAuthProvidersResponse(BaseModel):
+    """OAuth providers list response model."""
+    providers: List[OAuthProviderConfig]
+    total_count: int
+
+class UserSearchRequest(BaseModel):
+    """User search request model."""
+    query: Optional[str] = None
+    auth_provider: Optional[AuthProvider] = None
+    is_verified: Optional[bool] = None
+    limit: int = Field(default=50, le=100)
+    offset: int = Field(default=0, ge=0)
+
+class UserSearchResponse(BaseModel):
+    """User search response model."""
+    users: List[User]
+    total_count: int
+    has_more: bool
+
+# Admin models
+class AdminUserUpdate(BaseModel):
+    """Admin user update model."""
+    is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None
+    auth_provider: Optional[AuthProvider] = None
+    full_name: Optional[str] = None
+    gpu_models_interested: Optional[List[str]] = None
+    min_profit_threshold: Optional[float] = Field(None, ge=0, le=1000)
+
+class BulkUserAction(BaseModel):
+    """Bulk user action model."""
+    user_ids: List[int]
+    action: str  # 'verify', 'deactivate', 'delete', etc.
+    reason: Optional[str] = None
+
+class SystemHealth(BaseModel):
+    """System health check model."""
+    status: str
+    database: str
+    redis: str
+    email_service: str
+    oauth_providers: Dict[str, str]
+    timestamp: datetime
+
+# Rate limiting models
+class RateLimitInfo(BaseModel):
+    """Rate limit information model."""
+    limit: int
+    remaining: int
+    reset_time: datetime
+    
+class RateLimitExceeded(BaseModel):
+    """Rate limit exceeded error model."""
+    error: str = "Rate limit exceeded"
+    retry_after: int
+    limit: int
+
+# ...existing models continue here...

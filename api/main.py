@@ -1,13 +1,20 @@
+import logging
+import os
+import time
+import json
+import redis
+import asyncpg
+
+# Initialize logger early
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-import redis
-import os
-import json
-import logging
-import time
+from starlette.middleware.sessions import SessionMiddleware
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -15,7 +22,6 @@ from typing import Optional
 try:
     from utils.connections import init_sentry, get_redis_connection
 except ImportError:
-    logger = logging.getLogger(__name__)
     logger.warning("utils.connections not found, using fallbacks")
     
     def init_sentry():
@@ -34,10 +40,22 @@ from models import (
 # Import routers
 try:
     from routers import auth
+    logger.info("Auth router imported successfully")
 except ImportError:
-    logger = logging.getLogger(__name__)
     logger.warning("Auth router not found")
     auth = None
+
+# Import OAuth router
+try:
+    from routers.oauth import router as oauth_router
+    oauth_router_available = True
+    logger.info("OAuth router imported successfully")
+except ImportError as e:
+    logger.warning(f"OAuth router not found: {e}")
+    oauth_router_available = False
+except Exception as e:
+    logger.error(f"Error importing OAuth router: {e}")
+    oauth_router_available = False
 
 # Import CRUD and security
 from crud import (
@@ -47,10 +65,6 @@ from crud import (
 )
 from security import get_password_hash
 from dependencies import redis_dependency, db_dependency
-
-# Initialize logger
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Initialize Sentry
 init_sentry()
@@ -62,6 +76,12 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
     redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None
+)
+
+# Add session middleware for OAuth state management
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=os.getenv("JWT_SECRET_KEY", "your-session-secret-key")
 )
 
 # Application startup and shutdown events
@@ -110,10 +130,17 @@ app.add_middleware(
     allowed_hosts=["*"]  # Configure this properly for production
 )
 
-# CORS middleware
+# Updated CORS middleware to include OAuth callback URLs
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    allow_origins=[
+        "http://localhost:3000",  # Your frontend
+        "http://localhost:8000",  # Your backend
+        "https://your-domain.com",  # Production frontend
+        "https://accounts.google.com",  # Google OAuth
+        "https://api.twitter.com",  # Twitter OAuth
+        "https://discord.com",  # Discord OAuth
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -634,13 +661,46 @@ if auth:
     app.include_router(auth.router)
     logger.info("Auth router included successfully")
 
+# Include OAuth router
+if oauth_router_available:
+    app.include_router(oauth_router)
+    logger.info("OAuth router included successfully")
+    
+    # Add debug endpoint to verify routes
+    @app.get("/debug/routes")
+    async def debug_routes():
+        """Debug endpoint to show all registered routes."""
+        routes = []
+        for route in app.routes:
+            if hasattr(route, 'methods') and hasattr(route, 'path'):
+                routes.append({
+                    "path": route.path,
+                    "methods": list(route.methods),
+                    "name": route.name
+                })
+        return {"routes": routes, "total": len(routes)}
+else:
+    logger.error("OAuth router not available - OAuth endpoints will not work")
+
+# Add OAuth callback success/error pages
+@app.get("/auth/success")
+async def auth_success():
+    """OAuth success callback page."""
+    return {"message": "Authentication successful", "status": "success"}
+
+@app.get("/auth/error")
+async def auth_error(message: str = "Authentication failed"):
+    """OAuth error callback page."""
+    return {"message": message, "status": "error"}
+
 @app.get("/")
 async def root():
     return {
         "message": "GPU Yield API", 
         "status": "running", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "oauth_providers": ["google", "twitter", "discord"]
     }
 
 # Test endpoint for AWS data

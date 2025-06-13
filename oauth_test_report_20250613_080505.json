@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-06-13T08:05:05.435404",
+  "backend_url": "http://localhost:8000",
+  "frontend_url": "http://localhost:3000",
+  "test_results": {
+    "api_health": true,
+    "database": true,
+    "redis": true,
+    "auth_endpoints": true,
+    "oauth_providers": true,
+    "jwt_tokens": true,
+    "user_operations": true
+  },
+  "environment": {
+    "database_url_set": true,
+    "redis_url_set": true,
+    "oauth_env_vars": {
+      "google": true,
+      "twitter": true,
+      "discord": true
+    }
+  }
+}
