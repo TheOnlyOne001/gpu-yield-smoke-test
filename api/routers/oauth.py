@@ -58,20 +58,20 @@ OAUTH_ENDPOINTS = {
 }
 
 # State management for OAuth flows
-async def create_oauth_state(redis_conn: redis.Redis, provider: str) -> str:
+def create_oauth_state(redis_conn: redis.Redis, provider: str) -> str:
     """Create and store OAuth state parameter."""
     state = secrets.token_urlsafe(32)
-    await redis_conn.setex(f"oauth_state:{state}", 600, provider)  # 10 minutes
+    redis_conn.setex(f"oauth_state:{state}", 600, provider)  # REMOVED await
     return state
 
-async def verify_oauth_state(redis_conn: redis.Redis, state: str) -> Optional[str]:
+def verify_oauth_state(redis_conn: redis.Redis, state: str) -> Optional[str]:
     """Verify OAuth state parameter and return provider."""
     if not state:
         return None
     
-    provider = await redis_conn.get(f"oauth_state:{state}")
+    provider = redis_conn.get(f"oauth_state:{state}")  # REMOVED await
     if provider:
-        await redis_conn.delete(f"oauth_state:{state}")
+        redis_conn.delete(f"oauth_state:{state}")  # REMOVED await
         return provider.decode('utf-8') if isinstance(provider, bytes) else provider
     return None
 
@@ -86,7 +86,7 @@ async def google_login(
         if not GOOGLE_CLIENT_ID:
             raise HTTPException(status_code=500, detail="Google OAuth not configured")
         
-        state = await create_oauth_state(redis_conn, "google")
+        state = create_oauth_state(redis_conn, "google")  # REMOVED await
         redirect_uri = f"{request.base_url}auth/google/callback"
         
         params = {
@@ -129,7 +129,7 @@ async def google_callback(
             return RedirectResponse(url=error_url)
         
         # Verify state
-        provider = await verify_oauth_state(redis_conn, state)
+        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
         if provider != "google":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
@@ -201,7 +201,7 @@ async def twitter_login(
         if not TWITTER_CLIENT_ID:
             raise HTTPException(status_code=500, detail="Twitter OAuth not configured")
         
-        state = await create_oauth_state(redis_conn, "twitter")
+        state = create_oauth_state(redis_conn, "twitter")  # REMOVED await
         redirect_uri = f"{request.base_url}auth/twitter/callback"
         
         params = {
@@ -244,7 +244,7 @@ async def twitter_callback(
             return RedirectResponse(url=error_url)
         
         # Verify state
-        provider = await verify_oauth_state(redis_conn, state)
+        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
         if provider != "twitter":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
@@ -320,7 +320,7 @@ async def discord_login(
         if not DISCORD_CLIENT_ID:
             raise HTTPException(status_code=500, detail="Discord OAuth not configured")
         
-        state = await create_oauth_state(redis_conn, "discord")
+        state = create_oauth_state(redis_conn, "discord")  # REMOVED await
         redirect_uri = f"{request.base_url}auth/discord/callback"
         
         params = {
@@ -361,7 +361,7 @@ async def discord_callback(
             return RedirectResponse(url=error_url)
         
         # Verify state
-        provider = await verify_oauth_state(redis_conn, state)
+        provider = verify_oauth_state(redis_conn, state)  # REMOVED await
         if provider != "discord":
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
