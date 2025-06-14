@@ -2,6 +2,8 @@ import os
 import httpx
 import secrets
 import json  # Add this import at the top
+import base64  # Add base64 import
+import hashlib  # Add hashlib import
 from datetime import timedelta, datetime, timezone
 from typing import Optional, Dict, Any
 from urllib.parse import urlencode, quote
@@ -37,8 +39,7 @@ DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
 DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
 
 # OAuth endpoints
-OAUTH_ENDPOINTS = {
-    'google': {
+OAUTH_ENDPOINTS = {    'google': {
         'auth_url': 'https://accounts.google.com/o/oauth2/v2/auth',
         'token_url': 'https://oauth2.googleapis.com/token',
         'user_info_url': 'https://www.googleapis.com/oauth2/v2/userinfo',
@@ -48,8 +49,8 @@ OAUTH_ENDPOINTS = {
         # FIXED Twitter OAuth 2.0 URLs
         'auth_url': 'https://twitter.com/i/oauth2/authorize',
         'token_url': 'https://api.twitter.com/2/oauth2/token',
-        'user_info_url': 'https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,username,public_metrics&expansions=pinned_tweet_id',
-        'scope': 'tweet.read users.read offline.access'  # UPDATED SCOPES
+        'user_info_url': 'https://api.twitter.com/2/users/me?user.fields=profile_image_url&expansions=pinned_tweet_id',
+        'scope': 'tweet.read users.read'  # Updated scope
     },
     'discord': {
         'auth_url': 'https://discord.com/api/oauth2/authorize',
@@ -195,47 +196,59 @@ async def google_callback(
         error_url = f"{FRONTEND_URL}/auth/error?message=Google authentication failed&provider=google"
         return RedirectResponse(url=error_url)
 
-# Twitter OAuth
+# Twitter OAuth - ENHANCED VERSION WITH DEBUGGING
 @router.get("/twitter/login")
 async def twitter_login(
     request: Request,
     redis_conn: redis.Redis = Depends(redis_dependency)
 ):
-    """Initiate Twitter OAuth login."""
+    """Initiate Twitter OAuth 2.0 login with enhanced debugging."""
     try:
+        logger.info("=== TWITTER OAUTH LOGIN START ===")
+        logger.info(f"Client ID: {TWITTER_CLIENT_ID[:15]}...")
+        logger.info(f"Client Secret configured: {bool(TWITTER_CLIENT_SECRET)}")
+        
         if not TWITTER_CLIENT_ID:
             raise HTTPException(status_code=500, detail="Twitter OAuth not configured")
         
         state = create_oauth_state(redis_conn, "twitter")
         redirect_uri = f"{request.base_url}auth/twitter/callback"
         
-        # FIXED: Proper PKCE for Twitter OAuth 2.0
-        import hashlib
-        import base64
-        
-        # Generate code verifier and challenge
+        # Generate proper PKCE challenge
         code_verifier = secrets.token_urlsafe(96)
-        code_challenge_bytes = hashlib.sha256(code_verifier.encode('utf-8')).digest()
-        code_challenge = base64.urlsafe_b64encode(code_challenge_bytes).decode('utf-8').rstrip('=')
+        logger.info(f"Generated code_verifier length: {len(code_verifier)}")
         
-        # Store code verifier in Redis for callback
+        # Store code verifier in Redis
         redis_conn.setex(f"twitter_verifier:{state}", 600, code_verifier)
+        logger.info(f"Stored verifier in Redis with key: twitter_verifier:{state}")
+        
+        # Create SHA256 code challenge
+        code_challenge = base64.urlsafe_b64encode(
+            hashlib.sha256(code_verifier.encode()).digest()
+        ).decode().rstrip('=')
+        logger.info(f"Generated code_challenge: {code_challenge[:20]}...")
         
         params = {
             'client_id': TWITTER_CLIENT_ID,
             'response_type': 'code',
-            'scope': OAUTH_ENDPOINTS['twitter']['scope'],
+            'scope': 'tweet.read users.read',
             'redirect_uri': redirect_uri,
             'state': state,
             'code_challenge': code_challenge,
-            'code_challenge_method': 'S256'  # FIXED: Use proper SHA256
+            'code_challenge_method': 'S256'
         }
         
-        auth_url = f"{OAUTH_ENDPOINTS['twitter']['auth_url']}?{urlencode(params)}"
+        auth_url = f"https://twitter.com/i/oauth2/authorize?{urlencode(params)}"
+        logger.info(f"Redirecting to: {auth_url}")
+        logger.info("=== TWITTER OAUTH LOGIN END ===")
+        
         return RedirectResponse(url=auth_url)
         
     except Exception as e:
         logger.error(f"Twitter OAuth initiation error: {e}")
+        logger.error(f"Error type: {type(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to initiate Twitter login"
@@ -247,105 +260,171 @@ async def twitter_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
     error: Optional[str] = None,
+    error_description: Optional[str] = None,
     conn = Depends(db_dependency),
     redis_conn: redis.Redis = Depends(redis_dependency)
 ):
-    """Handle Twitter OAuth callback."""
+    """Handle Twitter OAuth 2.0 callback with proper Authorization header."""
     try:
+        logger.info("=== TWITTER OAUTH CALLBACK START ===")
+        logger.info(f"Received - code: {'Yes' if code else 'No'}")
+        logger.info(f"Received - state: {state[:20] if state else 'None'}...")
+        logger.info(f"Received - error: {error}")
+        logger.info(f"Received - error_description: {error_description}")
+        
         if error:
-            error_url = f"{FRONTEND_URL}/auth/error?error={error}&provider=twitter"
+            logger.error(f"Twitter OAuth error: {error} - {error_description}")
+            error_url = f"{FRONTEND_URL}/auth/error?error={error}&description={error_description}&provider=twitter"
             return RedirectResponse(url=error_url)
         
         if not code or not state:
+            logger.error("Missing code or state parameter")
             error_url = f"{FRONTEND_URL}/auth/error?message=Missing authorization code or state"
             return RedirectResponse(url=error_url)
         
-        # Verify state (NO await)
+        # Verify state
         provider = verify_oauth_state(redis_conn, state)
+        logger.info(f"State verification result: {provider}")
         if provider != "twitter":
+            logger.error(f"Invalid state - expected 'twitter', got '{provider}'")
             error_url = f"{FRONTEND_URL}/auth/error?message=Invalid OAuth state"
             return RedirectResponse(url=error_url)
         
-        # Get stored code verifier
-        code_verifier = redis_conn.get(f"twitter_verifier:{state}")
+        # Get code verifier
+        verifier_key = f"twitter_verifier:{state}"
+        code_verifier = redis_conn.get(verifier_key)
+        logger.info(f"Retrieved verifier from Redis: {'Yes' if code_verifier else 'No'}")
+        
         if not code_verifier:
-            error_url = f"{FRONTEND_URL}/auth/error?message=Code verifier not found"
+            logger.error(f"Missing code verifier for state: {state}")
+            error_url = f"{FRONTEND_URL}/auth/error?message=Missing code verifier"
             return RedirectResponse(url=error_url)
         
-        # Clean up verifier
-        redis_conn.delete(f"twitter_verifier:{state}")
-        code_verifier = code_verifier.decode('utf-8') if isinstance(code_verifier, bytes) else code_verifier
+        if isinstance(code_verifier, bytes):
+            code_verifier = code_verifier.decode('utf-8')
         
-        # Exchange code for token
+        logger.info(f"Code verifier length: {len(code_verifier)}")
+        
+        # Create Basic Auth header for Twitter OAuth 2.0
+        credentials = f"{TWITTER_CLIENT_ID}:{TWITTER_CLIENT_SECRET}"
+        credentials_b64 = base64.b64encode(credentials.encode()).decode()
+        
+        # Exchange code for token - REMOVE client_secret from body, add to Authorization header
         redirect_uri = f"{request.base_url}auth/twitter/callback"
         token_data = {
-            'client_id': TWITTER_CLIENT_ID,
-            'client_secret': TWITTER_CLIENT_SECRET,
             'code': code,
             'grant_type': 'authorization_code',
             'redirect_uri': redirect_uri,
-            'code_verifier': code_verifier  # FIXED: Use stored verifier
+            'code_verifier': code_verifier
         }
         
+        # Headers with Basic Auth
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Authorization': f'Basic {credentials_b64}'
+        }
+        
+        logger.info(f"Making token request to: https://api.twitter.com/2/oauth2/token")
+        logger.info(f"Token request data: {token_data}")
+        logger.info(f"Using Basic Auth header: Basic {credentials_b64[:20]}...")
+        
         async with httpx.AsyncClient() as client:
-            # FIXED: Proper Authorization header for Twitter
-            headers = {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': f'Basic {base64.b64encode(f"{TWITTER_CLIENT_ID}:{TWITTER_CLIENT_SECRET}".encode()).decode()}'
-            }
-            
+            # Exchange code for access token
             token_response = await client.post(
-                OAUTH_ENDPOINTS['twitter']['token_url'],
+                'https://api.twitter.com/2/oauth2/token',
                 data=token_data,
                 headers=headers
             )
+            
+            logger.info(f"Token response status: {token_response.status_code}")
+            
+            if token_response.status_code != 200:
+                response_text = token_response.text
+                logger.error(f"Twitter token exchange failed: {token_response.status_code}")
+                logger.error(f"Response body: {response_text}")
+                raise Exception(f"Token exchange failed: {token_response.status_code} - {response_text}")
+            
             token_json = token_response.json()
+            logger.info(f"Token response keys: {list(token_json.keys())}")
             
             if 'error' in token_json:
                 logger.error(f"Twitter token error: {token_json}")
                 raise Exception(f"Token exchange error: {token_json['error']}")
             
             # Get user info
-            headers = {'Authorization': f"Bearer {token_json['access_token']}"}
+            access_token = token_json['access_token']
+            logger.info(f"Got access token: {access_token[:20]}...")
+            
+            user_headers = {'Authorization': f"Bearer {access_token}"}
             user_response = await client.get(
-                OAUTH_ENDPOINTS['twitter']['user_info_url'],
-                headers=headers
+                'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
+                headers=user_headers
             )
             
-            if user_response.status_code != 200:
-                logger.error(f"Twitter user info error: {user_response.text}")
-                raise Exception(f"User info error: {user_response.status_code}")
+            logger.info(f"User info response status: {user_response.status_code}")
             
-            user_data = user_response.json()['data']
+            if user_response.status_code != 200:
+                response_text = user_response.text
+                logger.error(f"Twitter user info failed: {user_response.status_code}")
+                logger.error(f"User response body: {response_text}")
+                raise Exception(f"Failed to get user info: {user_response.status_code} - {response_text}")
+                
+            user_json = user_response.json()
+            logger.info(f"User response structure: {list(user_json.keys())}")
+            
+            if 'data' not in user_json:
+                logger.error(f"Invalid Twitter user response: {user_json}")
+                raise Exception("Invalid user data received from Twitter")
+                
+            user_data = user_json['data']
+            logger.info(f"User data keys: {list(user_data.keys())}")
+            logger.info(f"User ID: {user_data['id']}")
+            logger.info(f"Username: {user_data['username']}")
         
-        # Create OAuth user data
+        # Clean up code verifier
+        redis_conn.delete(verifier_key)
+        logger.info("Cleaned up code verifier from Redis")
+          # Create OAuth user data
+        # Twitter doesn't provide email, so generate a placeholder with valid domain
+        placeholder_email = f"twitter_{user_data['id']}@noemail.example"
+        
         oauth_user = UserOAuth(
             provider=AuthProvider.TWITTER,
             provider_id=user_data['id'],
-            email=user_data.get('email'),  # May be None
+            email=placeholder_email,  # Use placeholder email with valid domain
             username=user_data['username'],
             full_name=user_data['name'],
             avatar_url=user_data.get('profile_image_url'),
             raw_data=user_data
         )
         
+        logger.info(f"Created OAuth user object for: {oauth_user.username}")
+        
         # Handle user creation/login
         user, access_token = await handle_oauth_user(conn, oauth_user, request)
+        logger.info(f"Successfully handled OAuth user: {user.id}")
         
         # ✅ FIXED: Proper JSON serialization
-        user_data = quote(json.dumps({
+        user_data_encoded = quote(json.dumps({
             'id': user.id,
             'email': user.email,
             'username': getattr(user, 'username', None),
             'full_name': user.full_name,
             'avatar_url': user.avatar_url
         }))
+        redirect_url = f"{FRONTEND_URL}/auth/success?token={access_token}&provider=twitter&user={user_data_encoded}"
         
-        redirect_url = f"{FRONTEND_URL}/auth/success?token={access_token}&provider=twitter&user={user_data}"
+        logger.info(f"Redirecting to success page: {redirect_url[:100]}...")
+        logger.info("=== TWITTER OAUTH CALLBACK SUCCESS ===")
+        
         return RedirectResponse(url=redirect_url)
         
     except Exception as e:
         logger.error(f"Twitter OAuth callback error: {e}")
+        logger.error(f"Error type: {type(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         error_url = f"{FRONTEND_URL}/auth/error?message=Twitter authentication failed&provider=twitter"
         return RedirectResponse(url=error_url)
 
@@ -485,8 +564,7 @@ async def handle_oauth_user(conn, oauth_user: UserOAuth, request: Request) -> tu
             # Update last login
             await update_user_last_login(conn, existing_user['id'])
             user = User(**existing_user)
-            
-            # Record successful login
+              # Record successful login
             await record_login_attempt(
                 conn, user.id, user.email, client_ip, user_agent,
                 oauth_user.provider.value, True
@@ -505,8 +583,8 @@ async def handle_oauth_user(conn, oauth_user: UserOAuth, request: Request) -> tu
                     user = User(**new_user)
             else:
                 # For providers that don't provide email (like Twitter)
-                # Generate a placeholder email
-                placeholder_email = f"{oauth_user.provider.value}_{oauth_user.provider_id}@oauth.local"
+                # Generate a placeholder email with a valid domain format
+                placeholder_email = f"{oauth_user.provider.value}_{oauth_user.provider_id}@noemail.example"
                 oauth_user.email = placeholder_email
                 new_user = await create_oauth_user(conn, oauth_user)
                 user = User(**new_user)
@@ -686,4 +764,20 @@ async def test_oauth_router():
             "/auth/twitter/login",
             "/auth/discord/login"
         ]
+    }
+
+# Add this debugging endpoint to help troubleshoot Twitter OAuth
+@router.get("/twitter/debug")
+async def debug_twitter_oauth():
+    """Debug Twitter OAuth configuration."""
+    return {
+        "twitter_client_id": TWITTER_CLIENT_ID[:10] + "..." if TWITTER_CLIENT_ID else None,
+        "twitter_client_secret_configured": bool(TWITTER_CLIENT_SECRET),
+        "auth_url": OAUTH_ENDPOINTS['twitter']['auth_url'],
+        "token_url": OAUTH_ENDPOINTS['twitter']['token_url'], 
+        "user_info_url": OAUTH_ENDPOINTS['twitter']['user_info_url'],
+        "scope": OAUTH_ENDPOINTS['twitter']['scope'],
+        "frontend_url": FRONTEND_URL,
+        "backend_url": os.getenv("BACKEND_URL", "http://localhost:8000"),
+        "callback_url": f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/auth/twitter/callback"
     }

@@ -37,7 +37,7 @@ oauth.register(
     }
 )
 
-# Twitter OAuth 2.0
+# Twitter OAuth 2.0 - REPLACE EXISTING TWITTER REGISTRATION
 oauth.register(
     name='twitter',
     client_id=TWITTER_CLIENT_ID,
@@ -46,7 +46,7 @@ oauth.register(
     authorize_url='https://twitter.com/i/oauth2/authorize',
     api_base_url='https://api.twitter.com/2/',
     client_kwargs={
-        'scope': 'users.read tweet.read',
+        'scope': 'tweet.read users.read',  # Updated scope
         'response_type': 'code',
         'redirect_uri': f'{BACKEND_URL}/auth/twitter/callback'
     }

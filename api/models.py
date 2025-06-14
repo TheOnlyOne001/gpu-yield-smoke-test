@@ -293,7 +293,7 @@ class UserOAuth(BaseModel):
     """OAuth user data model."""
     provider: AuthProvider
     provider_id: str
-    email: EmailStr
+    email: Optional[EmailStr] = None  # ← Make email optional for providers like Twitter
     full_name: Optional[str] = None
     username: Optional[str] = None
     avatar_url: Optional[str] = None
