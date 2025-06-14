@@ -1,18 +1,120 @@
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 import redis  # Add this missing import
 import logging
 
-from models import User, Token
-from security import authenticate_user, create_access_token, get_current_active_user
-from dependencies import redis_dependency, db_dependency
+from ..models import User, Token, SignupRequest, SignupResponse, AlertJob
+from ..security import authenticate_user, create_access_token, get_current_active_user, get_password_hash
+from ..dependencies import redis_dependency, db_dependency  
+from ..crud import get_user_by_email, create_user
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+@router.post("/signup", response_model=SignupResponse, summary="User Signup")
+async def signup(
+    signup_data: dict = Body(...),
+    conn = Depends(db_dependency),
+    redis_conn: redis.Redis = Depends(redis_dependency)
+):
+    """
+    Handles user signup requests with database integration and job queuing.
+    """
+    try:
+        email = signup_data.get('email')
+        password = signup_data.get('password')
+        username = signup_data.get('username')
+        hcaptcha_response = signup_data.get('hcaptcha_response', 'development-test-key')
+        gpu_models_interested = signup_data.get('gpu_models_interested', [])
+        min_profit_threshold = signup_data.get('min_profit_threshold')
+        
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is required"
+            )
+        
+        if not password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password is required"
+            )
+        
+        logger.info(f"New signup request from: {email}")
+        
+        # Basic hCaptcha validation (in production, verify with hCaptcha service)
+        if not hcaptcha_response or len(hcaptcha_response) < 10:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid captcha response"
+            )
+        
+        # Check if email already exists in database
+        existing_user = await get_user_by_email(conn, email)
+        if existing_user:
+            logger.warning(f"Signup attempt with existing email: {email}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Use the provided password instead of generating a temp one
+        hashed_password = get_password_hash(password)
+        
+        # Create user in database
+        new_user = await create_user(
+            conn=conn,
+            email=email,
+            username=username,
+            hashed_password=hashed_password,
+            gpu_models_interested=gpu_models_interested,
+            min_profit_threshold=min_profit_threshold
+        )
+        
+        user_id = str(new_user["id"])
+        
+        # Queue welcome email job
+        welcome_job = AlertJob(
+            job_type="send_welcome_email",
+            email=email,
+            user_id=user_id
+        )
+        
+        try:
+            redis_conn.xadd("alert_queue", welcome_job.dict())
+            logger.info(f"Welcome email job queued for user: {email}")
+        except Exception as e:
+            logger.warning(f"Failed to queue welcome email for {email}: {e}")
+            # Don't fail the signup if email queueing fails
+        
+        logger.info(f"User {email} successfully registered with ID {user_id}")
+        
+        return SignupResponse(
+            status="success",
+            message="Signup successful! You can now log in with your credentials.",
+            user_id=user_id
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (like validation errors)
+        raise
+    except ValueError as e:
+        # Handle database constraint errors (like duplicate email)
+        logger.error(f"Database constraint error during signup: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error during signup: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during signup"
+        )
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
@@ -101,7 +203,7 @@ async def logout(
     try:
         # Optional: Add token to revocation list if Redis is available
         if redis_conn:
-            from security import revoke_token
+            from ..security import revoke_token
             await revoke_token(current_user.email, redis_conn)
         
         logger.info(f"User logged out successfully: {current_user.email}")

@@ -39,11 +39,11 @@ from models import (
 
 # Import routers
 try:
-    from routers import auth
+    from routers.auth import router as auth_router
     logger.info("Auth router imported successfully")
 except ImportError:
     logger.warning("Auth router not found")
-    auth = None
+    auth_router = None
 
 # Import OAuth router
 try:
@@ -657,8 +657,8 @@ except ImportError as e:
     logger.warning(f"Could not import WebSocket router: {e}")
 
 # Include existing auth router if available
-if auth:
-    app.include_router(auth.router)
+if auth_router:
+    app.include_router(auth_router)
     logger.info("Auth router included successfully")
 
 # Include OAuth router
