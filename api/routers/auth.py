@@ -2,18 +2,80 @@ from datetime import timedelta
 from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, Body
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentials
 import redis  # Add this missing import
 import logging
+from jose import JWTError, jwt
+import os
 
-from ..models import User, Token, SignupRequest, SignupResponse, AlertJob
-from ..security import authenticate_user, create_access_token, get_current_active_user, get_password_hash
-from ..dependencies import redis_dependency, db_dependency  
-from ..crud import get_user_by_email, create_user
+from models import User, Token, SignupRequest, SignupResponse, AlertJob
+from security import authenticate_user, create_access_token, get_current_active_user, get_password_hash
+from dependencies import redis_dependency, db_dependency  
+from crud import get_user_by_email, create_user
+
+# JWT Configuration (should match security.py)
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-here")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+# Initialize HTTPBearer security scheme
+security = HTTPBearer()
+
+async def get_current_user_dependency(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    conn = Depends(db_dependency)
+) -> dict:
+    """Dependency to get current authenticated user."""
+    token = credentials.credentials
+    
+    try:
+        # Decode JWT token (same logic as in security.py)
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials"
+            )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
+    
+    user = await get_user_by_email(conn, email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    return user
+
+@router.get("/user")
+async def get_current_user(
+    current_user: dict = Depends(get_current_user_dependency)
+):
+    """Get current authenticated user details."""
+    return {
+        "id": str(current_user.get("id", "")),
+        "email": current_user.get("email", ""),
+        "username": current_user.get("username"),
+        "full_name": current_user.get("full_name"),
+        "avatar_url": current_user.get("avatar_url"),
+        "auth_provider": current_user.get("auth_provider", "email"),
+        "is_verified": current_user.get("is_verified", False),
+        "created_at": str(current_user.get("created_at")) if current_user.get("created_at") else None,
+        "last_login": str(current_user.get("last_login")) if current_user.get("last_login") else None
+    }
 
 @router.post("/signup", response_model=SignupResponse, summary="User Signup")
 async def signup(
@@ -271,5 +333,4 @@ async def refresh_token(
         logger.error(f"Error refreshing token for user {current_user.email}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error refreshing token"
-        )
+            detail="Error refreshing token"        )

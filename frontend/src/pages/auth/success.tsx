@@ -43,32 +43,28 @@ const AuthSuccessPage = () => {
             } catch (e) {
               console.error('Failed to parse user data:', e);
             }
-          }
-
-          // Trigger celebration
+          }          // Show processing for 2 seconds, then trigger celebration
           setTimeout(() => {
             setIsProcessing(false);
             setShowRewards(true);
             triggerCelebration();
-          }, 1000);
-
-          // Start countdown
-          const timer = setInterval(() => {
-            setCountdown((prev) => {
-              if (prev <= 1) {
-                clearInterval(timer);
-                
-                // Redirect to dashboard
-                const returnTo = sessionStorage.getItem('auth_return_to') || '/dashboard';
-                sessionStorage.removeItem('auth_return_to');
-                router.replace(returnTo);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-
-          return () => clearInterval(timer);
+            
+            // Start countdown immediately after celebration
+            const timer = setInterval(() => {
+              setCountdown((prev) => {
+                if (prev <= 1) {
+                  clearInterval(timer);
+                  
+                  // Redirect to dashboard
+                  const returnTo = sessionStorage.getItem('auth_return_to') || '/dashboard';
+                  sessionStorage.removeItem('auth_return_to');
+                  router.replace(returnTo);
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+          }, 2000); // Show processing for 2 seconds before showing success page
           
         } catch (error) {
           console.error('OAuth success processing error:', error);
@@ -79,7 +75,7 @@ const AuthSuccessPage = () => {
       }
     };
 
-    if (router.isReady) {
+    if (router.isReady && router.query.token) {
       handleOAuthSuccess();
     }
   }, [router.isReady, router.query]);
