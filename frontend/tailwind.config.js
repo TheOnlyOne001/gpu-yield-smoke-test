@@ -50,10 +50,25 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backdropBlur: {
+        'xs': '2px',
+        'sm': '4px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        '2xl': '40px',
+        '3xl': '64px',
+      },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'animate-in': 'animate-in 0.3s ease-out',
+        'slide-in-from-top-2': 'slide-in-from-top-2 0.3s ease-out',
+        'dropdown-enter': 'dropdown-enter 120ms cubic-bezier(0.22, 0.61, 0.36, 1)',
+        'button-press': 'button-press 70ms ease-out',
+        'gradient-shift': 'gradient-shift 3s ease infinite',
+        'loading-pulse': 'pulse-subtle 1.5s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -63,6 +78,32 @@ module.exports = {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'animate-in': {
+          '0%': { opacity: '0', transform: 'translateY(-10px) scale(0.95)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        'slide-in-from-top-2': {
+          '0%': { transform: 'translateY(-8px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'dropdown-enter': {
+          '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.95)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        'button-press': {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(0.97)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'gradient-shift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        'pulse-subtle': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
         },
       },
     },

@@ -37,19 +37,340 @@ a {
   --background-end-rgb: 0, 0, 0;
 }
 
-.gpu-accelerated {
-  transform: translateZ(0);
-  will-change: transform;
+/* ============================================ */
+/* DESIGN SYSTEM TOKENS & UTILITIES */
+/* ============================================ */
+
+/* Design System Tokens */
+:root {
+  /* Surface Tokens */
+  --surface-1: rgba(17, 18, 24, 0.72);
+  --surface-elevated: #1F2233;
+  
+  /* Accent & Gradients */
+  --accent-gradient: linear-gradient(135deg, #7A5FFF, #01C8FF);
+  --accent-gradient-hover: linear-gradient(135deg, #8A6FFF, #11D8FF);
+  
+  /* Border Radius */
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* Typography */
+  --text-primary: #F4F6FF;
+  --text-secondary: rgba(244, 246, 255, 0.64);
+  
+  /* Stroke */
+  --stroke: rgba(255, 255, 255, 0.08);
+  --stroke-hover: rgba(255, 255, 255, 0.16);
+  
+  /* Focus Ring */
+  --focus-ring: #01C8FF;
 }
 
-.skeleton {
-  background: linear-gradient(90deg, 
-    rgba(255,255,255,0.1) 25%, 
-    rgba(255,255,255,0.2) 50%, 
-    rgba(255,255,255,0.1) 75%
-  );
-  background-size: 200% 100%;
-  animation: loading 2s infinite;
+/* Custom Animations - Exact Specifications */
+@keyframes dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes button-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Animation Classes */
+.animate-dropdown-enter {
+  animation: dropdown-enter 120ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.animate-button-press {
+  animation: button-press 70ms ease-out;
+}
+
+.loading-pulse {
+  animation: pulse-subtle 1.5s ease-in-out infinite;
+}
+
+/* Scale Utilities */
+.scale-97 {
+  transform: scale(0.97);
+}
+
+.scale-103 {
+  transform: scale(1.03);
+}
+
+/* Glassmorphism Utilities */
+.glass-surface {
+  background: var(--surface-1);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--stroke);
+}
+
+.glass-elevated {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--stroke);
+  box-shadow: 
+    0 24px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Button Variants - Design System Compliant */
+.btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  transition: all 200ms ease-out;
+}
+
+.btn-primary:hover {
+  background: var(--accent-gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(122, 95, 255, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  transition: transform 70ms ease-out;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border: 1px solid var(--stroke);
+  transition: all 200ms ease-out;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--stroke-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+  transition: transform 70ms ease-out;
+}
+
+/* Enhanced Button States */
+.btn-enhanced {
+  position: relative;
+  overflow: hidden;
+  transition: all 200ms ease-out;
+}
+
+.btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 500ms ease;
+}
+
+.btn-enhanced:hover::before {
+  left: 100%;
+}
+
+/* Focus States - WCAG AA Compliant */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-ring);
+  border-color: var(--focus-ring);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.keyboard-focus:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-lg);
+}
+
+/* Hover Effects - 4px Elevation */
+.hover-elevate {
+  transition: all 200ms ease-out;
+}
+
+.hover-elevate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient Backgrounds with Animation */
+.animated-gradient {
+  background: linear-gradient(270deg, #7A5FFF, #01C8FF, #7A5FFF);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Typography System */
+.text-primary {
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Badge Variants */
+.badge-success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge-info {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Status Indicators */
+.status-online {
+  position: relative;
+}
+
+.status-online::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border: 2px solid var(--surface-elevated);
+  border-radius: 50%;
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Micro-interactions */
+.haptic-feedback:active {
+  transform: scale(0.97);
+  transition: transform 70ms ease-out;
+}
+
+/* Custom Scrollbar Enhancement */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================ */
+/* ACCESSIBILITY & RESPONSIVE OPTIMIZATIONS */
+/* ============================================ */
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --stroke: rgba(255, 255, 255, 0.2);
+    --stroke-hover: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  /* Already optimized for dark mode */
+}
+
+/* Mobile-specific Optimizations */
+@media (max-width: 768px) {
+  .glass-surface,
+  .glass-elevated {
+    backdrop-filter: blur(16px); /* Reduced blur for mobile performance */
+  }
+  
+  /* Larger touch targets */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .glass-surface,
+  .glass-elevated {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
 }
 
 @keyframes loading {
@@ -182,7 +503,207 @@ a {
   }
 }
 
-/* Continue with all your existing utilities... */
+/* ============================================ */
+/* MODERN ANIMATIONS & EFFECTS */
+/* ============================================ */
+
+/* Modern Animations */
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-in-from-top-2 {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.3s ease-out;
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top-2 0.3s ease-out;
+}
+
+/* Modern Blur Effects */
+.backdrop-blur-2xl {
+  backdrop-filter: blur(40px);
+}
+
+.backdrop-blur-3xl {
+  backdrop-filter: blur(64px);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Modern Focus Styles */
+.modern-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Loading Skeleton */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Dark mode shimmer */
+.dark .shimmer {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200px 100%;
+}
+
+/* Modern Card Hover */
+.modern-card {
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2px;
+  border-radius: 12px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: inherit;
+  border-radius: inherit;
+}
+
+/* Smooth Transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* ============================================ */
+/* GLASSMORPHISM SUPPORT & FIXES */
+/* ============================================ */
+
+/* Ensure backdrop-filter works properly */
+.backdrop-blur-fix {
+  -webkit-backdrop-filter: blur(var(--blur-amount, 12px));
+  backdrop-filter: blur(var(--blur-amount, 12px));
+}
+
+/* Browser-specific backdrop filter support */
+@supports (backdrop-filter: blur()) {
+  .glass-surface,
+  .glass-elevated {
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+  }
+}
+
+/* Fallback for browsers that don't support backdrop-filter */
+@supports not (backdrop-filter: blur()) {
+  .glass-surface {
+    background: rgba(17, 18, 24, 0.9) !important;
+  }
+  
+  .glass-elevated {
+    background: rgba(31, 34, 51, 0.95) !important;
+  }
+}
+
+/* Force hardware acceleration for better blur performance */
+.backdrop-blur-xl,
+.backdrop-blur-2xl,
+.backdrop-blur-3xl {
+  transform: translateZ(0);
+  will-change: backdrop-filter;
+}
+
+/* Enhanced glassmorphism utility */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(150%) brightness(110%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(110%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Glassmorphism for dark backgrounds */
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Fix for Mobile Safari backdrop-filter */
+@supports (-webkit-backdrop-filter: blur()) {
+  .mobile-glass {
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}
 @layer utilities {
   .bg-grid-white\/\[0\.02\] {
     background-image: 

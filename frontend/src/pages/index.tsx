@@ -1,5 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import useSWR from 'swr';
 import { 
   Zap, 
@@ -17,7 +18,13 @@ import {
   Check,
   AlertCircle,
   Cpu,
-  Activity
+  Activity,
+  Menu,
+  LogIn,
+  UserPlus,
+  Star,
+  ArrowUpRight,
+  User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +36,7 @@ import LogoBar from '../components/LogoBar';
 import GpuCounter, { GpuCounterInline } from '../components/GpuCounter';
 import { fetcherWithTimestamp, FetchResult } from '../lib/fetcher';
 import SyncStatusBadge from '../components/SyncStatusBadge';
+import AuthDropdown from '../components/AuthDropdown';
 
 // API configuration
 const API_BASE_URL = (() => {
@@ -183,81 +191,301 @@ const HomePage: React.FC = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        {/* Navigation */}
-        <nav className="border-b border-white/10 bg-black/20 backdrop-blur-xl">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">        {/* Design System Navigation */}
+        <nav 
+          className="fixed top-0 left-0 right-0 z-50 border-b"
+          style={{
+            background: 'var(--surface-1)',
+            backdropFilter: 'blur(24px)',
+            borderColor: 'var(--stroke)'
+          }}
+        >
+          {/* Ambient background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-cyan-500/5 to-purple-500/5" />
+          
+          <div className="relative container mx-auto px-4">
+            <div className="flex items-center justify-between h-20">
+              
+              {/* Logo - Enhanced with Design System */}
+              <Link href="/" className="group flex items-center space-x-3 focus-ring keyboard-focus rounded-xl p-2 -m-2">
+                <div className="relative">
+                  <div 
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-purple-500/25 transition-all duration-200"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  >
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  {/* Hover glow effect */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-20 blur-lg transition-all duration-200"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  />
                 </div>
-                <span className="text-xl font-bold text-white">GPU Yield</span>
+                <div className="flex flex-col">
+                  <span className="text-lg font-semibold text-white group-hover:text-purple-100 transition-colors">
+                    GPU Yield
+                  </span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    Mining Platform
+                  </span>
+                </div>
+              </Link>
+              
+              {/* Desktop Navigation */}
+              <div className="hidden lg:flex items-center space-x-3">
+                
+                {/* Navigation Links - Design System Pills */}
+                <div 
+                  className="flex items-center space-x-1 p-1 rounded-2xl border"
+                  style={{ 
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    borderColor: 'var(--stroke)'
+                  }}
+                >                  <a 
+                    href="#features" 
+                    className="px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-out focus-ring keyboard-focus hover:bg-white/8"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--text-primary)' }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-secondary)' }}
+                  >
+                    Features
+                  </a>
+                  <a 
+                    href="#pricing" 
+                    className="px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-out focus-ring keyboard-focus hover:bg-white/8"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--text-primary)' }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-secondary)' }}
+                  >
+                    Pricing
+                  </a>
+                  <a 
+                    href="#docs" 
+                    className="px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-out focus-ring keyboard-focus hover:bg-white/8"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--text-primary)' }}
+                    onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-secondary)' }}
+                  >
+                    Docs
+                  </a>
+                </div>
+                
+                {/* GPU Counter - Design System Enhanced */}
+                <div className="mx-3">
+                  <div 
+                    className="px-4 py-2.5 rounded-xl border"
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      borderColor: 'rgba(34, 197, 94, 0.2)'
+                    }}
+                  >
+                    <GpuCounterInline className="text-emerald-300 text-sm font-medium" />
+                  </div>
+                </div>
+                
+                {/* Auth Dropdown */}
+                <AuthDropdown />
+                
+                {/* Sync Status - Design System */}
+                <div 
+                  className="px-3 py-2.5 rounded-xl border text-xs font-medium"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    borderColor: 'var(--stroke)',
+                    color: 'var(--text-secondary)'
+                  }}
+                >
+                  <SyncStatusBadge 
+                    timestamp={timestamp} 
+                    isLoading={isLoading}
+                  />
+                </div>
               </div>
-              <div className="hidden md:flex items-center space-x-6">
-                <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
-                <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</a>
-                
-                {/* Add inline GPU counter to navigation */}
-                <GpuCounterInline className="hidden lg:flex" />
-                
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                  Sign In
-                </Button>
-                
-                {/* Add sync status to navigation */}
-                <SyncStatusBadge 
-                  timestamp={timestamp} 
-                  isLoading={isLoading}
-                  className="text-xs"
-                />
+
+              {/* Mobile Menu Button - Design System */}
+              <div className="lg:hidden">
+                <button 
+                  className="w-10 h-10 rounded-xl border transition-all duration-200 ease-out focus-ring keyboard-focus hover:bg-white/8 active:scale-97"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    borderColor: 'var(--stroke)',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  <Menu className="w-5 h-5 mx-auto" />
+                </button>
               </div>
+            </div>
+
+            {/* Mobile Navigation - Design System Compliant */}
+            <div className="lg:hidden border-t" style={{ borderColor: 'var(--stroke)' }}>
+              <div className="py-6 space-y-4">
+                
+                {/* Mobile Navigation Links */}
+                <div className="space-y-2">
+                  <a 
+                    href="#features" 
+                    className="block px-4 py-3 rounded-xl font-medium transition-all duration-200 focus-ring keyboard-focus hover:bg-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    Features
+                  </a>
+                  <a 
+                    href="#pricing" 
+                    className="block px-4 py-3 rounded-xl font-medium transition-all duration-200 focus-ring keyboard-focus hover:bg-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    Pricing
+                  </a>
+                  <a 
+                    href="#docs" 
+                    className="block px-4 py-3 rounded-xl font-medium transition-all duration-200 focus-ring keyboard-focus hover:bg-white/5"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    Documentation
+                  </a>
+                </div>
+
+                {/* Mobile GPU Counter */}
+                <div className="px-4">
+                  <div 
+                    className="p-3 rounded-xl border"
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      borderColor: 'rgba(34, 197, 94, 0.2)'
+                    }}
+                  >
+                    <GpuCounterInline />
+                  </div>
+                </div>
+                
+                {/* Mobile Auth Buttons - Design System */}
+                <div className="px-4 pt-4 border-t" style={{ borderColor: 'var(--stroke)' }}>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link href="/login">
+                      <button className="btn-secondary w-full h-12 rounded-xl font-medium focus-ring keyboard-focus flex items-center justify-center gap-2">
+                        <LogIn className="w-4 h-4" />
+                        <span>Sign In</span>
+                      </button>
+                    </Link>
+                    <Link href="/signup">
+                      <button 
+                        className="btn-primary w-full h-12 rounded-xl font-medium focus-ring keyboard-focus flex items-center justify-center gap-2"
+                        style={{ background: 'var(--accent-gradient)' }}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        <span>Sign Up</span>
+                      </button>
+                    </Link>
+                  </div>
+                  
+                  {/* Mobile sync status */}
+                  <div className="mt-4 flex justify-center">
+                    <div 
+                      className="px-3 py-2 rounded-xl border text-xs"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        borderColor: 'var(--stroke)',
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      <SyncStatusBadge 
+                        timestamp={timestamp} 
+                        isLoading={isLoading}
+                      />
+                    </div>
+                  </div>
+                </div>              </div>
             </div>
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <section className="relative overflow-hidden">
-          {/* Background Effects */}
-          <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-600/30 to-purple-600/30 rounded-full blur-3xl" />
+        {/* Enhanced Hero Section */}
+        <section className="relative overflow-hidden pt-20">
+          {/* Modern Background Effects */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/50 to-slate-900" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-cyan-600/20 rounded-full blur-3xl" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent)] opacity-70" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.1),transparent)] opacity-70" />
+          </div>
           
-          <div className="container mx-auto px-4 py-20 relative">
+          <div className="relative container mx-auto px-4 py-20">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
-                <Badge className="mb-6 bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Real-time GPU profit tracking
-                </Badge>
+                {/* Modern Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 border border-blue-500/20 rounded-full backdrop-blur-sm">
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium text-blue-100">Real-time GPU profit tracking</span>
+                  <div className="px-2 py-0.5 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-md">
+                    <span className="text-xs font-bold text-emerald-400">Live</span>
+                  </div>
+                </div>
                 
-                <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent leading-tight">
-                  Turn Your GPU Into a
-                  <span className="block bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                {/* Modern Heading with Gradient Text */}
+                <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                  <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+                    Turn Your GPU Into a
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
                     Profit Machine
                   </span>
                 </h1>
 
-                <div
-                  className={`mt-3 inline-flex items-center space-x-2 rounded-full bg-slate-800/70 px-4 py-1 text-sm font-medium shadow ${
-                    delta !== undefined && delta < 0 ? 'text-red-400' : 'text-green-400'
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 animate-pulse"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12l5 5L20 7" />
-                  </svg>
-                  <span>RTX 4090 yield delta {formatYieldDelta(delta)}</span>
+                {/* Enhanced Yield Delta Display */}
+                <div className="mb-8">
+                  <div className={`
+                    inline-flex items-center gap-3 px-6 py-3 rounded-2xl backdrop-blur-2xl border
+                    ${delta !== undefined && delta < 0 
+                      ? 'bg-red-500/10 border-red-500/20 text-red-400' 
+                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    }
+                  `}>
+                    <div className="w-3 h-3 rounded-full bg-current animate-pulse" />
+                    <Cpu className="w-5 h-5" />
+                    <span className="font-bold text-lg">RTX 4090 yield delta {formatYieldDelta(delta)}</span>
+                    <div className="px-2 py-1 bg-current/20 rounded-lg">
+                      <span className="text-xs font-bold">Live</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-                  Stop guessing which platform pays the most. Get real-time data on GPU rental rates and maximize your earnings with smart automation.
+                {/* Enhanced Description */}
+                <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+                  Stop guessing which platform pays the most. Get <span className="text-blue-400 font-semibold">real-time data</span> on GPU rental rates and maximize your earnings with <span className="text-purple-400 font-semibold">smart automation</span>.
                 </p>
 
+                {/* Modern CTA Buttons */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+                  <Link href="/signup">
+                    <Button className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white font-semibold rounded-2xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                      <span className="relative flex items-center gap-2">
+                        <Sparkles className="w-5 h-5" />
+                        Start Earning Free
+                        <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+                      </span>
+                    </Button>
+                  </Link>
+                  
+                  <Link href="/login">
+                    <Button variant="outline" className="px-8 py-4 border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 hover:border-white/30 font-semibold rounded-2xl transition-all duration-300">
+                      <User className="w-5 h-5 mr-2" />
+                      Sign In
+                    </Button>
+                  </Link>                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* GPU Counter and Data Section */}
+        <section className="relative py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
                 {/* Add GpuCounter component here */}
                 <GpuCounter 
                   showDetails={true} 
