@@ -1,424 +1,318 @@
 import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useAuth } from '@/contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import {
-  Mail,
-  Lock,
-  User,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  Loader2,
   Chrome,
   Twitter,
   MessageCircle,
+  Sparkles,
+  Zap,
+  Shield,
   CheckCircle,
-  ArrowLeft
+  ArrowRight,
+  Users,
+  TrendingUp,
+  Star,
+  Gift
 } from 'lucide-react';
 
-// UI Components
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-
-const SignupPage: React.FC = () => {
-  const { signup, loginWithOAuth, isAuthenticated, loading } = useAuth();
+// Simulated auth hook - replace with your actual auth context
+const useAuth = () => {
   const router = useRouter();
-
-  // Form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false);
   
-  // UI state
-  const [error, setError] = useState('');
-  const [signupMethod, setSignupMethod] = useState<'email' | 'oauth'>('email');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const loginWithOAuth = async (provider: string) => {
+    // Simulate OAuth redirect
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    window.location.href = `${API_BASE_URL}/auth/${provider}/login`;
+  };
 
-  // Password strength validation
-  const [passwordStrength, setPasswordStrength] = useState({
-    minLength: false,
-    hasUpperCase: false,
-    hasLowerCase: false,
-    hasNumber: false,
-    hasSpecialChar: false
-  });
+  return { loginWithOAuth, isAuthenticated, loading };
+};
 
-  // Redirect if already authenticated
+const SignupPage = () => {
+  const { loginWithOAuth, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  const [hoveredProvider, setHoveredProvider] = useState<string | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [showBenefits, setShowBenefits] = useState(false);
+
   useEffect(() => {
     if (isAuthenticated && !loading) {
       router.push('/dashboard');
     }
   }, [isAuthenticated, loading, router]);
 
-  // Validate password strength
   useEffect(() => {
-    setPasswordStrength({
-      minLength: password.length >= 8,
-      hasUpperCase: /[A-Z]/.test(password),
-      hasLowerCase: /[a-z]/.test(password),
-      hasNumber: /\d/.test(password),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    });
-  }, [password]);
+    // Show benefits after a delay
+    const timer = setTimeout(() => setShowBenefits(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const isPasswordValid = Object.values(passwordStrength).every(Boolean) && password.length > 0;
-  const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
-
-  // Handle email/password signup
-  const handleEmailSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password || !isPasswordValid || !passwordsMatch || !acceptTerms) return;
-
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      await signup(email, password, username || undefined);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Signup failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle OAuth signup
-  const handleOAuthSignup = async (provider: string) => {
-    if (!acceptTerms) {
-      setError('Please accept the terms and conditions');
-      return;
-    }
-    
-    setError('');
-    try {
-      await loginWithOAuth(provider);
-    } catch (err) {
-      setError(`${provider} signup failed`);
-    }
-  };
-
-  // OAuth providers configuration
-  const oauthProviders = [
+  const providers = [
     {
+      id: 'google',
       name: 'Google',
-      provider: 'google',
       icon: Chrome,
-      color: 'bg-blue-600 hover:bg-blue-700',
-      textColor: 'text-white'
+      color: 'bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-500',
+      textColor: 'text-gray-800',
+      gradient: 'from-blue-500 to-red-500',
+      description: 'Quick and secure with your Google account'
     },
     {
+      id: 'twitter',
       name: 'Twitter',
-      provider: 'twitter',
       icon: Twitter,
-      color: 'bg-sky-500 hover:bg-sky-600',
-      textColor: 'text-white'
+      color: 'bg-black hover:bg-gray-900 border-2 border-transparent',
+      textColor: 'text-white',
+      gradient: 'from-blue-400 to-blue-600',
+      description: 'Connect with your Twitter community'
     },
     {
+      id: 'discord',
       name: 'Discord',
-      provider: 'discord',
       icon: MessageCircle,
-      color: 'bg-indigo-600 hover:bg-indigo-700',
-      textColor: 'text-white'
+      color: 'bg-[#5865F2] hover:bg-[#4752C4] border-2 border-transparent',
+      textColor: 'text-white',
+      gradient: 'from-[#5865F2] to-[#7289DA]',
+      description: 'Join our Discord community instantly'
     }
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  const benefits = [
+    { icon: Zap, text: "Instant access to GPU yield tracking", delay: 0.1 },
+    { icon: Shield, text: "Enterprise-grade security", delay: 0.2 },
+    { icon: Users, text: "Join 10,000+ GPU miners", delay: 0.3 },
+    { icon: TrendingUp, text: "Real-time profitability analytics", delay: 0.4 }
+  ];
+
+  const handleSignup = async (provider: string) => {
+    setSelectedProvider(provider);
+    
+    // Trigger celebration animation
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#3B82F6', '#10B981', '#F59E0B']
+    });
+
+    // Small delay for visual feedback
+    setTimeout(() => {
+      loginWithOAuth(provider);
+    }, 300);
+  };
 
   return (
-    <>
-      <Head>
-        <title>Sign Up - GPU Yield</title>
-        <meta name="description" content="Create your GPU Yield account and start maximizing your GPU profits" />
-      </Head>
-
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          {/* Header */}
-          <div className="text-center">
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-              Create your account
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Or{' '}
-              <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                sign in to your existing account
-              </Link>
-            </p>
-          </div>
-
-          {/* Signup Method Selection */}
-          <div className="flex justify-center space-x-4 mb-6">
-            <Button
-              variant={signupMethod === 'email' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSignupMethod('email')}
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Email
-            </Button>
-            <Button
-              variant={signupMethod === 'oauth' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSignupMethod('oauth')}
-            >
-              <Chrome className="w-4 h-4 mr-2" />
-              Social
-            </Button>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">
-                {signupMethod === 'email' && 'Sign up with Email'}
-                {signupMethod === 'oauth' && 'Sign up with Social Media'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Error Message */}
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-center">
-                  <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-                  <span className="text-sm text-red-700 dark:text-red-400">{error}</span>
-                </div>
-              )}
-
-              {/* Email/Password Signup */}
-              {signupMethod === 'email' && (
-                <form onSubmit={handleEmailSignup} className="space-y-4">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Email address *
-                    </label>
-                    <div className="mt-1 relative">
-                      <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Username (optional)
-                    </label>
-                    <div className="mt-1 relative">
-                      <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        autoComplete="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="pl-10 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                        placeholder="Choose a username"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Password *
-                    </label>
-                    <div className="mt-1 relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete="new-password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                        placeholder="Create a strong password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPassword ? <EyeOff /> : <Eye />}
-                      </button>
-                    </div>
-                    
-                    {/* Password Strength Indicator */}
-                    {password && (
-                      <div className="mt-2 space-y-1">
-                        <div className="text-xs text-gray-600 dark:text-gray-400">Password requirements:</div>
-                        <div className="grid grid-cols-2 gap-1 text-xs">
-                          {Object.entries({
-                            'At least 8 characters': passwordStrength.minLength,
-                            'Uppercase letter': passwordStrength.hasUpperCase,
-                            'Lowercase letter': passwordStrength.hasLowerCase,
-                            'Number': passwordStrength.hasNumber,
-                            'Special character': passwordStrength.hasSpecialChar
-                          }).map(([requirement, met]) => (
-                            <div
-                              key={requirement}
-                              className={`flex items-center ${met ? 'text-green-600' : 'text-gray-400'}`}
-                            >
-                              <CheckCircle className={`w-3 h-3 mr-1 ${met ? 'text-green-600' : 'text-gray-400'}`} />
-                              {requirement}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Confirm Password *
-                    </label>
-                    <div className="mt-1 relative">
-                      <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        autoComplete="new-password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`pl-10 pr-10 appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm ${
-                          confirmPassword && !passwordsMatch 
-                            ? 'border-red-300 dark:border-red-600' 
-                            : 'border-gray-300 dark:border-gray-600'
-                        }`}
-                        placeholder="Confirm your password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-gray-600"
-                      >
-                        {showConfirmPassword ? <EyeOff /> : <Eye />}
-                      </button>
-                    </div>
-                    {confirmPassword && !passwordsMatch && (
-                      <p className="mt-1 text-xs text-red-600">Passwords do not match</p>
-                    )}
-                  </div>
-
-                  {/* Terms and Conditions */}
-                  <div className="flex items-center">
-                    <input
-                      id="accept-terms"
-                      name="accept-terms"
-                      type="checkbox"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="accept-terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                      I agree to the{' '}
-                      <Link href="/terms" className="text-blue-600 hover:text-blue-500">
-                        Terms of Service
-                      </Link>{' '}
-                      and{' '}
-                      <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
-                        Privacy Policy
-                      </Link>
-                    </label>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || !email || !isPasswordValid || !passwordsMatch || !acceptTerms}
-                    className="w-full"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      'Create Account'
-                    )}
-                  </Button>
-                </form>
-              )}
-
-              {/* OAuth Signup */}
-              {signupMethod === 'oauth' && (
-                <div className="space-y-4">
-                  {/* Terms acceptance for OAuth */}
-                  <div className="flex items-center">
-                    <input
-                      id="accept-terms-oauth"
-                      name="accept-terms-oauth"
-                      type="checkbox"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="accept-terms-oauth" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                      I agree to the{' '}
-                      <Link href="/terms" className="text-blue-600 hover:text-blue-500">
-                        Terms of Service
-                      </Link>{' '}
-                      and{' '}
-                      <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
-                        Privacy Policy
-                      </Link>
-                    </label>
-                  </div>
-
-                  <div className="space-y-3">
-                    {oauthProviders.map((provider) => {
-                      const Icon = provider.icon;
-                      return (
-                        <Button
-                          key={provider.provider}
-                          onClick={() => handleOAuthSignup(provider.provider)}
-                          disabled={!acceptTerms}
-                          className={`w-full ${provider.color} ${provider.textColor}`}
-                          variant="default"
-                        >
-                          <Icon className="w-5 h-5 mr-2" />
-                          Sign up with {provider.name}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
-              <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                Sign in here
-              </Link>
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4 overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full filter blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl opacity-20 animate-pulse animation-delay-2000" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500 to-purple-500 rounded-full filter blur-3xl opacity-10 animate-pulse animation-delay-4000" />
       </div>
-    </>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-5xl flex flex-col lg:flex-row items-center gap-12"
+      >
+        {/* Left side - Benefits */}
+        <div className="flex-1 text-center lg:text-left">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
+              Start Mining
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                Smarter Today
+              </span>
+            </h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Join thousands of miners maximizing their GPU profits with real-time yield analytics.
+            </p>
+          </motion.div>
+
+          <AnimatePresence>
+            {showBenefits && (
+              <motion.div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: benefit.delay }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                      <benefit.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-gray-300">{benefit.text}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Social proof */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="mt-8 flex items-center gap-4"
+          >
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 border-2 border-gray-900 flex items-center justify-center text-white text-xs font-bold"
+                >
+                  {String.fromCharCode(65 + i)}
+                </div>
+              ))}
+            </div>
+            <div>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                ))}
+              </div>
+              <p className="text-sm text-gray-400">10,000+ miners trust GPU Yield</p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right side - Signup card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+              >
+                <Sparkles className="w-10 h-10 text-white" />
+              </motion.div>
+              <h2 className="text-3xl font-bold text-white mb-2">Get Started Free</h2>
+              <p className="text-gray-300">Choose your preferred sign-in method</p>
+            </div>
+
+            {/* Limited time offer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mb-6 p-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-500/30"
+            >
+              <div className="flex items-center gap-2 text-yellow-300">
+                <Gift className="w-5 h-5" />
+                <span className="font-semibold">Limited Time: Get Pro features free for 30 days!</span>
+              </div>
+            </motion.div>
+
+            {/* OAuth providers */}
+            <div className="space-y-3">
+              {providers.map((provider, index) => (
+                <motion.button
+                  key={provider.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSignup(provider.id)}
+                  onMouseEnter={() => setHoveredProvider(provider.id)}
+                  onMouseLeave={() => setHoveredProvider(null)}
+                  disabled={selectedProvider !== null}
+                  className={`relative w-full p-4 rounded-xl font-medium transition-all duration-200 ${provider.color} ${provider.textColor} ${
+                    selectedProvider === provider.id ? 'ring-4 ring-offset-2 ring-offset-gray-900 ring-blue-500' : ''
+                  } disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group`}
+                >
+                  <div className="relative z-10 flex items-center justify-center gap-3">
+                    <provider.icon className="w-5 h-5" />
+                    <span>Continue with {provider.name}</span>
+                    {selectedProvider === provider.id && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="ml-2"
+                      >
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      </motion.div>
+                    )}
+                  </div>
+                  
+                  {/* Hover effect */}
+                  <motion.div
+                    initial={{ x: '-100%' }}
+                    animate={{ x: hoveredProvider === provider.id ? '0%' : '-100%' }}
+                    transition={{ duration: 0.3 }}
+                    className={`absolute inset-0 bg-gradient-to-r ${provider.gradient} opacity-10`}
+                  />
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Security badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="mt-8 flex items-center justify-center gap-6 text-gray-400"
+            >
+              <div className="flex items-center gap-1">
+                <Shield className="w-4 h-4" />
+                <span className="text-xs">SSL Secured</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-xs">GDPR Compliant</span>
+              </div>
+            </motion.div>
+
+            {/* Terms */}
+            <p className="text-xs text-center text-gray-400 mt-6">
+              By signing up, you agree to our{' '}
+              <a href="/terms" className="text-blue-400 hover:text-blue-300 underline">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" className="text-blue-400 hover:text-blue-300 underline">
+                Privacy Policy
+              </a>
+            </p>
+          </div>
+
+          {/* Login link */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+            className="text-center mt-6"
+          >
+            <p className="text-gray-300">
+              Already have an account?{' '}
+              <a href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+                Sign in
+                <ArrowRight className="inline w-4 h-4 ml-1" />
+              </a>
+            </p>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </div>
   );
 };
 

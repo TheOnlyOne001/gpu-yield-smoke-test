@@ -2,17 +2,14 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { AuthProvider } from '@/contexts/AuthContext'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import Layout from '@/components/layout/layout'
 
-// List of routes that don't require authentication
+// Add auth success/error routes to public routes
 const publicRoutes = [
   '/',
   '/login',
-  '/register',
   '/signup',
-  '/forgot-password',
-  '/reset-password',
   '/auth/success',
   '/auth/error',
   '/auth/callback',
@@ -25,7 +22,6 @@ const publicRoutes = [
 // List of routes that should redirect authenticated users away from
 const authRoutes = [
   '/login',
-  '/register',
   '/signup'
 ]
 
@@ -33,10 +29,7 @@ const authRoutes = [
 const pagesWithoutLayout = [
   '/', 
   '/login', 
-  '/register', 
   '/signup',
-  '/forgot-password',
-  '/reset-password',
   '/auth/success',
   '/auth/error',
   '/privacy',
@@ -45,8 +38,10 @@ const pagesWithoutLayout = [
   '/about'
 ]
 
-function MyApp({ Component, pageProps }: AppProps) {
+// Inner component that uses auth
+function AppContent({ Component, pageProps }: AppProps) {
   const router = useRouter()
+  const { isAuthenticated, loading } = useAuth()
 
   // Handle route changes for analytics, etc.
   useEffect(() => {
@@ -77,10 +72,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [router.events])
 
   // Check if current route is public
-  const isPublicRoute = publicRoutes.some(route => {
-    if (route === '/') return router.pathname === '/'
-    return router.pathname.startsWith(route)
-  })
+  const isPublicRoute = publicRoutes.includes(router.pathname)
 
   // Check if current route is auth route  
   const isAuthRoute = authRoutes.some(route => {
@@ -96,17 +88,31 @@ function MyApp({ Component, pageProps }: AppProps) {
   // Check if it's an OAuth callback route
   const isOAuthCallback = router.pathname.startsWith('/auth/callback/')
 
+  // Only redirect to login if not on a public route and not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !isPublicRoute) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, loading, router, isPublicRoute])
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {shouldShowLayout ? (
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      ) : (
+        <Component {...pageProps} />
+      )}
+    </div>
+  )
+}
+
+// Main App component that provides auth context
+function MyApp(appProps: AppProps) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {shouldShowLayout ? (
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        ) : (
-          <Component {...pageProps} />
-        )}
-      </div>
+      <AppContent {...appProps} />
     </AuthProvider>
   )
 }

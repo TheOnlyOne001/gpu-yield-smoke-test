@@ -1,177 +1,216 @@
 import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AlertCircle, RefreshCw, ArrowLeft, Home, Mail } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import {
+  AlertCircle,
+  XCircle,
+  RefreshCw,
+  ArrowLeft,
+  HelpCircle,
+  Shield,
+  Chrome,
+  Twitter,
+  MessageCircle
+} from 'lucide-react';
 
-const AuthErrorPage: React.FC = () => {
+const AuthErrorPage = () => {
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [errorDetails, setErrorDetails] = useState<string>('');
-  const [provider, setProvider] = useState<string>('');
+  const [errorDetails, setErrorDetails] = useState({
+    message: 'Authentication failed',
+    provider: '',
+    code: ''
+  });
 
   useEffect(() => {
-    const { message, error, error_description, provider: queryProvider } = router.query;
-    
-    // Set provider
-    if (queryProvider && typeof queryProvider === 'string') {
-      setProvider(queryProvider);
+    if (router.isReady) {
+      const { message, provider, error, error_description } = router.query;
+      
+      setErrorDetails({
+        message: (error_description || message || 'Authentication failed') as string,
+        provider: (provider || '') as string,
+        code: (error || '') as string
+      });
     }
-    
-    // Set error message from query parameters
-    if (message && typeof message === 'string') {
-      setErrorMessage(message);
-    } else if (error && typeof error === 'string') {
-      setErrorMessage(getErrorMessage(error));
-      if (error_description && typeof error_description === 'string') {
-        setErrorDetails(error_description);
-      }
-    } else {
-      setErrorMessage('Authentication failed');
+  }, [router.isReady, router.query]);
+
+  const getProviderIcon = (provider: string) => {
+    switch (provider?.toLowerCase()) {
+      case 'google':
+        return Chrome;
+      case 'twitter':
+        return Twitter;
+      case 'discord':
+        return MessageCircle;
+      default:
+        return Shield;
     }
-  }, [router.query]);
-
-  const getErrorMessage = (error: string): string => {
-    const errorMessages: Record<string, string> = {
-      'access_denied': 'Access was denied. You may have cancelled the authentication process.',
-      'invalid_request': 'The authentication request was invalid.',
-      'unauthorized_client': 'The application is not authorized to perform this request.',
-      'unsupported_response_type': 'The authorization server does not support this response type.',
-      'invalid_scope': 'The requested scope is invalid, unknown, or malformed.',
-      'server_error': 'The authorization server encountered an unexpected condition.',
-      'temporarily_unavailable': 'The authorization server is temporarily overloaded or under maintenance.',
-      'invalid_client': 'Client authentication failed.',
-      'invalid_grant': 'The provided authorization grant is invalid.',
-      'unsupported_grant_type': 'The authorization grant type is not supported.',
-      'email_already_exists': 'An account with this email already exists. Try signing in instead.',
-      'provider_error': 'The authentication provider encountered an error.',
-      'callback_timeout': 'The authentication process timed out.',
-      'no_token': 'No authentication token was received.',
-    };
-
-    return errorMessages[error] || `Authentication error: ${error}`;
   };
 
-  const handleRetry = () => {
+  const getProviderName = (provider: string) => {
+    switch (provider?.toLowerCase()) {
+      case 'google':
+        return 'Google';
+      case 'twitter':
+        return 'Twitter';
+      case 'discord':
+        return 'Discord';
+      default:
+        return 'OAuth Provider';
+    }
+  };
+
+  const commonErrors = [
+    {
+      code: 'access_denied',
+      title: 'Access Denied',
+      description: 'You declined the authentication request.',
+      solution: 'Click "Try Again" and accept the permissions to continue.'
+    },
+    {
+      code: 'server_error',
+      title: 'Server Error',
+      description: 'The authentication server encountered an error.',
+      solution: 'Please wait a moment and try again.'
+    },
+    {
+      code: 'temporarily_unavailable',
+      title: 'Service Unavailable',
+      description: 'The authentication service is temporarily unavailable.',
+      solution: 'Please try again in a few minutes.'
+    }
+  ];
+
+  const getErrorInfo = () => {
+    const errorInfo = commonErrors.find(e => errorDetails.code.includes(e.code));
+    return errorInfo || {
+      title: 'Authentication Failed',
+      description: errorDetails.message,
+      solution: 'Please try again or use a different sign-in method.'
+    };
+  };
+
+  const errorInfo = getErrorInfo();
+  const ProviderIcon = getProviderIcon(errorDetails.provider);
+
+  const handleTryAgain = () => {
     router.push('/login');
   };
 
-  const handleGoHome = () => {
-    router.push('/');
+  const handleSupport = () => {
+    router.push('/support');
   };
-
-  const getSuggestedActions = () => {
-    const suggestions = [];
-    
-    if (errorMessage.includes('cancelled')) {
-      suggestions.push('Try the authentication process again');
-    }
-    
-    if (errorMessage.includes('email already exists')) {
-      suggestions.push('Try signing in with your existing account');
-      suggestions.push('Use the "Forgot Password" option if needed');
-    }
-    
-    if (errorMessage.includes('temporarily unavailable')) {
-      suggestions.push('Wait a few minutes and try again');
-    }
-    
-    if (provider) {
-      suggestions.push(`Check your ${provider} account permissions`);
-    }
-    
-    return suggestions;
-  };
-
-  const suggestions = getSuggestedActions();
 
   return (
-    <>
-      <Head>
-        <title>Authentication Error - GPU Yield</title>
-        <meta name="description" content="Authentication error occurred" />
-        <meta name="robots" content="noindex" />
-      </Head>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
+      {/* Animated background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ff00000a_1px,transparent_1px),linear-gradient(to_bottom,#ff00000a_1px,transparent_1px)] bg-[size:14px_24px]" />
+      </div>
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <CardTitle className="text-2xl text-red-600">
-              Authentication Failed
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400 mb-2">
-                {errorMessage}
-              </p>
-              
-              {provider && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Provider: {provider.charAt(0).toUpperCase() + provider.slice(1)}
-                </p>
-              )}
-              
-              {errorDetails && (
-                <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 p-3 rounded-md mt-3">
-                  <strong>Details:</strong> {errorDetails}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-red-500/20">
+          {/* Error icon */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+            className="text-center mb-6"
+          >
+            <div className="w-20 h-20 bg-red-500/20 rounded-full mx-auto mb-4 flex items-center justify-center relative">
+              <XCircle className="w-10 h-10 text-red-500" />
+              {errorDetails.provider && (
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center border-2 border-red-500/50">
+                  <ProviderIcon className="w-4 h-4 text-white" />
                 </div>
               )}
             </div>
-
-            {suggestions.length > 0 && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
-                <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
-                  Suggested Actions:
-                </h4>
-                <ul className="text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
-                  {suggestions.map((suggestion, index) => (
-                    <li key={index}>{suggestion}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Button onClick={handleRetry} className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-              
-              <Button onClick={handleGoHome} variant="outline" className="w-full">
-                <Home className="w-4 h-4 mr-2" />
-                Go to Homepage
-              </Button>
-            </div>
-
-            <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                Still having trouble?
+            <h1 className="text-2xl font-bold text-white mb-2">{errorInfo.title}</h1>
+            {errorDetails.provider && (
+              <p className="text-sm text-gray-400">
+                with {getProviderName(errorDetails.provider)}
               </p>
-              <div className="flex justify-center space-x-4">
-                <Link 
-                  href="/support" 
-                  className="text-sm text-blue-600 hover:text-blue-500 font-medium flex items-center"
-                >
-                  <Mail className="w-3 h-3 mr-1" />
-                  Contact Support
-                </Link>
-                <Link 
-                  href="/login" 
-                  className="text-sm text-gray-600 hover:text-gray-500 font-medium flex items-center"
-                >
-                  <ArrowLeft className="w-3 h-3 mr-1" />
-                  Back to Login
-                </Link>
+            )}
+          </motion.div>
+
+          {/* Error details */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-4 mb-6"
+          >
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-gray-300 text-sm">{errorInfo.description}</p>
+                  {errorDetails.code && (
+                    <p className="text-xs text-gray-500 mt-1">Error code: {errorDetails.code}</p>
+                  )}
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <HelpCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">What to do?</p>
+                  <p className="text-gray-300 text-sm">{errorInfo.solution}</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-3"
+          >
+            <button
+              onClick={handleTryAgain}
+              className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Try Again
+            </button>
+
+            <button
+              onClick={() => router.push('/login')}
+              className="w-full py-3 bg-gray-700/50 text-white font-medium rounded-xl hover:bg-gray-700/70 transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Login
+            </button>
+          </motion.div>
+
+          {/* Help link */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-center mt-6"
+          >
+            <p className="text-sm text-gray-400">
+              Still having issues?{' '}
+              <button
+                onClick={handleSupport}
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Contact Support
+              </button>
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 
