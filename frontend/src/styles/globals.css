@@ -640,70 +640,7 @@ a {
   transition-duration: 150ms;
 }
 
-/* ============================================ */
-/* GLASSMORPHISM SUPPORT & FIXES */
-/* ============================================ */
-
-/* Ensure backdrop-filter works properly */
-.backdrop-blur-fix {
-  -webkit-backdrop-filter: blur(var(--blur-amount, 12px));
-  backdrop-filter: blur(var(--blur-amount, 12px));
-}
-
-/* Browser-specific backdrop filter support */
-@supports (backdrop-filter: blur()) {
-  .glass-surface,
-  .glass-elevated {
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-  }
-}
-
-/* Fallback for browsers that don't support backdrop-filter */
-@supports not (backdrop-filter: blur()) {
-  .glass-surface {
-    background: rgba(17, 18, 24, 0.9) !important;
-  }
-  
-  .glass-elevated {
-    background: rgba(31, 34, 51, 0.95) !important;
-  }
-}
-
-/* Force hardware acceleration for better blur performance */
-.backdrop-blur-xl,
-.backdrop-blur-2xl,
-.backdrop-blur-3xl {
-  transform: translateZ(0);
-  will-change: backdrop-filter;
-}
-
-/* Enhanced glassmorphism utility */
-.glass-premium {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px) saturate(150%) brightness(110%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(110%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Glassmorphism for dark backgrounds */
-.glass-dark {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* Fix for Mobile Safari backdrop-filter */
-@supports (-webkit-backdrop-filter: blur()) {
-  .mobile-glass {
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-  }
-}
+/* Continue with all your existing utilities... */
 @layer utilities {
   .bg-grid-white\/\[0\.02\] {
     background-image: 
